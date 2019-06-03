@@ -1,0 +1,73 @@
+.row-align {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.helm-status {
+  display: flex;
+  flex-direction: row;
+  align-items: left;
+  justify-content: left;
+}
+
+.switch-status {
+  display: flex;
+  flex-direction: row;
+  align-items: left;
+  justify-content: left;
+}
+
+.Padding-Left {
+  margin-left: 2%;
+}
+
+.dataDog-status {
+  display: flex;
+  flex-direction: row;
+  align-items: left;
+  justify-content: left;
+}
+
+.flex-container {
+   display: flex;
+   flex-direction: row;
+   align-items: center;
+   justify-content: space-between;
+}
+
+.kube-status {
+  display: flex;
+  flex-direction: row;
+  align-items: left;
+  justify-content: left;
+}
+
+.log-status {
+  display: flex;
+  flex-direction: row;
+  align-items: right;
+  justify-content: right;
+}
+
+.double-padded {
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.right-padded {
+  margin-right: 5px;
+}
+
+.kube-resource-list {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+  width: 100%;
+  position: relative;
+  min-height: 60%;
+  max-height: 60%;
+  padding: 5px;
+}
