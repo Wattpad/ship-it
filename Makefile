@@ -7,7 +7,7 @@ VERSION := $(shell git rev-parse HEAD)
 IMAGE := $(PROJECT_NAME):$(VERSION)
 
 build:
-	docker build -f build/package/Dockerfile -t $(IMAGE) .
+	docker build -t $(IMAGE) .
 
 push: build
 	docker tag $(IMAGE) $(ECR_REGISTRY)/$(IMAGE)
