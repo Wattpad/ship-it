@@ -73,6 +73,8 @@ class SingleGridCell extends React.Component {
       width: this.props.cellSize,
       height: this.props.cellSize
     }
+
+    // Re written to put material ui components in the tile original component only took images
     return (
       <div style={SingleGridCellStyle} id={this.props.id} className='SingleGridCell'>
         <div>
@@ -138,7 +140,7 @@ class ReactExpandableGrid extends React.Component {
     }
   }
 
-  findIdNode(target) { // takes event target and returns the id
+  findIdNode(target) { // takes event target and returns the id (written to make sure the expanded detail renders from the correct reference point as in the original component each tile on the grid was just an img tag)
     var t = target
     var found = false
     while (!found && t != null) {
@@ -153,8 +155,6 @@ class ReactExpandableGrid extends React.Component {
   }
 
   renderExpandedDetail(target) {
-    //var thisId = target.id
-    //var className = target.className;
     var thisIdNumber = this.findIdNode(target)
     var detail = document.getElementById('expandedDetail')
 
@@ -373,17 +373,6 @@ class ReactExpandableGrid extends React.Component {
       textAlign: 'center'
     }
 
-    // var cssForSelectedArrow = {
-    //   width: 0,
-    //   height: 0,
-    //   borderLeft: '20px solid transparent',
-    //   borderRight: '20px solid transparent',
-    //   borderBottom: '30px solid' + this.props.detailBackgroundColor,
-    //   marginTop: this.props.cellSize,
-    //   marginLeft: this.props.cellSize / 2 - 20,
-    //   display: 'none'
-    // }
-
     return (
       <div id='GridDetailExpansion' style={cssForGridDetailExpansion}>
         <div id='theGridHolder' style={cssForTheGridHolder}>
@@ -391,7 +380,6 @@ class ReactExpandableGrid extends React.Component {
             {rows}
           </ol>
         </div>
-        {/*<div id='selected_arrow' style={cssForSelectedArrow} />*/}
       </div>
     )
   }
@@ -416,7 +404,7 @@ ReactExpandableGrid.propTypes = {
   show_mobile_style_from_width: PropTypes.number
 }
 
-var data = [
+var data = [ // old image data (this json will be restructured with kube deploy information)
   { 'img': 'http://i.imgur.com/zIEjP6Q.jpg', 'link': 'https://www.instagram.com/p/BRFjVZtgSJD/', 'title': 'Westland Tai Poutini National Park', 'description': 'Photo by @christopheviseux / The Westland Tai Poutini National Park in New Zealand’s South Island offers a remarkable opportunity to take a guided walk on a glacier. A helicopter drop high on the Franz Josef Glacier, provides access to explore stunning ice formations and blue ice caves. Follow me for more images around the world @christopheviseux #newzealand #mountain #ice' },
   { 'img': 'http://i.imgur.com/rCrvQTv.jpg', 'link': 'https://www.instagram.com/p/BQ6_Wa2gmdR/', 'title': 'Dubai Desert Conservation Reserve', 'description': 'Photo by @christopheviseux / Early morning flight on a hot air balloon ride above the Dubai Desert Conservation Reserve. Merely an hour drive from the city, the park was created to protect indigenous species and biodiversity. The Arabian Oryx, which was close to extinction, now has a population well over 100. There are many options to explore the desert and flying above may be one of the most mesmerizing ways. Follow me @christopheviseux for more images from the Middle East. #dubai #desert' },
   { 'img': 'http://i.imgur.com/U8iVzVl.jpg', 'link': 'https://www.instagram.com/p/BQyfDiKAEq9/', 'title': 'Crumbling Reflections', 'description': 'Photo @pedromcbride // Crumbling Reflections: Much has changed in Cuba over the 17 years I have visited this island. But much has stayed the same. Time still ticks at a Cuban pace and old cars still run… I don’t know how... and while pockets of new construction and renovation exist thanks to a growing tourism boom, most buildings are crumbling and cracking under the Caribbean climate. But amidst the hardship, nostalgia and messy vitality, the Cuban people keep moving, like their cars. And somehow, they do it with a colorful friendliness and warmth that always amazes me. To see more, follow @pedromcbride #cuba #havana #photo #workshop @natgeoexpeditions #reflection #photooftheday #petemcbride.' },
