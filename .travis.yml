@@ -1,0 +1,27 @@
+language: go
+
+go:
+  - 1.12.1
+
+services:
+  - docker
+
+before_install:
+  - pip install --user awscli
+  - export PATH=$PATH:$HOME/.local/bin
+  - eval $(aws ecr get-login --no-include-email --region us-east-1)
+
+install:
+  - go get "honnef.co/go/tools/cmd/staticcheck"
+
+script:
+  - go vet ./...
+  - staticcheck ./...
+  - make build
+
+after_success:
+  - make push
+
+branches:
+  only:
+    - master
