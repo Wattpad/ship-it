@@ -1,14 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
+	"ship-it/internal/api"
 )
 
-func hello(w http.ResponseWriter, _ *http.Request) {
-	fmt.Fprint(w, "Hello, world!")
-}
-
 func main() {
-	http.ListenAndServe(":80", http.HandlerFunc(hello))
+	http.ListenAndServe(":80", api.New())
 }
