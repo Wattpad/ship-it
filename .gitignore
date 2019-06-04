@@ -14,3 +14,6 @@ ship-it
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+
+# Misc
+*.DS_Store
