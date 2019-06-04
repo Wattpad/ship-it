@@ -12,10 +12,10 @@ before_install:
   - eval $(aws ecr get-login --no-include-email --region us-east-1)
 
 install:
+  - go build
   - go get "honnef.co/go/tools/cmd/staticcheck"
 
 script:
-  - go build
   - go vet ./...
   - staticcheck ./...
   - make build
