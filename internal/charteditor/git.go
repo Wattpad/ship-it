@@ -16,7 +16,7 @@ type GitCommands interface {
 	UpdateFile(msg string, branch string, path string, fileContent []byte) (*github.RepositoryContentResponse, error)
 	CreateLabel(name string, color string, description string) (*github.Label, error)
 	DeleteLabel(name string) (*github.Response, error)
-	DownloadFile(branch string, path string)
+	DownloadFile(branch string, path string) ([]byte, error)
 }
 
 type GitClient struct {

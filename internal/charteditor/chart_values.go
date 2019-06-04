@@ -2,13 +2,8 @@ package charteditor
 
 /*
 TODO:
-- Handle case where chart folder only contains values.yaml
 - Handle DockerRegistry Case (registry is not under image heading)
-- Change image tag in values file of a chart and marshal it back to bytes (done)
-- Commit those bytes in place of the old file on GitHub (done)
 */
-
-// stop taking imageRepo field from metadata.yml
 
 import (
 	"fmt"
@@ -60,7 +55,7 @@ func LoadChart(serviceName string, localPath string, client GitClient) (*HelmCha
 
 	path := filepath.Join(localPath, chartPath)
 	fmt.Println(path)
-	c, err := chartutil.Load(path) // path is from reference point of main.go
+	c, err := chartutil.Load(path) // path is from reference of where the function is called
 	if err != nil {
 		return nil, err
 	}
