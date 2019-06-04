@@ -15,6 +15,7 @@ install:
   - go get "honnef.co/go/tools/cmd/staticcheck"
 
 script:
+  - go build
   - go vet ./...
   - staticcheck ./...
   - make build
