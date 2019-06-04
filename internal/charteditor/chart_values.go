@@ -148,7 +148,7 @@ func getChartValue(values chartutil.Values, key string) (string, error) { // Fro
 
 	valStr, ok := val.(string)
 	if !ok {
-		return "", fmt.Errorf("Failed to convert %s to string: %v", key, val)
+		return "", fmt.Errorf("failed to convert %s to string: %v", key, val)
 	}
 
 	return valStr, nil

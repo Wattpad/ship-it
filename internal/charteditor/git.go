@@ -166,13 +166,13 @@ func (c *GitClient) SaveDirectory(branch string, repoPath string, localPath stri
 	if err != nil {
 		return err
 	}
-	if dir != nil {
-		for _, d := range dir {
-			if err := c.SaveDirectory(branch, *d.Path, localPath); err != nil {
-				return err
-			}
+
+	for _, d := range dir { // since we are using range the loop does not execute in the nil case
+		if err := c.SaveDirectory(branch, *d.Path, localPath); err != nil {
+			return err
 		}
-	} else {
+	}
+	if dir == nil {
 		relativePath, err := filepath.Rel("", *file.Path) //*
 		path := filepath.Join(localPath, relativePath)
 
