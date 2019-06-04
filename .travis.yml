@@ -23,7 +23,9 @@ script:
   - make build
 
 after_success:
-  - make push
+  - if [[ "$TRAVIS_BRANCH" == "master" ]]; then
+      make push ;
+    fi
 
 branches:
   only:
