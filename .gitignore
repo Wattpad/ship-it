@@ -17,6 +17,6 @@ ship-it
 
 # npm Packages
 web/node_modules
-
+web/build
 # Misc
 *.DS_Store
