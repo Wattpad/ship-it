@@ -173,8 +173,7 @@ func (c *GitClient) SaveDirectory(branch string, repoPath string, localPath stri
 		}
 	}
 	if dir == nil {
-		relativePath, err := filepath.Rel("", *file.Path) //*
-		path := filepath.Join(localPath, relativePath)
+		path := filepath.Join(localPath, *file.Path)
 
 		if err != nil {
 			return err
