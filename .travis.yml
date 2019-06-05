@@ -3,24 +3,37 @@ language: go
 go:
   - 1.12.1
 
+env:
+  - GO111MODULE=on
+
 services:
   - docker
 
-before_install:
-  - pip install --user awscli
-  - export PATH=$PATH:$HOME/.local/bin
-  - eval $(aws ecr get-login --no-include-email --region us-east-1)
+stages:
+  - Test
+  - name: Push
+    if: type = push AND branch = master
 
-install:
-  - go get "honnef.co/go/tools/cmd/staticcheck"
+jobs:
+  include:
+    - stage: Test
+      name: Lint
+      install: go get "honnef.co/go/tools/cmd/staticcheck"
+      script:
+        - go vet ./...
+        - staticcheck ./...
 
-script:
-  - go vet ./...
-  - staticcheck ./...
-  - make build
+    - stage: Test
+      name: Test
+      script: go test ./...
 
-after_success:
-  - make push
+    - stage: Push
+      name: Push
+      before_install:
+        - pip install --user awscli
+        - export PATH=$PATH:$HOME/.local/bin
+        - eval $(aws ecr get-login --no-include-email --region us-east-1)
+      script: make push
 
 branches:
   only:
