@@ -9,10 +9,10 @@ env:
 services:
   - docker
 
-before_install:
-  - pip install --user awscli
-  - export PATH=$PATH:$HOME/.local/bin
-  - eval $(aws ecr get-login --no-include-email --region us-east-1)
+stages:
+  - Test
+  - name: Push
+    if: type = push AND branch = master
 
 jobs:
   include:
@@ -27,13 +27,12 @@ jobs:
       name: Test
       script: go test ./...
 
-    - stage: Build
-      name: Build
-      script: make build
-
     - stage: Push
       name: Push
-      if: type = push AND branch = master
+      before_install:
+        - pip install --user awscli
+        - export PATH=$PATH:$HOME/.local/bin
+        - eval $(aws ecr get-login --no-include-email --region us-east-1)
       script: make push
 
 branches:
