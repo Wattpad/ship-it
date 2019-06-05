@@ -10,7 +10,8 @@ services:
   - docker
 
 stages:
-  - Test
+  - name: Test
+    if: type = pull_request
   - name: Push
     if: type = push AND branch = master
 
