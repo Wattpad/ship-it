@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"sync"
+	"syscall"
 
 	"github.com/Wattpad/sqsconsumer"
 	"github.com/aws/aws-sdk-go/aws"
@@ -58,7 +59,7 @@ func RunConsumer(c *sqsconsumer.Consumer) {
 	// set up a context which will gracefully cancel the worker on interrupt
 	fetchCtx, cancelFetch := context.WithCancel(context.Background())
 	term := make(chan os.Signal, 1)
-	signal.Notify(term, os.Interrupt, os.Kill)
+	signal.Notify(term, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-term
 		log.Println("Starting graceful shutdown")
