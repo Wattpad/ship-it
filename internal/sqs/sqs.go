@@ -21,17 +21,23 @@ type SQSConfig struct {
 	Svc    *sqs.SQS
 }
 
-func NewSQSConfig(name string, region string) *SQSConfig {
+func NewSQSConfig(name string, region string) (*SQSConfig, error) {
 	conf := &aws.Config{
 		Region: &region,
 	}
-	svc := sqs.New(session.New(conf))
+
+	s, err := session.NewSession(conf)
+	if err != nil {
+		return nil, err
+	}
+
+	svc := sqs.New(s)
 
 	return &SQSConfig{
 		Name:   name,
 		Region: region,
 		Svc:    svc,
-	}
+	}, nil
 }
 
 func SQSObjectForQueue(name string, svc *sqs.SQS) (*sqsconsumer.SQSService, error) {
