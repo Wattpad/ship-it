@@ -33,9 +33,13 @@ func NewSQSConfig(name string, region string) *SQSConfig {
 	}
 }
 
+func SQSObjectForQueue(name string, svc *sqs.SQS) (*sqsconsumer.Consumer, error) {
+	return nil, nil
+}
+
 func (s *SQSConfig) NewSQSConsumer() (*sqsconsumer.Consumer, error) {
 	// Create SQS service
-	service, err := sqsconsumer.SQSObjectForQueue(s.Name, s.Svc)
+	service, err := SQSObjectForQueue(s.Name, s.Svc)
 	if err != nil {
 		return nil, err
 	}
