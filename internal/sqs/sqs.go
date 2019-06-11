@@ -3,6 +3,7 @@ package ecrconsumer
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/Wattpad/sqsconsumer"
 	"github.com/aws/aws-sdk-go/aws"
@@ -38,6 +39,7 @@ func (s *SQSConfig) NewSQSConsumer() (*sqsconsumer.Consumer, error) {
 
 	// Create and return SQS consumer
 	consumer := sqsconsumer.NewConsumer(service, processMessage)
+	consumer.SetLogger(log.Printf)
 	return consumer, nil
 }
 
