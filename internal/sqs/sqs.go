@@ -84,7 +84,23 @@ func RunConsumer(c *sqsconsumer.Consumer) {
 	log.Println("Shutdown complete")
 }
 
+func handleCancel(ctx context.Context, msg string) error {
+	select {
+	case <-ctx.Done():
+		log.Println("Context done so aborting processing message:", msg)
+		return ctx.Err()
+	default:
+		return nil
+	}
+}
+
 func processMessage(ctx context.Context, msg string) error {
+
+	err := handleCancel(ctx, msg)
+	if err != nil {
+		return err
+	}
+
 	fmt.Println(msg)
 	return nil
 }
