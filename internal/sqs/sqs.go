@@ -33,7 +33,7 @@ func NewSQSConfig(name string, region string) *SQSConfig {
 	}
 }
 
-func SQSObjectForQueue(name string, svc *sqs.SQS) (*sqsconsumer.Consumer, error) {
+func SQSObjectForQueue(name string, svc *sqs.SQS) (*sqsconsumer.SQSService, error) {
 	return nil, nil
 }
 
