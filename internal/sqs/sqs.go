@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
+	"os/signal"
+	"sync"
 
 	"github.com/Wattpad/sqsconsumer"
 	"github.com/aws/aws-sdk-go/aws"
@@ -41,6 +44,37 @@ func (s *SQSConfig) NewSQSConsumer() (*sqsconsumer.Consumer, error) {
 	consumer := sqsconsumer.NewConsumer(service, processMessage)
 	consumer.SetLogger(log.Printf)
 	return consumer, nil
+}
+
+// Runs a preconfigured Consumer
+func RunConsumer(c *sqsconsumer.Consumer) {
+
+	numFetchers := 1
+
+	// set up a context which will gracefully cancel the worker on interrupt
+	fetchCtx, cancelFetch := context.WithCancel(context.Background())
+	term := make(chan os.Signal, 1)
+	signal.Notify(term, os.Interrupt, os.Kill)
+	go func() {
+		<-term
+		log.Println("Starting graceful shutdown")
+		cancelFetch()
+	}()
+
+	wg := &sync.WaitGroup{}
+	wg.Add(numFetchers)
+	for i := 0; i < numFetchers; i++ {
+		go func() {
+			// start running the consumer with a context that will be cancelled when a graceful shutdown is requested
+			c.Run(fetchCtx)
+
+			wg.Done()
+		}()
+	}
+
+	// wait for all the consumers to exit cleanly
+	wg.Wait()
+	log.Println("Shutdown complete")
 }
 
 func processMessage(ctx context.Context, msg string) error {
