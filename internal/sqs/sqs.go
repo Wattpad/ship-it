@@ -59,7 +59,7 @@ func RunConsumer(c *sqsconsumer.Consumer) {
 	// set up a context which will gracefully cancel the worker on interrupt
 	fetchCtx, cancelFetch := context.WithCancel(context.Background())
 	term := make(chan os.Signal, 1)
-	signal.Notify(term, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(term, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
 		<-term
 		log.Println("Starting graceful shutdown")
