@@ -1,5 +1,3 @@
-github.com/Wattpad/sqsconsumer v0.0.0-20170510132609-fa099c630d1b h1:RA4/9rrz+GSdTUfDq0Sorlmb7pYMtE13w+Nq1vSAjUo=
-github.com/Wattpad/sqsconsumer v0.0.0-20170510132609-fa099c630d1b/go.mod h1:KBztELD0bMOv22L0XfK0kBqP4/kggh/etXPTypa2xuA=
 github.com/Wattpad/sqsconsumer v0.0.0-20190611184259-511082fa45b3 h1:YyI/dxkC5wLEClu1Ys6ar2mlNgJ8gR7e4tGEz3ae4v8=
 github.com/Wattpad/sqsconsumer v0.0.0-20190611184259-511082fa45b3/go.mod h1:KBztELD0bMOv22L0XfK0kBqP4/kggh/etXPTypa2xuA=
 github.com/aws/aws-sdk-go v1.19.47 h1:ZEze0mpk8Fttrsz6UNLqhH/jRGYbMPfWFA2ILas4AmM=
