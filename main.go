@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -21,30 +20,26 @@ import (
 )
 
 func main() {
-	http.ListenAndServe(":80", api.New())
-
 	// Setup a cancel on interrupt context
-	fetchCtx, cancelFetch := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
 	term := make(chan os.Signal, 1)
 	signal.Notify(term, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
 		<-term
 		log.Println("Starting graceful shutdown")
-		cancelFetch()
+		cancel()
 	}()
 
 	// Load Environment Variables
 	envConf, err := ecrconsumer.ConfigFromEnv()
 	if err != nil {
-		fmt.Println(err)
-		return
+		log.Fatal(err)
 	}
 
 	sqsConf, err := ecrconsumer.NewSQSConfig("kube-deploy-events.fifo", envConf)
 	if err != nil {
-		log.Println(err)
-		return
+		log.Fatal(err)
 	}
 
 	// DataDog Setup
@@ -60,8 +55,7 @@ func main() {
 
 	s, err := session.NewSession(conf)
 	if err != nil {
-		fmt.Println(err)
-		return
+		log.Fatal(err)
 	}
 
 	svc := sqs.New(s)
@@ -73,5 +67,6 @@ func main() {
 		return
 	}
 
-	go consumer.Run(fetchCtx)
+	go consumer.Run(ctx)
+	http.ListenAndServe(":80", api.New())
 }
