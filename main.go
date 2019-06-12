@@ -13,7 +13,7 @@ import (
 func main() {
 	http.ListenAndServe(":80", api.New())
 	// ECR SQS Consumer Setup
-	conf, err := ecrconsumer.NewSQSConfig("kube-deploy-events.fifo", "us-east-1")
+	conf, err := ecrconsumer.NewSQSConfig("kube-deploy-events.fifo")
 	if err != nil {
 		log.Println(err)
 		return
