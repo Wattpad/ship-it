@@ -32,7 +32,7 @@ func main() {
 	}()
 
 	// Load Environment Variables
-	envConf, err := ecrconsumer.ConfigFromEnv()
+	envConf, err := ecrconsumer.FromEnv()
 	if err != nil {
 		log.Fatal(err)
 	}
