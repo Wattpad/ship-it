@@ -13,24 +13,6 @@ import (
 	"github.com/go-kit/kit/metrics/dogstatsd"
 )
 
-// NOTE: Refactor to take Env struct
-
-type SQSConfig struct {
-	QueueName   string
-	Region      string
-	DatadogHost string
-	DatadogPort string
-}
-
-func NewSQSConfig(name string, env *Config) (*SQSConfig, error) {
-	return &SQSConfig{
-		QueueName:   name,
-		Region:      env.AWSRegion,
-		DatadogHost: env.DogstatsdHost,
-		DatadogPort: env.DogstatsdPort,
-	}, nil
-}
-
 func NewSQSConsumer(logger kitlog.Logger, dd *dogstatsd.Dogstatsd, hist metrics.Histogram, name string, svc sqsconsumer.SQSAPI) (*sqsconsumer.Consumer, error) {
 	// Create SQS service
 	service, err := sqsconsumer.NewSQSService(name, svc)

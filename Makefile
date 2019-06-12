@@ -5,10 +5,13 @@ PROJECT_NAME := ship-it
 VERSION := $(shell git rev-parse HEAD)
 
 IMAGE := $(PROJECT_NAME):$(VERSION)
+LATEST_IMAGE := $(PROJECT_NAME):latest
 
 build:
 	docker build -t $(IMAGE) .
 
 push: build
 	docker tag $(IMAGE) $(ECR_REGISTRY)/$(IMAGE)
+	docker tag $(IMAGE) $(ECR_REGISTRY)/$(LATEST_IMAGE)
 	docker push $(ECR_REGISTRY)/$(IMAGE)
+	docker push $(ECR_REGISTRY)/$(LATEST_IMAGE)

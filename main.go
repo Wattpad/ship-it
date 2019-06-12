@@ -11,23 +11,27 @@ import (
 	"syscall"
 	"time"
 
-	kitlog "github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/metrics/dogstatsd"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
+	kitlog "github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/metrics/dogstatsd"
 )
 
 func main() {
-	// Setup a cancel on interrupt context
+	logger := kitlog.NewJSONLogger(kitlog.NewSyncWriter(os.Stdout))
+	logger = kitlog.With(logger, "timestamp", kitlog.DefaultTimestampUTC, "caller", kitlog.DefaultCaller)
+
+	logger.Log("event", "service.start")
+	defer logger.Log("event", "service.stop")
+
 	ctx, cancel := context.WithCancel(context.Background())
-	term := make(chan os.Signal, 1)
-	signal.Notify(term, syscall.SIGINT, syscall.SIGTERM)
+
+	signals := make(chan os.Signal, 2)
+	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		<-term
-		log.Println("Starting graceful shutdown")
+		<-signals
 		cancel()
 	}()
 
@@ -37,11 +41,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// DataDog Setup
-	logger := kitlog.NewJSONLogger(kitlog.NewSyncWriter(os.Stdout))
-	dd := dogstatsd.New("wattpad.", logger)
+	dd := dogstatsd.New("wattpad.ship-it.", logger)
 	go dd.SendLoop(time.NewTicker(time.Second).C, "udp", envConf.DataDogAddress())
-	hist := dd.NewTiming("worker.time", 1.0).With("worker", "ship-it-worker", "queue", envConf.QueueName)
+	hist := dd.NewTiming("consumer.time", 1.0).With("consumer", "ship-it-consumer", "queue", envConf.QueueName)
 
 	// AWS Setup
 	conf := &aws.Config{
@@ -63,5 +65,9 @@ func main() {
 	}
 
 	go consumer.Run(ctx)
-	http.ListenAndServe(":80", api.New())
+
+	go http.ListenAndServe(":80", api.New())
+
+	<-ctx.Done()
+	logger.Log("event", "service.exit", "error", ctx.Err())
 }
