@@ -16,7 +16,7 @@ import (
 // NOTE: Refactor to take Env struct
 
 type SQSConfig struct {
-	Name        string
+	QueueName   string
 	Region      string
 	DatadogHost string
 	DatadogPort string
@@ -24,7 +24,7 @@ type SQSConfig struct {
 
 func NewSQSConfig(name string, env *Config) (*SQSConfig, error) {
 	return &SQSConfig{
-		Name:        name,
+		QueueName:   name,
 		Region:      env.AWSRegion,
 		DatadogHost: env.DogstatsdHost,
 		DatadogPort: env.DogstatsdPort,
