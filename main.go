@@ -38,7 +38,7 @@ func main() {
 	// Load Environment Variables
 	envConf, err := FromEnv()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Error getting environment variables %s", err)
 	}
 
 	dd := dogstatsd.New("wattpad.ship-it.", logger)
@@ -52,7 +52,7 @@ func main() {
 
 	s, err := session.NewSession(conf)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Error opening AWS session %s", err)
 	}
 
 	svc := sqs.New(s)
