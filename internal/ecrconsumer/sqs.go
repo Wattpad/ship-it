@@ -4,17 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
-	"os/signal"
-	"sync"
-	"syscall"
 	"time"
 
 	"github.com/Wattpad/sqsconsumer"
 	"github.com/Wattpad/sqsconsumer/middleware"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/sqs"
 
 	// Metric Imports
 	kitlog "github.com/go-kit/kit/log"
@@ -25,49 +18,29 @@ import (
 // NOTE: Refactor to take Env struct
 
 type SQSConfig struct {
-	Name string
-	Svc  *sqs.SQS
-	Env  *Config
+	Name        string
+	Region      string
+	DatadogHost string
+	DatadogPort string
 }
 
-func NewSQSConfig(name string) (*SQSConfig, error) {
-	envConf, err := ConfigFromEnv()
-	if err != nil {
-		return nil, err
-	}
-
-	conf := &aws.Config{
-		Region: &envConf.AWSRegion,
-	}
-
-	s, err := session.NewSession(conf)
-	if err != nil {
-		return nil, err
-	}
-
-	svc := sqs.New(s)
-
+func NewSQSConfig(name string, env *Config) (*SQSConfig, error) {
 	return &SQSConfig{
-		Name: name,
-		Svc:  svc,
-		Env:  envConf,
+		Name:        name,
+		Region:      env.AWSRegion,
+		DatadogHost: env.DogstatsdHost,
+		DatadogPort: env.DogstatsdPort,
 	}, nil
 }
 
-func (s *SQSConfig) NewSQSConsumer(logger kitlog.Logger) (*sqsconsumer.Consumer, error) {
+func NewSQSConsumer(logger kitlog.Logger, dd *dogstatsd.Dogstatsd, hist metrics.Histogram, name string, svc sqsconsumer.SQSAPI) (*sqsconsumer.Consumer, error) {
 	// Create SQS service
-	service, err := sqsconsumer.NewSQSService(s.Name, s.Svc)
+	service, err := sqsconsumer.NewSQSService(name, svc)
 	if err != nil {
 		return nil, err
 	}
 
-	// Initialize Data Dog
-
-	dd := dogstatsd.New("wattpad.", logger)
-	go dd.SendLoop(time.NewTicker(time.Second).C, "udp", s.Env.DataDogAddress())
-
 	// Configure Middleware
-	hist := dd.NewTiming("worker.time", 1.0).With("worker", "ship-it-worker", "queue", s.Name)
 	track := dataDogTimeTracker(hist)
 	wrappedLogger := loggerMiddleware(logger)
 	handler := middleware.ApplyDecoratorsToHandler(processMessage, track, wrappedLogger)
@@ -81,32 +54,7 @@ func (s *SQSConfig) NewSQSConsumer(logger kitlog.Logger) (*sqsconsumer.Consumer,
 // Runs a preconfigured Consumer
 func RunConsumer(c *sqsconsumer.Consumer) {
 
-	numFetchers := 1
-
 	// set up a context which will gracefully cancel the worker on interrupt
-	fetchCtx, cancelFetch := context.WithCancel(context.Background())
-	term := make(chan os.Signal, 1)
-	signal.Notify(term, syscall.SIGINT, syscall.SIGTERM)
-	go func() {
-		<-term
-		log.Println("Starting graceful shutdown")
-		cancelFetch()
-	}()
-
-	wg := &sync.WaitGroup{}
-	wg.Add(numFetchers)
-	for i := 0; i < numFetchers; i++ {
-		go func() {
-			// start running the consumer with a context that will be cancelled when a graceful shutdown is requested
-			c.Run(fetchCtx)
-
-			wg.Done()
-		}()
-	}
-
-	// wait for all the consumers to exit cleanly
-	wg.Wait()
-	log.Println("Shutdown complete")
 }
 
 func handleCancel(ctx context.Context, msg string) error {
