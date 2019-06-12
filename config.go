@@ -1,4 +1,4 @@
-package ecrconsumer
+package main
 
 import (
 	"net"
@@ -10,6 +10,7 @@ type Config struct {
 	AWSRegion     string `envconfig:"AWS_REGION" required:"true"`
 	DogstatsdHost string `split_words:"true" required:"true"`
 	DogstatsdPort string `split_words:"true" default:"8125"`
+	QueueName     string `split_words:"true" required:"true"`
 }
 
 func (e *Config) DataDogAddress() string {

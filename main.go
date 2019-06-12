@@ -32,12 +32,7 @@ func main() {
 	}()
 
 	// Load Environment Variables
-	envConf, err := ecrconsumer.FromEnv()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	sqsConf, err := ecrconsumer.NewSQSConfig("kube-deploy-events.fifo", envConf)
+	envConf, err := FromEnv()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -46,7 +41,7 @@ func main() {
 	logger := kitlog.NewJSONLogger(kitlog.NewSyncWriter(os.Stdout))
 	dd := dogstatsd.New("wattpad.", logger)
 	go dd.SendLoop(time.NewTicker(time.Second).C, "udp", envConf.DataDogAddress())
-	hist := dd.NewTiming("worker.time", 1.0).With("worker", "ship-it-worker", "queue", sqsConf.QueueName)
+	hist := dd.NewTiming("worker.time", 1.0).With("worker", "ship-it-worker", "queue", envConf.QueueName)
 
 	// AWS Setup
 	conf := &aws.Config{
@@ -61,7 +56,7 @@ func main() {
 	svc := sqs.New(s)
 
 	// ECR SQS Consumer Setup
-	consumer, err := ecrconsumer.NewSQSConsumer(logger, dd, hist, sqsConf.QueueName, svc)
+	consumer, err := ecrconsumer.NewSQSConsumer(logger, dd, hist, envConf.QueueName, svc)
 	if err != nil {
 		log.Println(err)
 		return
