@@ -10,10 +10,9 @@ import (
 	// Metric Imports
 	kitlog "github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics"
-	"github.com/go-kit/kit/metrics/dogstatsd"
 )
 
-func NewSQSConsumer(logger kitlog.Logger, dd *dogstatsd.Dogstatsd, hist metrics.Histogram, name string, svc sqsconsumer.SQSAPI) (*sqsconsumer.Consumer, error) {
+func NewSQSConsumer(logger kitlog.Logger, hist metrics.Histogram, name string, svc sqsconsumer.SQSAPI) (*sqsconsumer.Consumer, error) {
 	// Create SQS service
 	service, err := sqsconsumer.NewSQSService(name, svc)
 	if err != nil {

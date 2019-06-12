@@ -58,7 +58,7 @@ func main() {
 	svc := sqs.New(s)
 
 	// ECR SQS Consumer Setup
-	consumer, err := ecrconsumer.NewSQSConsumer(logger, dd, hist, envConf.QueueName, svc)
+	consumer, err := ecrconsumer.NewSQSConsumer(logger, hist, envConf.QueueName, svc)
 	if err != nil {
 		log.Println(err)
 		return
