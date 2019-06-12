@@ -20,14 +20,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/sqs"
 )
 
-// TODO:
-// also create DD object here + histogram (done)
-// Make NewSQSConsumer independent function with extra args (done)
-// Create context in main and run sqsconsumer.Run in go routine in main.go (done)
-// Create SVC object in main and take interface for SQSAPI as args in NewSQSConfig instead of constructing the SVC in the function (done)
-// Data Dog event for successful message processing
-// raname package directory to ecrconsumer and merge in the git chart editor code (done)
-
 func main() {
 	http.ListenAndServe(":80", api.New())
 
@@ -62,7 +54,6 @@ func main() {
 	hist := dd.NewTiming("worker.time", 1.0).With("worker", "ship-it-worker", "queue", sqsConf.Name)
 
 	// AWS Setup
-
 	conf := &aws.Config{
 		Region: &envConf.AWSRegion,
 	}
