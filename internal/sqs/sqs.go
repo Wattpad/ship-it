@@ -19,6 +19,7 @@ import (
 	// Metric Imports
 	kitlog "github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics"
+	"github.com/go-kit/kit/metrics/dogstatsd"
 )
 
 type SQSConfig struct {
@@ -46,16 +47,26 @@ func NewSQSConfig(name string, region string) (*SQSConfig, error) {
 	}, nil
 }
 
-func (s *SQSConfig) NewSQSConsumer() (*sqsconsumer.Consumer, error) {
+func (s *SQSConfig) NewSQSConsumer(logger kitlog.Logger) (*sqsconsumer.Consumer, error) {
 	// Create SQS service
 	service, err := sqsconsumer.NewSQSService(s.Name, s.Svc)
 	if err != nil {
 		return nil, err
 	}
 
+	// Initialize Data Dog
+	dd := dogstatsd.New("wattpad.", logger)
+	go dd.SendLoop(time.Tick(time.Second), "udp", "8125")
+
+	// Configure Middleware
+	hist := dd.NewTiming("worker.time", 1.0).With("worker", "ship-it-worker", "queue", s.Name)
+	track := dataDogTimeTracker(hist)
+	wrappedLogger := loggerMiddleware(logger)
+	handler := middleware.ApplyDecoratorsToHandler(processMessage, track, wrappedLogger)
+
 	// Create and return SQS consumer
-	consumer := sqsconsumer.NewConsumer(service, processMessage)
-	consumer.SetLogger(log.Printf)
+	consumer := sqsconsumer.NewConsumer(service, handler)
+
 	return consumer, nil
 }
 
