@@ -56,7 +56,7 @@ func (s *SQSConfig) NewSQSConsumer(logger kitlog.Logger) (*sqsconsumer.Consumer,
 
 	// Initialize Data Dog
 	dd := dogstatsd.New("wattpad.", logger)
-	go dd.SendLoop(time.Tick(time.Second), "udp", "8125")
+	go dd.SendLoop(time.NewTicker(time.Second).C, "udp", "8125")
 
 	// Configure Middleware
 	hist := dd.NewTiming("worker.time", 1.0).With("worker", "ship-it-worker", "queue", s.Name)
