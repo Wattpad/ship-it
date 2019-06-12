@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"net"
 	"os"
 	"os/signal"
 	"sync"
@@ -23,15 +22,22 @@ import (
 	"github.com/go-kit/kit/metrics/dogstatsd"
 )
 
+// NOTE: Refactor to take Env struct
+
 type SQSConfig struct {
-	Name   string
-	Region string
-	Svc    *sqs.SQS
+	Name string
+	Svc  *sqs.SQS
+	Env  *Config
 }
 
-func NewSQSConfig(name string, region string) (*SQSConfig, error) {
+func NewSQSConfig(name string) (*SQSConfig, error) {
+	envConf, err := ConfigFromEnv()
+	if err != nil {
+		return nil, err
+	}
+
 	conf := &aws.Config{
-		Region: &region,
+		Region: &envConf.AWSRegion,
 	}
 
 	s, err := session.NewSession(conf)
@@ -42,9 +48,9 @@ func NewSQSConfig(name string, region string) (*SQSConfig, error) {
 	svc := sqs.New(s)
 
 	return &SQSConfig{
-		Name:   name,
-		Region: region,
-		Svc:    svc,
+		Name: name,
+		Svc:  svc,
+		Env:  envConf,
 	}, nil
 }
 
@@ -57,10 +63,8 @@ func (s *SQSConfig) NewSQSConsumer(logger kitlog.Logger) (*sqsconsumer.Consumer,
 
 	// Initialize Data Dog
 
-	address := net.JoinHostPort("", "8125") // Add DD info to SQS config
-
 	dd := dogstatsd.New("wattpad.", logger)
-	go dd.SendLoop(time.NewTicker(time.Second).C, "udp", address)
+	go dd.SendLoop(time.NewTicker(time.Second).C, "udp", s.Env.DataDogAddress())
 
 	// Configure Middleware
 	hist := dd.NewTiming("worker.time", 1.0).With("worker", "ship-it-worker", "queue", s.Name)
