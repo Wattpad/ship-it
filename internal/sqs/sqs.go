@@ -8,11 +8,17 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/Wattpad/sqsconsumer"
+	"github.com/Wattpad/sqsconsumer/middleware"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
+
+	// Metric Imports
+	kitlog "github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/metrics"
 )
 
 type SQSConfig struct {
@@ -103,4 +109,36 @@ func processMessage(ctx context.Context, msg string) error {
 
 	fmt.Println(msg)
 	return nil
+}
+
+func dataDogTimeTracker(hist metrics.Histogram) middleware.MessageHandlerDecorator {
+	return func(fn sqsconsumer.MessageHandlerFunc) sqsconsumer.MessageHandlerFunc {
+		return func(ctx context.Context, msg string) error {
+			start := time.Now()
+
+			err := fn(ctx, msg)
+
+			var status string
+			if err != nil {
+				status = "failure"
+			} else {
+				status = "success"
+			}
+			hist.With("status", status).Observe(float64(time.Since(start).Seconds() * 1000))
+
+			return err
+		}
+	}
+}
+
+func loggerMiddleware(logger kitlog.Logger) middleware.MessageHandlerDecorator {
+	return func(fn sqsconsumer.MessageHandlerFunc) sqsconsumer.MessageHandlerFunc {
+		return func(ctx context.Context, msg string) error {
+			err := fn(ctx, msg)
+			if err != nil {
+				logger.Log("error", err)
+			}
+			return err
+		}
+	}
 }
