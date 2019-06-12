@@ -11,6 +11,7 @@ require (
 	github.com/go-logfmt/logfmt v0.4.0 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/mock v1.3.1 // indirect
+	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/stretchr/testify v1.3.0 // indirect
 	golang.org/x/net v0.0.0-20190607181551-461777fb6f67 // indirect
 )

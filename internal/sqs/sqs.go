@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"os/signal"
 	"sync"
@@ -55,8 +56,11 @@ func (s *SQSConfig) NewSQSConsumer(logger kitlog.Logger) (*sqsconsumer.Consumer,
 	}
 
 	// Initialize Data Dog
+
+	address := net.JoinHostPort("", "8125") // Add DD info to SQS config
+
 	dd := dogstatsd.New("wattpad.", logger)
-	go dd.SendLoop(time.NewTicker(time.Second).C, "udp", "8125")
+	go dd.SendLoop(time.NewTicker(time.Second).C, "udp", address)
 
 	// Configure Middleware
 	hist := dd.NewTiming("worker.time", 1.0).With("worker", "ship-it-worker", "queue", s.Name)
