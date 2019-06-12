@@ -20,6 +20,11 @@ func main() {
 	}
 
 	logger := kitlog.NewJSONLogger(kitlog.NewSyncWriter(os.Stdout))
+	// also create DD object here + histogram
+	// Make NewSQSConsumer independent function with extra args
+	// Create context stuff in main and run sqsconsumer.Run in go routine in main.go
+	// Create SVC object in main and take interface for SQSAPI as args in NewSQSConfig instead of constructing the SVC in the function
+	// Data Dog event for successful message processing
 
 	consumer, err := conf.NewSQSConsumer(logger)
 	if err != nil {
