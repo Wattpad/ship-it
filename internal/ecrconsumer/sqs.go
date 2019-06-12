@@ -2,7 +2,6 @@ package ecrconsumer
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/Wattpad/sqsconsumer"
@@ -51,8 +50,6 @@ func NewSQSConsumer(logger kitlog.Logger, dd *dogstatsd.Dogstatsd, hist metrics.
 }
 
 func processMessage(ctx context.Context, msg string) error {
-
-	fmt.Println(msg)
 	return nil
 }
 
