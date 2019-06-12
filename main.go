@@ -66,7 +66,7 @@ func main() {
 
 	go consumer.Run(ctx)
 
-	go http.ListenAndServe(":80", api.New())
+	go http.ListenAndServe(":"+envConf.ServicePort, api.New())
 
 	<-ctx.Done()
 	logger.Log("event", "service.exit", "error", ctx.Err())
