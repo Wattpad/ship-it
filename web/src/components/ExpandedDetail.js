@@ -55,7 +55,7 @@ class ExpandedDetail extends React.Component {
 
   render() {
     return (
-      <MuiThemeProvider theme={theme}>
+      <MuiThemeProvider theme={theme} >
         <div className="flex-container">
           <div className="helm-status">
             <div className="right-padded">

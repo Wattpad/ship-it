@@ -128,6 +128,8 @@ class ReactExpandableGrid extends React.Component {
   constructor(props) {
     super(props)
 
+    this.gridRef = React.createRef()
+
     this.state = {
       expanded: false,
       selected_id: '',
@@ -237,7 +239,6 @@ class ReactExpandableGrid extends React.Component {
     var cssforExpandedDetail = {
       backgroundColor: this.props.detailBackgroundColor,
       height: this.props.detailHeight,
-      width: this.props.detailWidth,
       display: 'none',
       position: 'relative',
       padding: '20px',
@@ -274,7 +275,6 @@ class ReactExpandableGrid extends React.Component {
       margin: 0,
       textAlign: 'center'
     }
-
     return (
       <div id='GridDetailExpansion' style={cssForGridDetailExpansion}>
         <div id='theGridHolder' style={cssForTheGridHolder}>
@@ -282,7 +282,7 @@ class ReactExpandableGrid extends React.Component {
             {rows}
           </ol>
         </div>
-      </div>
+      </div >
     )
   }
 }
@@ -292,11 +292,8 @@ ReactExpandableGrid.propTypes = {
   cellSize: PropTypes.number,
   cellMargin: PropTypes.number,
   bgColor: PropTypes.string,
-  detailWidth: PropTypes.string, // in %
   detailHeight: PropTypes.number,
   detailBackgroundColor: PropTypes.string,
-  ExpandedDetail_closeX_bool: PropTypes.bool,
-  show_mobile_style_from_width: PropTypes.number
 }
 
 ReactExpandableGrid.defaultProps = {
@@ -304,11 +301,8 @@ ReactExpandableGrid.defaultProps = {
   cellSize: 250,
   cellMargin: 25,
   bgColor: '#f2f2f2',
-  detailWidth: '100%',
   detailHeight: 300,
   detailBackgroundColor: '#D9D9D9',
-  ExpandedDetail_closeX_bool: true,
-  show_mobile_style_from_width: 600,
 }
 
 export default ReactExpandableGrid
