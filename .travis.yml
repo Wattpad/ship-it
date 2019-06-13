@@ -12,11 +12,17 @@ services:
 stages:
   - name: Test
     if: type = pull_request
+  - name: Build
+    if: type = pull_request
   - name: Push
     if: type = push AND branch = master
 
 jobs:
   include:
+    - stage: Build
+      name: Docker
+      script: make build
+
     - stage: Test
       name: Lint
       install: go get "honnef.co/go/tools/cmd/staticcheck"
@@ -30,8 +36,8 @@ jobs:
 
     - stage: Push
       name: Push
-      before_install:
-        - pip install --user awscli
+      install: pip install --user awscli
+      before_script:
         - export PATH=$PATH:$HOME/.local/bin
         - eval $(aws ecr get-login --no-include-email --region us-east-1)
       script: make push
