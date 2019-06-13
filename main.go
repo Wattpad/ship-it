@@ -5,11 +5,17 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"syscall"
-
 	"ship-it/internal/api"
+	"ship-it/internal/ecrconsumer"
+	"syscall"
+	"time"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/sqs"
 
 	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/metrics/dogstatsd"
 )
 
 func main() {
@@ -28,6 +34,32 @@ func main() {
 		<-signals
 		cancel()
 	}()
+
+	envConf, err := FromEnv()
+	if err != nil {
+		logger.Log("Error getting environment variables %s", err)
+		os.Exit(1)
+	}
+
+	dd := dogstatsd.New("wattpad.ship-it.", logger)
+	go dd.SendLoop(time.Tick(time.Second), "udp", envConf.DataDogAddress())
+	hist := dd.NewTiming("worker.time", 1.0).With("", "worker:ecrconsumer", "queue", envConf.QueueName)
+
+	s, err := session.NewSession(&aws.Config{
+		Region: &envConf.AWSRegion,
+	})
+	if err != nil {
+		logger.Log("Error opening AWS session %s", err)
+		os.Exit(1)
+	}
+
+	consumer, err := ecrconsumer.NewSQSConsumer(logger, hist, envConf.QueueName, sqs.New(s))
+	if err != nil {
+		logger.Log("Error creating SQS consumer %s", err)
+		os.Exit(1)
+	}
+
+	go consumer.Run(ctx)
 
 	srv := http.Server{
 		Addr:    ":80",
