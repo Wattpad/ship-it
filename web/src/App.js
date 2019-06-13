@@ -4,47 +4,44 @@ import './App.css';
 import TopBar from './components/TopBar';
 
 var data = [
-  {
-    serviceName: "loki",
-    deploymentStatus: "deployed",
-    timeStamp: "5 min ago",
-    chartVersion: "0.1.1",
+  { // Formatted as it will be from the real API
+    name: "homeslice",
+    created: "2019-06-13T14:09:47.781282",
+    lastDeployed: "2019-06-13T14:09:47.78Z",
+    owner: {
+      team: "squad-cd",
+      slack: "#squad-cd"
+    },
     autoDeploy: true,
-    mirandaPR: "https://github.com",
-    highlanderPR: "https://github.com",
-    slackLink: "https://slack.com",
-    dockerLink: "https://www.docker.com/",
-    dataDogDashboard: "dd",
-    dataDogMonitor: "",
-    sumoLogs: "",
-    travisBuild: "",
-    kubeResources: [
-      "pod 1",
-      "pod 2",
-      "pod 3",
-      "pod 4",
-    ]
-  }, {
-    serviceName: "hermes",
-    deploymentStatus: "deployed",
-    timeStamp: "5 min ago",
-    chartVersion: "0.1.1",
-    autoDeploy: true,
-    mirandaPR: "https://github.com",
-    highlanderPR: "https://github.com",
-    slackLink: "https://slack.com",
-    dockerLink: "https://www.docker.com/",
-    dataDogDashboard: "dd",
-    dataDogMonitor: "",
-    sumoLogs: "",
-    travisBuild: "",
-    kubeResources: [
-      "pod 1",
-      "pod 2",
-      "pod 3",
-      "pod 4",
-    ]
-  },
+    code: {
+      github: "https://github.com/Wattpad/highlander/wattpad/src/services/homeslice",
+      ref: "adf098ad00a8d76d5ad5ad4ada5dad4ad"
+    },
+    build: {
+      travis: "" // Can get the build URL from GitHub Checks API
+    },
+    monitoring: {
+      datadog: {
+        dashboard: "https://app.datadoghq.com/dashboard/4px-qaj-tnc/home-v2?tile_size=m",
+        monitors: "https://app.datadoghq.com/monitors/manage?q=home"
+      },
+      sumologic: "https://service.us2.sumologic.com/ui/#/search/KRBpz5OodF4HcTasdIEYkuhguVAEennEj7xIV8ke"
+    },
+    artifacts: {
+      docker: {
+        image: "723255503624.dkr.ecr.us-east-1.amazonaws.com/homeslice",
+        tag: "adf098ad00a8d76d5ad5ad4ada5dad4ad"
+      },
+      chart: {
+        path: "https://charts.wattpadhq.com/homeslice",
+        version: "1.2.3"
+      }
+    },
+    deployment: {
+      status: "deploying", // deploying, deployed, rolled_back, failed
+      // NOTE resources separate endpoint
+    }
+  }
 ]
 
 function App() {
