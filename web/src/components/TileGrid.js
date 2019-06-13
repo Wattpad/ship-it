@@ -243,41 +243,11 @@ class ReactExpandableGrid extends React.Component {
     var cssforExpandedDetail = {
       backgroundColor: this.props.detailBackgroundColor,
       height: this.props.detailHeight,
+      width: this.props.detailWidth,
       display: 'none',
       position: 'relative',
       padding: '20px',
-      transition: 'display 2s ease-in-out 0.5s'
-    }
-
-    var cssforExpandedDetailImage = {
-      display: 'inline-block',
-      maxWidth: this.props.ExpandedDetail_image_size,
-      width: '100%',
-      height: 'auto',
-      align: 'center',
-      position: 'absolute',
-      top: 0,
-      bottom: 0,
-      left: 0,
-      right: 0,
-      margin: 'auto'
-    }
-
-    var cssforExpandedDetailTitle = {
-      backgroundColor: this.props.ExpandedDetail_title_bgColor,
-      width: '100%',
-      height: 'auto',
-      marginBottom: '15px'
-    }
-
-    var cssforExpandedDetailDescription = {
-      backgroundColor: this.props.ExpandedDetail_description_bgColor,
-      color: this.props.ExpandedDetail_font_color,
-      width: 'auto%',
-      height: '80%',
-      marginRight: '30px',
-      marginLeft: '30px',
-      textAlign: 'justify'
+      transition: 'display 2s ease-in-out 0.5s',
     }
 
     var cssforExpandedDetailLeft
@@ -295,27 +265,6 @@ class ReactExpandableGrid extends React.Component {
       height: '100%',
       float: 'right',
       position: 'relative'
-    }
-
-    var cssForDescriptionLink = {
-      textDecoration: 'none',
-      position: 'relative',
-      float: 'bottom',
-      bottom: 20,
-      cursor: 'pointer'
-    }
-
-    var cssForImageLink = {
-      cursor: 'pointer'
-    }
-
-    var cssforExpandedDetailClose = {
-      textDecoration: 'none',
-      position: 'relative',
-      float: 'right',
-      top: 10,
-      right: 10,
-      cursor: 'pointer'
     }
 
     // Make Mobile Friendly
@@ -393,49 +342,18 @@ ReactExpandableGrid.propTypes = {
   detailWidth: PropTypes.string, // in %
   detailHeight: PropTypes.number,
   detailBackgroundColor: PropTypes.string,
-  ExpandedDetail_right_width: PropTypes.string, // in %
-  ExpandedDetail_left_width: PropTypes.string, // in %
-  ExpandedDetail_description_bgColor: PropTypes.string,
-  ExpandedDetail_title_bgColor: PropTypes.string,
-  ExpandedDetail_img_bgColor: PropTypes.string,
-  ExpandedDetail_link_text: PropTypes.string,
-  ExpandedDetail_font_color: PropTypes.string,
   ExpandedDetail_closeX_bool: PropTypes.bool,
   show_mobile_style_from_width: PropTypes.number
 }
 
-var data = [ // old image data (this json will be restructured with kube deploy information)
-  { 'img': 'http://i.imgur.com/zIEjP6Q.jpg', 'link': 'https://www.instagram.com/p/BRFjVZtgSJD/', 'title': 'Westland Tai Poutini National Park', 'description': 'Photo by @christopheviseux / The Westland Tai Poutini National Park in New Zealand’s South Island offers a remarkable opportunity to take a guided walk on a glacier. A helicopter drop high on the Franz Josef Glacier, provides access to explore stunning ice formations and blue ice caves. Follow me for more images around the world @christopheviseux #newzealand #mountain #ice' },
-  { 'img': 'http://i.imgur.com/rCrvQTv.jpg', 'link': 'https://www.instagram.com/p/BQ6_Wa2gmdR/', 'title': 'Dubai Desert Conservation Reserve', 'description': 'Photo by @christopheviseux / Early morning flight on a hot air balloon ride above the Dubai Desert Conservation Reserve. Merely an hour drive from the city, the park was created to protect indigenous species and biodiversity. The Arabian Oryx, which was close to extinction, now has a population well over 100. There are many options to explore the desert and flying above may be one of the most mesmerizing ways. Follow me @christopheviseux for more images from the Middle East. #dubai #desert' },
-  { 'img': 'http://i.imgur.com/U8iVzVl.jpg', 'link': 'https://www.instagram.com/p/BQyfDiKAEq9/', 'title': 'Crumbling Reflections', 'description': 'Photo @pedromcbride // Crumbling Reflections: Much has changed in Cuba over the 17 years I have visited this island. But much has stayed the same. Time still ticks at a Cuban pace and old cars still run… I don’t know how... and while pockets of new construction and renovation exist thanks to a growing tourism boom, most buildings are crumbling and cracking under the Caribbean climate. But amidst the hardship, nostalgia and messy vitality, the Cuban people keep moving, like their cars. And somehow, they do it with a colorful friendliness and warmth that always amazes me. To see more, follow @pedromcbride #cuba #havana #photo #workshop @natgeoexpeditions #reflection #photooftheday #petemcbride.' },
-  { 'img': 'http://i.imgur.com/Ky9aJlE.jpg', 'link': 'https://www.instagram.com/p/BQxf6CEgD8p/', 'title': 'Impalas', 'description': 'Impetious young impala go head-to-head as they practice sparring. A talent they will need later in life when the rut begins. Photographed on assignment for @natgeotravel in Kruger National Park. For more images from Kruger, South Africa, follow @kengeiger #natgeotravel #krugernationalpark' },
-  { 'img': 'http://i.imgur.com/mf3qfzt.jpg', 'link': 'https://www.instagram.com/p/BQvy7gbgynF/', 'title': 'Elephants', 'description': 'Photo by @ronan_donovan // Two bull African elephants at dawn in Uganda\'s Murchison Falls National Park. See more from Uganda with @ronan_donovan.' },
-  { 'img': 'http://i.imgur.com/zIEjP6Q.jpg', 'link': 'https://www.instagram.com/p/BRFjVZtgSJD/', 'title': 'Westland Tai Poutini National Park', 'description': 'Photo by @christopheviseux / The Westland Tai Poutini National Park in New Zealand’s South Island offers a remarkable opportunity to take a guided walk on a glacier. A helicopter drop high on the Franz Josef Glacier, provides access to explore stunning ice formations and blue ice caves. Follow me for more images around the world @christopheviseux #newzealand #mountain #ice' },
-  { 'img': 'http://i.imgur.com/rCrvQTv.jpg', 'link': 'https://www.instagram.com/p/BQ6_Wa2gmdR/', 'title': 'Dubai Desert Conservation Reserve', 'description': 'Photo by @christopheviseux / Early morning flight on a hot air balloon ride above the Dubai Desert Conservation Reserve. Merely an hour drive from the city, the park was created to protect indigenous species and biodiversity. The Arabian Oryx, which was close to extinction, now has a population well over 100. There are many options to explore the desert and flying above may be one of the most mesmerizing ways. Follow me @christopheviseux for more images from the Middle East. #dubai #desert' },
-  { 'img': 'http://i.imgur.com/U8iVzVl.jpg', 'link': 'https://www.instagram.com/p/BQyfDiKAEq9/', 'title': 'Crumbling Reflections', 'description': 'Photo @pedromcbride // Crumbling Reflections: Much has changed in Cuba over the 17 years I have visited this island. But much has stayed the same. Time still ticks at a Cuban pace and old cars still run… I don’t know how... and while pockets of new construction and renovation exist thanks to a growing tourism boom, most buildings are crumbling and cracking under the Caribbean climate. But amidst the hardship, nostalgia and messy vitality, the Cuban people keep moving, like their cars. And somehow, they do it with a colorful friendliness and warmth that always amazes me. To see more, follow @pedromcbride #cuba #havana #photo #workshop @natgeoexpeditions #reflection #photooftheday #petemcbride.' },
-  { 'img': 'http://i.imgur.com/Ky9aJlE.jpg', 'link': 'https://www.instagram.com/p/BQxf6CEgD8p/', 'title': 'Impalas', 'description': 'Impetious young impala go head-to-head as they practice sparring. A talent they will need later in life when the rut begins. Photographed on assignment for @natgeotravel in Kruger National Park. For more images from Kruger, South Africa, follow @kengeiger #natgeotravel #krugernationalpark' },
-  { 'img': 'http://i.imgur.com/mf3qfzt.jpg', 'link': 'https://www.instagram.com/p/BQvy7gbgynF/', 'title': 'Elephants', 'description': 'Photo by @ronan_donovan // Two bull African elephants at dawn in Uganda\'s Murchison Falls National Park. See more from Uganda with @ronan_donovan.' },
-  { 'img': 'http://i.imgur.com/zIEjP6Q.jpg', 'link': 'https://www.instagram.com/p/BRFjVZtgSJD/', 'title': 'Westland Tai Poutini National Park', 'description': 'Photo by @christopheviseux / The Westland Tai Poutini National Park in New Zealand’s South Island offers a remarkable opportunity to take a guided walk on a glacier. A helicopter drop high on the Franz Josef Glacier, provides access to explore stunning ice formations and blue ice caves. Follow me for more images around the world @christopheviseux #newzealand #mountain #ice' },
-  { 'img': 'http://i.imgur.com/rCrvQTv.jpg', 'link': 'https://www.instagram.com/p/BQ6_Wa2gmdR/', 'title': 'Dubai Desert Conservation Reserve', 'description': 'Photo by @christopheviseux / Early morning flight on a hot air balloon ride above the Dubai Desert Conservation Reserve. Merely an hour drive from the city, the park was created to protect indigenous species and biodiversity. The Arabian Oryx, which was close to extinction, now has a population well over 100. There are many options to explore the desert and flying above may be one of the most mesmerizing ways. Follow me @christopheviseux for more images from the Middle East. #dubai #desert' },
-  { 'img': 'http://i.imgur.com/rCrvQTv.jpg', 'link': 'https://www.instagram.com/p/BQ6_Wa2gmdR/', 'title': 'Dubai Desert Conservation Reserve', 'description': 'Photo by @christopheviseux / Early morning flight on a hot air balloon ride above the Dubai Desert Conservation Reserve. Merely an hour drive from the city, the park was created to protect indigenous species and biodiversity. The Arabian Oryx, which was close to extinction, now has a population well over 100. There are many options to explore the desert and flying above may be one of the most mesmerizing ways. Follow me @christopheviseux for more images from the Middle East. #dubai #desert' }
-]
-
 ReactExpandableGrid.defaultProps = {
-  gridData: JSON.stringify(data),
+  gridData: "",
   cellSize: 250,
   cellMargin: 25,
   bgColor: '#f2f2f2',
   detailWidth: '100%',
   detailHeight: 300,
   detailBackgroundColor: '#D9D9D9',
-  ExpandedDetail_right_width: '60%',
-  ExpandedDetail_left_width: '40%',
-  ExpandedDetail_image_size: 300,
-  ExpandedDetail_description_bgColor: '#D9D9D9',
-  ExpandedDetail_title_bgColor: '#D9D9D9',
-  ExpandedDetail_img_bgColor: '#D9D9D9',
-  ExpandedDetail_link_text: '→ Link',
-  ExpandedDetail_font_color: '#434343',
   ExpandedDetail_closeX_bool: true,
   show_mobile_style_from_width: 600,
 }
