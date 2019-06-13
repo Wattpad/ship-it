@@ -250,41 +250,6 @@ class ReactExpandableGrid extends React.Component {
       transition: 'display 2s ease-in-out 0.5s',
     }
 
-    var cssforExpandedDetailLeft
-    var cssforExpandedDetailRight
-
-    cssforExpandedDetailLeft = {
-      width: this.props.ExpandedDetail_left_width,
-      height: '100%',
-      float: 'left',
-      position: 'relative'
-    }
-
-    cssforExpandedDetailRight = {
-      width: this.props.ExpandedDetail_right_width,
-      height: '100%',
-      float: 'right',
-      position: 'relative'
-    }
-
-    // Make Mobile Friendly
-    if (window.innerWidth < this.props.show_mobile_style_from_width) {
-      cssforExpandedDetailLeft = {
-        width: '0%',
-        height: '100%',
-        float: 'left',
-        position: 'relative',
-        display: 'none'
-      }
-
-      cssforExpandedDetailRight = {
-        width: '100%',
-        height: '100%',
-        float: 'right',
-        position: 'relative'
-      }
-    }
-
     var closeX
     if (this.props.ExpandedDetail_closeX_bool) {
       closeX = 'X'
