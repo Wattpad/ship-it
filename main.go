@@ -5,8 +5,9 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"ship-it/internal/api"
 	"syscall"
+
+	"ship-it/internal/api"
 
 	"github.com/go-kit/kit/log"
 )
@@ -28,8 +29,21 @@ func main() {
 		cancel()
 	}()
 
-	go http.ListenAndServe(":80", api.New())
+	srv := http.Server{
+		Addr:    ":80",
+		Handler: api.New(),
+	}
 
-	<-ctx.Done()
-	logger.Log("event", "service.exit", "error", ctx.Err())
+	exit := make(chan error)
+	go func() { exit <- srv.ListenAndServe() }()
+
+	select {
+	case <-ctx.Done():
+		logger.Log("event", "service.exit", "error", ctx.Err())
+	case err := <-exit:
+		cancel()
+		logger.Log("event", "service.exit", "error", err)
+	}
+
+	srv.Shutdown(context.Background())
 }
