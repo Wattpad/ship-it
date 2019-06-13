@@ -277,7 +277,8 @@ class ReactExpandableGrid extends React.Component {
     var cssForGridList = {
       listStyle: 'none',
       padding: 0,
-      display: 'inline-block'
+      display: 'inline-block',
+      width: '100%'
     }
 
     var cssForTheGridHolder = {
