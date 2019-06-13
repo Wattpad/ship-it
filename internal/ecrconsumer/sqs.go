@@ -7,24 +7,20 @@ import (
 	"github.com/Wattpad/sqsconsumer"
 	"github.com/Wattpad/sqsconsumer/middleware"
 
-	// Metric Imports
-	kitlog "github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics"
 )
 
-func NewSQSConsumer(logger kitlog.Logger, hist metrics.Histogram, name string, svc sqsconsumer.SQSAPI) (*sqsconsumer.Consumer, error) {
-	// Create SQS service
+func NewSQSConsumer(logger log.Logger, hist metrics.Histogram, name string, svc sqsconsumer.SQSAPI) (*sqsconsumer.Consumer, error) {
 	service, err := sqsconsumer.NewSQSService(name, svc)
 	if err != nil {
 		return nil, err
 	}
 
-	// Configure Middleware
 	track := dataDogTimeTracker(hist)
 	wrappedLogger := loggerMiddleware(logger)
 	handler := middleware.ApplyDecoratorsToHandler(processMessage, track, wrappedLogger)
 
-	// Create and return SQS consumer
 	consumer := sqsconsumer.NewConsumer(service, handler)
 
 	return consumer, nil
@@ -54,7 +50,7 @@ func dataDogTimeTracker(hist metrics.Histogram) middleware.MessageHandlerDecorat
 	}
 }
 
-func loggerMiddleware(logger kitlog.Logger) middleware.MessageHandlerDecorator {
+func loggerMiddleware(logger log.Logger) middleware.MessageHandlerDecorator {
 	return func(fn sqsconsumer.MessageHandlerFunc) sqsconsumer.MessageHandlerFunc {
 		return func(ctx context.Context, msg string) error {
 			err := fn(ctx, msg)

@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -14,13 +13,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
-	kitlog "github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics/dogstatsd"
 )
 
 func main() {
-	logger := kitlog.NewJSONLogger(kitlog.NewSyncWriter(os.Stdout))
-	logger = kitlog.With(logger, "timestamp", kitlog.DefaultTimestampUTC, "caller", kitlog.DefaultCaller)
+	logger := log.NewJSONLogger(log.NewSyncWriter(os.Stdout))
+	logger = log.With(logger, "timestamp", log.DefaultTimestampUTC, "caller", log.DefaultCaller)
 
 	logger.Log("event", "service.start")
 	defer logger.Log("event", "service.stop")
@@ -35,33 +34,28 @@ func main() {
 		cancel()
 	}()
 
-	// Load Environment Variables
 	envConf, err := FromEnv()
 	if err != nil {
-		log.Fatalf("Error getting environment variables %s", err)
+		logger.Log("Error getting environment variables %s", err)
+		os.Exit(1)
 	}
 
 	dd := dogstatsd.New("wattpad.ship-it.", logger)
-	go dd.SendLoop(time.NewTicker(time.Second).C, "udp", envConf.DataDogAddress())
-	hist := dd.NewTiming("consumer.time", 1.0).With("consumer", "ship-it-consumer", "queue", envConf.QueueName)
+	go dd.SendLoop(time.Tick(time.Second), "udp", envConf.DataDogAddress())
+	hist := dd.NewTiming("worker.time", 1.0).With("worker", "worker:ecrconsumer", "queue", envConf.QueueName)
 
-	// AWS Setup
-	conf := &aws.Config{
+	s, err := session.NewSession(&aws.Config{
 		Region: &envConf.AWSRegion,
+	})
+	if err != nil {
+		logger.Log("Error opening AWS session %s", err)
+		os.Exit(1)
 	}
 
-	s, err := session.NewSession(conf)
+	consumer, err := ecrconsumer.NewSQSConsumer(logger, hist, envConf.QueueName, sqs.New(s))
 	if err != nil {
-		log.Fatalf("Error opening AWS session %s", err)
-	}
-
-	svc := sqs.New(s)
-
-	// ECR SQS Consumer Setup
-	consumer, err := ecrconsumer.NewSQSConsumer(logger, hist, envConf.QueueName, svc)
-	if err != nil {
-		log.Println(err)
-		return
+		logger.Log("Error creating SQS consumer %s", err)
+		os.Exit(1)
 	}
 
 	go consumer.Run(ctx)

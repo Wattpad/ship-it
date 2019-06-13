@@ -11,7 +11,7 @@ type Config struct {
 	DogstatsdHost string `split_words:"true" required:"true"`
 	DogstatsdPort string `split_words:"true" default:"8125"`
 	QueueName     string `split_words:"true" required:"true"`
-	ServicePort   string `split_words:"true" required:"true"`
+	ServicePort   string `split_words:"true" default:"80"`
 }
 
 func (e *Config) DataDogAddress() string {
@@ -20,7 +20,7 @@ func (e *Config) DataDogAddress() string {
 
 func FromEnv() (*Config, error) {
 	var env *Config
-	if err := envconfig.Process("", &env); err != nil {
+	if err := envconfig.Process("", env); err != nil {
 		return nil, err
 	}
 	return env, nil
