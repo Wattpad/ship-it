@@ -13,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
+
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics/dogstatsd"
 )
@@ -60,8 +61,21 @@ func main() {
 
 	go consumer.Run(ctx)
 
-	go http.ListenAndServe(":"+envConf.ServicePort, api.New())
+	srv := http.Server{
+		Addr:    ":80",
+		Handler: api.New(),
+	}
 
-	<-ctx.Done()
-	logger.Log("event", "service.exit", "error", ctx.Err())
+	exit := make(chan error)
+	go func() { exit <- srv.ListenAndServe() }()
+
+	select {
+	case <-ctx.Done():
+		logger.Log("event", "service.exit", "error", ctx.Err())
+	case err := <-exit:
+		cancel()
+		logger.Log("event", "service.exit", "error", err)
+	}
+
+	srv.Shutdown(context.Background())
 }
