@@ -1,5 +1,4 @@
 import React from 'react'
-import Icon from '@material-ui/core/Icon'
 
 import HelmIcon from '../assets/helm_icon.png'
 import KubeIcon from '../assets/kubernetes_icon.png'
@@ -10,7 +9,7 @@ import Typography from '@material-ui/core/Typography'
 import Switch from '@material-ui/core/Switch'
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import { Paper, Card, ListSubheader, ListItem, ListItemText, List } from '@material-ui/core';
+import { Paper, ListItem, ListItemText, List } from '@material-ui/core';
 
 const theme = createMuiTheme({
   palette: {

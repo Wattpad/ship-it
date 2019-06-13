@@ -11,17 +11,11 @@ import DoneIcon from '@material-ui/icons/Done'
 import ExpandIcon from '@material-ui/icons/ExpandMore'
 import CompressIcon from '@material-ui/icons/ExpandLess'
 import IconButton from '@material-ui/core/IconButton'
-import Green from '@material-ui/core/colors/green';
 import SelectionDialog from './SelectionDialog'
-import CircularProgress from '@material-ui/core/CircularProgress'
 
 import TimePassed from '../assets/time_passed.png'
 import SlackIcon from '../assets/slack_icon.png'
-import GitIcon from '../assets/octocat.png'
 import DockerIcon from '../assets/docker_icon.png'
-import KubeIcon from '../assets/kubernetes_icon.png'
-import JenkinsIcon from '../assets/jenkins_icon.png'
-import TravisIcon from '../assets/travis_icon.png'
 import ExpandedDetail from './ExpandedDetail';
 
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
@@ -195,7 +189,6 @@ class ReactExpandableGrid extends React.Component {
   handleCellClick(event) {
     var target = event.target
     var thisIdNumber = this.findIdNode(target)
-    var className = event.target.className
     console.log(event)
     console.log(thisIdNumber);
     if (this.state.expanded) { // expanded == true
@@ -248,13 +241,6 @@ class ReactExpandableGrid extends React.Component {
       position: 'relative',
       padding: '20px',
       transition: 'display 2s ease-in-out 0.5s',
-    }
-
-    var closeX
-    if (this.props.ExpandedDetail_closeX_bool) {
-      closeX = 'X'
-    } else {
-      closeX = ''
     }
 
     grid.push( // Expanded Detail here
