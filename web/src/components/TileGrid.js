@@ -34,6 +34,7 @@ const deployTagTheme = createMuiTheme({
   }
 })
 
+const imgAlt = "not found"
 var keys = []
 
 class SingleGridCell extends React.Component {
@@ -88,17 +89,17 @@ class SingleGridCell extends React.Component {
               </MuiThemeProvider>
               <div>
                 <IconButton>
-                  <img src={TimePassed} />
+                  <img src={TimePassed} alt={imgAlt} />
                 </IconButton>
                 5 min ago
               </div>
               <div className='row-align'>
                 <SelectionDialog />
                 <IconButton>
-                  <img src={SlackIcon} width="32" height="32" />
+                  <img src={SlackIcon} width="32" height="32" alt={imgAlt} />
                 </IconButton>
                 <IconButton>
-                  <img src={DockerIcon} width="32" height="32" />
+                  <img src={DockerIcon} width="32" height="32" alt={imgAlt} />
                 </IconButton>
               </div>
               <div>

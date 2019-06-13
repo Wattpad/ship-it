@@ -23,6 +23,8 @@ const theme = createMuiTheme({
   }
 })
 
+const imgAlt = "not found"
+
 class ExpandedDetail extends React.Component {
   constructor(props) {
     super(props)
@@ -35,7 +37,7 @@ class ExpandedDetail extends React.Component {
         <div className="flex-container">
           <div className="helm-status">
             <div className="right-padded">
-              <img src={HelmIcon} width="32" height="32" />
+              <img src={HelmIcon} width="32" height="32" alt={imgAlt} />
             </div>
             <div>
               <Typography variant="h5">ChartVersion</Typography>
@@ -53,7 +55,7 @@ class ExpandedDetail extends React.Component {
 
           <div className="dataDog-status">
             <div className="right-padded">
-              <img src={DataDogIcon} width="32" height="32" />
+              <img src={DataDogIcon} width="32" height="32" alt={imgAlt} />
             </div>
             <div>
               <Typography variant="h6">Dashboard | Monitor</Typography>
@@ -64,7 +66,7 @@ class ExpandedDetail extends React.Component {
         <div className="flex-container">
           <div className="kube-status">
             <div className="right-padded">
-              <img src={KubeIcon} width="32" height="32" />
+              <img src={KubeIcon} width="32" height="32" alt={imgAlt} />
             </div>
             <div>
               <Typography variant="h6">Resources</Typography>
@@ -72,13 +74,13 @@ class ExpandedDetail extends React.Component {
           </div>
           <div className="log-status">
             <div className="right-padded">
-              <img src={SumoIcon} width="32" height="32" />
+              <img src={SumoIcon} width="32" height="32" alt={imgAlt} />
             </div>
             <div>
               <Typography variant="h6">Logs</Typography>
             </div>
             <div className="double-padded">
-              <img src={TravisIcon} width="32" height="32" />
+              <img src={TravisIcon} width="32" height="32" alt={imgAlt} />
             </div>
             <div>
               <Typography variant="h6">Build</Typography>

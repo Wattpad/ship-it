@@ -65,6 +65,8 @@ const styles = theme => ({
   },
 });
 
+const imgAlt = "not found"
+
 const theme = createMuiTheme({
   palette: {
     primary: {
@@ -97,7 +99,7 @@ class TopBar extends React.Component {
         <AppBar position="static" color="primary">
           <Toolbar>
             <IconButton>
-              <img src={WattpadLogo} width="32" height="32" />
+              <img src={WattpadLogo} width="32" height="32" alt={imgAlt} />
             </IconButton>
             <Typography variant="h6">
               Kube Deploy V2!
