@@ -57,7 +57,6 @@ function App() {
         detailHeight={300}
         ExpandedDetail_image_size={300}
         cellSize={250}
-        detailWidth='100%'
         ExpandedDetail_closeX_bool={false}
       />
     </div>
