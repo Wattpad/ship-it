@@ -3,7 +3,7 @@ import ReactExpandableGrid from './components/TileGrid';
 import './App.css';
 import TopBar from './components/TopBar';
 
-var data = [
+const data = [
   { // Formatted as it will be from the real API
     name: "homeslice",
     created: "2019-06-13T14:09:47.781282",

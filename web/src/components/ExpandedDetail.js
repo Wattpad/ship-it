@@ -11,6 +11,28 @@ import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { Paper, ListItem, ListItemText, List } from '@material-ui/core';
 
+var resources = [ // Sample JSON for kubernetes resource list
+  {
+    "kind": "Deployment",
+    "metadata": { "name": "homeslice" },
+    "replicas": 1,
+    "availableReplicas": 1
+  },
+  {
+    "kind": "Pod",
+    "metadata": { "name": "homeslice-dufbsjdfbsdbf" },
+    "age": "5d"
+  },
+  {
+    "kind": "HorizontalPodAutoscaler",
+    "metadata": { "name": "homeslice" },
+  },
+  {
+    "kind": "Service",
+    "metadata": { "name": "homeslice" },
+  },
+]
+
 const theme = createMuiTheme({
   palette: {
     primary: {
