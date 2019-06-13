@@ -43,7 +43,7 @@ func main() {
 
 	dd := dogstatsd.New("wattpad.ship-it.", logger)
 	go dd.SendLoop(time.Tick(time.Second), "udp", envConf.DataDogAddress())
-	hist := dd.NewTiming("worker.time", 1.0).With("worker", "worker:ecrconsumer", "queue", envConf.QueueName)
+	hist := dd.NewTiming("worker.time", 1.0).With("", "worker:ecrconsumer", "queue", envConf.QueueName)
 
 	s, err := session.NewSession(&aws.Config{
 		Region: &envConf.AWSRegion,
