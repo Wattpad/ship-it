@@ -9,7 +9,6 @@ import Typography from '@material-ui/core/Typography'
 import Chip from '@material-ui/core/Chip'
 import DoneIcon from '@material-ui/icons/Done'
 import ExpandIcon from '@material-ui/icons/ExpandMore'
-import CompressIcon from '@material-ui/icons/ExpandLess'
 import IconButton from '@material-ui/core/IconButton'
 import SelectionDialog from './SelectionDialog'
 
@@ -73,7 +72,7 @@ class SingleGridCell extends React.Component {
       <div style={SingleGridCellStyle} id={this.props.id} className='SingleGridCell'>
         <div>
           <Card style={cardStyle}>
-            <CardContent >
+            <CardContent>
               <Typography variant="h5" component="h2">
                 ServiceName
               </Typography>
@@ -102,17 +101,9 @@ class SingleGridCell extends React.Component {
                 </IconButton>
               </div>
               <div>
-                {
-                  this.state.expanded // Not working
-                    ?
-                    <IconButton onClick={this.cellClick.bind(this)}>
-                      <CompressIcon />
-                    </IconButton>
-                    :
-                    <IconButton onClick={this.cellClick.bind(this)}>
-                      <ExpandIcon />
-                    </IconButton>
-                }
+                <IconButton onClick={this.cellClick.bind(this)}>
+                  <ExpandIcon />
+                </IconButton>
               </div>
             </CardContent>
           </Card>
@@ -138,7 +129,6 @@ class ReactExpandableGrid extends React.Component {
     var t = target
     var found = false
     while (!found && t != null) {
-      console.log(t.className)
       if (String(t.className) === "SingleGridCell") {
         found = true;
         return parseInt(t.id.substring(10))
@@ -152,7 +142,6 @@ class ReactExpandableGrid extends React.Component {
     var thisIdNumber = this.findIdNode(target)
     var detail = document.getElementById('expandedDetail')
 
-    console.log(detail)
     var ol = document.getElementById("grid_cell_" + thisIdNumber.toString()).parentNode
     var lengthOfList = parseInt(ol.childNodes.length)
     var startingIndex = thisIdNumber + 1
@@ -189,7 +178,7 @@ class ReactExpandableGrid extends React.Component {
   handleCellClick(event) {
     var target = event.target
 
-    if (this.state.expanded) { // expanded == true
+    if (this.state.expanded) {
       if (this.state.selected_id === event.target.id) { // Clicking on already opened detail
         this.closeExpandedDetail()
         this.renderExpandedDetail(target)
@@ -205,7 +194,7 @@ class ReactExpandableGrid extends React.Component {
           detail.style.display = 'block'
         })
       }
-    } else { // expanded == false
+    } else {
       this.setState({
         expanded: true,
         selected_id: event.target.id
@@ -275,7 +264,7 @@ class ReactExpandableGrid extends React.Component {
             {rows}
           </ol>
         </div>
-      </div >
+      </div>
     )
   }
 }
