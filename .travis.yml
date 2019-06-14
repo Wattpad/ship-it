@@ -32,7 +32,7 @@ jobs:
     
     - stage: Test
       name: JSLint
-      script: npm install eslint-plugin-react && cd web && npm run lint
+      script: cd web && npm install && npm run lint
 
     - stage: Test
       name: Test
