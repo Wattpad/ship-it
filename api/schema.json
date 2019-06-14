@@ -26,7 +26,7 @@
           "build",
           "monitoring",
           "artifacts",
-          "deployment"
+          "status"
         ],
         "properties": {
           "name": {
@@ -144,7 +144,7 @@
                 "title": "The Travis Schema",
                 "default": "",
                 "examples": [
-                  ""
+                  "https://travis-ci.org/Wattpad/highlander/service"
                 ],
                 "pattern": "^(.*)$"
               }
@@ -275,92 +275,19 @@
               }
             }
           },
-          "deployment": {
-            "$id": "#/properties/items/items/properties/deployment",
-            "type": "object",
-            "title": "The Deployment Schema",
-            "required": [
-              "status",
-              "resources"
+          "status": {
+            "$id": "#/properties/items/items/properties/status",
+            "type": "string",
+            "title": "The Status Schema",
+            "default": "",
+            "examples": [
+              "deployed",
+              "failed",
+              "pending_rollback",
+              "pending_install",
+              "pending_upgrade"
             ],
-            "properties": {
-              "status": {
-                "$id": "#/properties/items/items/properties/deployment/properties/status",
-                "type": "string",
-                "title": "The Status Schema",
-                "default": "",
-                "examples": [
-                  "deploying"
-                ],
-                "pattern": "^(.*)$"
-              },
-              "resources": {
-                "$id": "#/properties/items/items/properties/deployment/properties/resources",
-                "type": "array",
-                "title": "The Resources Schema",
-                "items": {
-                  "$id": "#/properties/items/items/properties/deployment/properties/resources/items",
-                  "type": "object",
-                  "title": "The Items Schema",
-                  "required": [
-                    "kind",
-                    "metadata",
-                    "replicas",
-                    "availableReplicas"
-                  ],
-                  "properties": {
-                    "kind": {
-                      "$id": "#/properties/items/items/properties/deployment/properties/resources/items/properties/kind",
-                      "type": "string",
-                      "title": "The Kind Schema",
-                      "default": "",
-                      "examples": [
-                        "Deployment"
-                      ],
-                      "pattern": "^(.*)$"
-                    },
-                    "metadata": {
-                      "$id": "#/properties/items/items/properties/deployment/properties/resources/items/properties/metadata",
-                      "type": "object",
-                      "title": "The Metadata Schema",
-                      "required": [
-                        "name"
-                      ],
-                      "properties": {
-                        "name": {
-                          "$id": "#/properties/items/items/properties/deployment/properties/resources/items/properties/metadata/properties/name",
-                          "type": "string",
-                          "title": "The Name Schema",
-                          "default": "",
-                          "examples": [
-                            "homeslice"
-                          ],
-                          "pattern": "^(.*)$"
-                        }
-                      }
-                    },
-                    "replicas": {
-                      "$id": "#/properties/items/items/properties/deployment/properties/resources/items/properties/replicas",
-                      "type": "integer",
-                      "title": "The Replicas Schema",
-                      "default": 0,
-                      "examples": [
-                        1
-                      ]
-                    },
-                    "availableReplicas": {
-                      "$id": "#/properties/items/items/properties/deployment/properties/resources/items/properties/availableReplicas",
-                      "type": "integer",
-                      "title": "The Availablereplicas Schema",
-                      "default": 0,
-                      "examples": [
-                        1
-                      ]
-                    }
-                  }
-                }
-              }
-            }
+            "pattern": "^(.*)$"
           }
         }
       }
