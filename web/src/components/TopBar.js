@@ -1,11 +1,11 @@
 import React from 'react'
 import { AppBar, Toolbar, Typography, InputBase } from '@material-ui/core'
-import { withStyles, createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
-import { fade } from '@material-ui/core/styles/colorManipulator';
-import PropTypes from 'prop-types';
-import SearchIcon from '@material-ui/icons/Search';
-import IconButton from '@material-ui/core/IconButton';
-import WattpadLogo from '../assets/wattpad_logo.png';
+import { withStyles, createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles'
+import { fade } from '@material-ui/core/styles/colorManipulator'
+import PropTypes from 'prop-types'
+import SearchIcon from '@material-ui/icons/Search'
+import IconButton from '@material-ui/core/IconButton'
+import WattpadLogo from '../assets/wattpad_logo.png'
 
 const styles = theme => ({
   root: {
@@ -63,7 +63,9 @@ const styles = theme => ({
       width: 200,
     },
   },
-});
+})
+
+const imgAlt = "not found"
 
 const theme = createMuiTheme({
   palette: {
@@ -91,13 +93,13 @@ class TopBar extends React.Component {
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes } = this.props
     return (
       <MuiThemeProvider theme={theme}>
         <AppBar position="static" color="primary">
           <Toolbar>
             <IconButton>
-              <img src={WattpadLogo} width="32" height="32" />
+              <img src={WattpadLogo} width="32" height="32" alt={imgAlt} />
             </IconButton>
             <Typography variant="h6">
               Kube Deploy V2!
@@ -125,6 +127,6 @@ class TopBar extends React.Component {
 
 TopBar.propTypes = {
   classes: PropTypes.object.isRequired,
-};
+}
 
-export default withStyles(styles)(TopBar);
+export default withStyles(styles)(TopBar)
