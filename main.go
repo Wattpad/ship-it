@@ -5,14 +5,15 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"ship-it/internal/api"
-	"ship-it/internal/ecrconsumer"
 	"syscall"
 	"time"
 
+	"ship-it/internal/api"
+	"ship-it/internal/ecrconsumer"
+	"ship-it/internal/service"
+
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
-
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics/dogstatsd"
 )
@@ -60,7 +61,7 @@ func main() {
 
 	srv := http.Server{
 		Addr:    ":" + envConf.ServicePort,
-		Handler: api.New(),
+		Handler: api.New(service.New()),
 	}
 
 	exit := make(chan error)
