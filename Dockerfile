@@ -8,6 +8,7 @@ COPY web .
 RUN npm install react-scripts && npm run build
 
 FROM alpine:3.8
+RUN apk add --no-cache ca-certificates
 COPY --from=golang-build /build/ship-it /
 COPY --from=node-build /build /dashboard
 CMD ["/ship-it"]
