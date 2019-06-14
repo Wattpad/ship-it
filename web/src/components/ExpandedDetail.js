@@ -7,9 +7,13 @@ import TravisIcon from '../assets/travis_icon.png'
 import SumoIcon from '../assets/sumo_logic_icon.png'
 import Typography from '@material-ui/core/Typography'
 import Switch from '@material-ui/core/Switch'
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles'
+import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider'
+import createMuiTheme from '@material-ui/core/styles/createMuiTheme'
 import FormControlLabel from '@material-ui/core/FormControlLabel'
-import { Paper, ListItem, ListItemText, List } from '@material-ui/core'
+import Paper from '@material-ui/core/Paper'
+import ListItem from '@material-ui/core/ListItem'
+import ListItemText from '@material-ui/core/ListItemText'
+import List from '@material-ui/core/List'
 
 const theme = createMuiTheme({
   palette: {
@@ -18,12 +22,11 @@ const theme = createMuiTheme({
     },
     secondary: {
       main: '#FEAF0A'
-      //main: '#FFFFFF'
     }
   }
 })
 
-const imgAlt = "not found"
+const imgAlt = 'not found'
 
 class ExpandedDetail extends React.Component {
   constructor(props) {
