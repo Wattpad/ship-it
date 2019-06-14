@@ -24,11 +24,15 @@ jobs:
       script: make build
 
     - stage: Test
-      name: Lint
+      name: GoLint
       install: go get "honnef.co/go/tools/cmd/staticcheck"
       script:
         - go vet ./...
         - staticcheck ./...
+    
+    - stage: Test
+      name: JSLint
+      script: cd web && npm install -D && npm run lint
 
     - stage: Test
       name: Test
