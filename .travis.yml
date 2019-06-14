@@ -32,7 +32,7 @@ jobs:
     
     - stage: Test
       name: JSLint
-      script: cd web && npm run lint
+      script: npm install -D && cd web && npm run lint
 
     - stage: Test
       name: Test
