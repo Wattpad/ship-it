@@ -15,9 +15,9 @@ import SelectionDialog from './SelectionDialog'
 import TimePassed from '../assets/time_passed.png'
 import SlackIcon from '../assets/slack_icon.png'
 import DockerIcon from '../assets/docker_icon.png'
-import ExpandedDetail from './ExpandedDetail';
+import ExpandedDetail from './ExpandedDetail'
 
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles'
 
 const deployTagTheme = createMuiTheme({
   palette: {
