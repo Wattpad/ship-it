@@ -83,11 +83,9 @@ class TopBar extends React.Component {
   constructor(props) {
     super(props)
     this.state = {}
-
-    this.handleChange = this.handleChange.bind(this);
   }
 
-  handleChange(event) {
+  handleChange = (event) => {
     this.setState({
       searchText: event.target.value
     })
