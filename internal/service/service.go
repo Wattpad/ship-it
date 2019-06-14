@@ -15,6 +15,6 @@ func New() *Service {
 
 type Service struct{}
 
-func (s *Service) ListDeployments(ctx context.Context) ([]models.DeploymentDetail, error) {
+func (s *Service) ListReleases(ctx context.Context) ([]models.Release, error) {
 	return nil, ErrNotImplemented
 }

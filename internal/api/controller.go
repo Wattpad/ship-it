@@ -14,8 +14,8 @@ func newController(s Service) *controller {
 	}
 }
 
-func (c *controller) ListDeployments(w http.ResponseWriter, r *http.Request) {
-	deps, err := c.svc.ListDeployments(r.Context())
+func (c *controller) ListReleases(w http.ResponseWriter, r *http.Request) {
+	deps, err := c.svc.ListReleases(r.Context())
 	if err != nil {
 		Error500(w, err)
 		return

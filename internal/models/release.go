@@ -4,12 +4,12 @@ import (
 	"time"
 )
 
-type DeploymentDetail struct {
+type Release struct {
 	Name         string    `json:"name"`
 	Created      string    `json:"created"`
 	LastDeployed time.Time `json:"lastDeployed"`
 	Owner        struct {
-		Team  string `json:"team"`
+		Squad string `json:"squad"`
 		Slack string `json:"slack"`
 	} `json:"owner"`
 	AutoDeploy bool `json:"autoDeploy"`
@@ -37,7 +37,5 @@ type DeploymentDetail struct {
 			Version string `json:"version"`
 		} `json:"chart"`
 	} `json:"artifacts"`
-	Deployment struct {
-		Status string `json:"status"`
-	} `json:"deployment"`
+	Status string `json:"status"`
 }

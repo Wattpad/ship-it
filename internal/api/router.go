@@ -14,7 +14,7 @@ func health(w http.ResponseWriter, _ *http.Request) {
 }
 
 type Service interface {
-	ListDeployments(context.Context) ([]models.DeploymentDetail, error)
+	ListReleases(context.Context) ([]models.Release, error)
 }
 
 // New returns an 'http.Handler' that serves the ship-it API.
@@ -25,7 +25,7 @@ func New(s Service) http.Handler {
 
 	r.Get("/health", health)
 
-	r.Get("/deployments", c.ListDeployments)
+	r.Get("/releases", c.ListReleases)
 
 	r.Mount("/dashboard", http.FileServer(http.Dir("")))
 	r.Mount("/static", http.FileServer(http.Dir("dashboard")))
