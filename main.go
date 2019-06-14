@@ -37,25 +37,25 @@ func main() {
 
 	envConf, err := FromEnv()
 	if err != nil {
-		logger.Log("Error getting environment variables %s", err)
+		logger.Log("error", err)
 		os.Exit(1)
 	}
 
 	dd := dogstatsd.New("wattpad.ship-it.", logger)
 	go dd.SendLoop(time.Tick(time.Second), "udp", envConf.DataDogAddress())
-	hist := dd.NewTiming("worker.time", 1.0).With("", "worker:ecrconsumer", "queue", envConf.QueueName)
+	hist := dd.NewTiming("worker.time", 1.0).With("worker", "ecrconsumer", "queue", envConf.QueueName)
 
 	s, err := session.NewSession(&aws.Config{
 		Region: &envConf.AWSRegion,
 	})
 	if err != nil {
-		logger.Log("Error opening AWS session %s", err)
+		logger.Log("error", err)
 		os.Exit(1)
 	}
 
 	consumer, err := ecrconsumer.NewSQSConsumer(logger, hist, envConf.QueueName, sqs.New(s))
 	if err != nil {
-		logger.Log("Error creating SQS consumer %s", err)
+		logger.Log("error", err)
 		os.Exit(1)
 	}
 
