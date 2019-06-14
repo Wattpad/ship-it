@@ -12,15 +12,13 @@ class SelectionDialog extends React.Component {
     super(props)
     this.state = { open: false }
 
-    this.handleClose = this.handleClose.bind(this);
-    this.handleOpen = this.handleOpen.bind(this);
   }
 
-  handleClose () {
+  handleClose = () => {
     this.setState({ open: false })
   }
 
-  handleOpen () {
+  handleOpen = () => {
     this.setState({ open: true })
   }
 
