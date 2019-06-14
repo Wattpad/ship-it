@@ -1,5 +1,4 @@
 import React from 'react'
-import Icon from '@material-ui/core/Icon'
 
 import HelmIcon from '../assets/helm_icon.png'
 import KubeIcon from '../assets/kubernetes_icon.png'
@@ -8,9 +7,9 @@ import TravisIcon from '../assets/travis_icon.png'
 import SumoIcon from '../assets/sumo_logic_icon.png'
 import Typography from '@material-ui/core/Typography'
 import Switch from '@material-ui/core/Switch'
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import { Paper, Card, ListSubheader, ListItem, ListItemText, List } from '@material-ui/core';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles'
+import FormControlLabel from '@material-ui/core/FormControlLabel'
+import { Paper, ListItem, ListItemText, List } from '@material-ui/core'
 
 const theme = createMuiTheme({
   palette: {
@@ -24,6 +23,8 @@ const theme = createMuiTheme({
   }
 })
 
+const imgAlt = "not found"
+
 class ExpandedDetail extends React.Component {
   constructor(props) {
     super(props)
@@ -32,11 +33,11 @@ class ExpandedDetail extends React.Component {
 
   render() {
     return (
-      <MuiThemeProvider theme={theme}>
+      <MuiThemeProvider theme={theme} >
         <div className="flex-container">
           <div className="helm-status">
             <div className="right-padded">
-              <img src={HelmIcon} width="32" height="32" />
+              <img src={HelmIcon} width="32" height="32" alt={imgAlt} />
             </div>
             <div>
               <Typography variant="h5">ChartVersion</Typography>
@@ -54,7 +55,7 @@ class ExpandedDetail extends React.Component {
 
           <div className="dataDog-status">
             <div className="right-padded">
-              <img src={DataDogIcon} width="32" height="32" />
+              <img src={DataDogIcon} width="32" height="32" alt={imgAlt} />
             </div>
             <div>
               <Typography variant="h6">Dashboard | Monitor</Typography>
@@ -65,7 +66,7 @@ class ExpandedDetail extends React.Component {
         <div className="flex-container">
           <div className="kube-status">
             <div className="right-padded">
-              <img src={KubeIcon} width="32" height="32" />
+              <img src={KubeIcon} width="32" height="32" alt={imgAlt} />
             </div>
             <div>
               <Typography variant="h6">Resources</Typography>
@@ -73,13 +74,13 @@ class ExpandedDetail extends React.Component {
           </div>
           <div className="log-status">
             <div className="right-padded">
-              <img src={SumoIcon} width="32" height="32" />
+              <img src={SumoIcon} width="32" height="32" alt={imgAlt} />
             </div>
             <div>
               <Typography variant="h6">Logs</Typography>
             </div>
             <div className="double-padded">
-              <img src={TravisIcon} width="32" height="32" />
+              <img src={TravisIcon} width="32" height="32" alt={imgAlt} />
             </div>
             <div>
               <Typography variant="h6">Build</Typography>
@@ -120,4 +121,4 @@ class ExpandedDetail extends React.Component {
   }
 }
 
-export default ExpandedDetail;
+export default ExpandedDetail
