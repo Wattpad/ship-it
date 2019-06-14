@@ -19,7 +19,7 @@ func (e *Config) DataDogAddress() string {
 }
 
 func FromEnv() (*Config, error) {
-	var env *Config
+	env := new(Config)
 	if err := envconfig.Process("", env); err != nil {
 		return nil, err
 	}
