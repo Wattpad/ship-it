@@ -37,7 +37,7 @@ func main() {
 
 	envConf, err := FromEnv()
 	if err != nil {
-		logger.Log("Error getting environment variables", err)
+		logger.Log("error", err)
 		os.Exit(1)
 	}
 
@@ -49,13 +49,13 @@ func main() {
 		Region: &envConf.AWSRegion,
 	})
 	if err != nil {
-		logger.Log("Error opening AWS session", err)
+		logger.Log("error", err)
 		os.Exit(1)
 	}
 
 	consumer, err := ecrconsumer.NewSQSConsumer(logger, hist, envConf.QueueName, sqs.New(s))
 	if err != nil {
-		logger.Log("Error creating SQS consumer", err)
+		logger.Log("error", err)
 		os.Exit(1)
 	}
 
