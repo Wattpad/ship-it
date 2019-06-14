@@ -35,7 +35,6 @@ const deployTagTheme = createMuiTheme({
 })
 
 const imgAlt = "not found"
-var keys = []
 
 class SingleGridCell extends React.Component {
   constructor(props) {
@@ -63,7 +62,7 @@ class SingleGridCell extends React.Component {
       marginBottom: 25,
       position: 'relative'
     }
-    console.log(keys)
+
     var cardStyle = {
       width: this.props.cellSize,
       height: this.props.cellSize
@@ -128,8 +127,6 @@ class ReactExpandableGrid extends React.Component {
   constructor(props) {
     super(props)
 
-    this.gridRef = React.createRef()
-
     this.state = {
       expanded: false,
       selected_id: '',
@@ -191,9 +188,7 @@ class ReactExpandableGrid extends React.Component {
 
   handleCellClick(event) {
     var target = event.target
-    var thisIdNumber = this.findIdNode(target)
-    console.log(event)
-    console.log(thisIdNumber);
+
     if (this.state.expanded) { // expanded == true
       if (this.state.selected_id === event.target.id) { // Clicking on already opened detail
         this.closeExpandedDetail()
@@ -228,14 +223,12 @@ class ReactExpandableGrid extends React.Component {
     var grid = []
     var idCounter = -1 // To help simplify mapping to object array indices. For example, <li> with 0th id corresponds to 0th child of <ol>
     var gridData = this.state.gridData
-    var k = []
     for (var i in gridData) {
       idCounter = idCounter + 1
       var thisUniqueKey = 'grid_cell_' + idCounter.toString()
-      k.push(thisUniqueKey)
       grid.push(<SingleGridCell handleCellClick={this.handleCellClick.bind(this)} key={thisUniqueKey} id={thisUniqueKey} cellMargin={this.props.cellMargin} SingleGridCellData={gridData[i]} cellSize={this.props.cellSize} />)
     }
-    keys = k
+
     var cssforExpandedDetail = {
       backgroundColor: this.props.detailBackgroundColor,
       height: this.props.detailHeight,
