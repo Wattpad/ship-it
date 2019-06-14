@@ -130,12 +130,12 @@ class ReactExpandableGrid extends React.Component {
     var found = false
     while (!found && t != null) {
       if (String(t.className) === "SingleGridCell") {
-        found = true;
+        found = true
         return parseInt(t.id.substring(10))
       }
       t = t.parentNode
     }
-    return -1;
+    return -1
   }
 
   renderExpandedDetail(target) {

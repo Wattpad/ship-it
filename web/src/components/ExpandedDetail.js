@@ -7,9 +7,9 @@ import TravisIcon from '../assets/travis_icon.png'
 import SumoIcon from '../assets/sumo_logic_icon.png'
 import Typography from '@material-ui/core/Typography'
 import Switch from '@material-ui/core/Switch'
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import { Paper, ListItem, ListItemText, List } from '@material-ui/core';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles'
+import FormControlLabel from '@material-ui/core/FormControlLabel'
+import { Paper, ListItem, ListItemText, List } from '@material-ui/core'
 
 const theme = createMuiTheme({
   palette: {
@@ -121,4 +121,4 @@ class ExpandedDetail extends React.Component {
   }
 }
 
-export default ExpandedDetail;
+export default ExpandedDetail

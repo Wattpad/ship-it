@@ -1,8 +1,8 @@
 import React from 'react'
 import Dialog from '@material-ui/core/Dialog'
-import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogTitle from '@material-ui/core/DialogTitle'
 import List from '@material-ui/core/List'
-import { ListItem, IconButton, DialogContent, DialogActions, Button } from '@material-ui/core';
+import { ListItem, IconButton, DialogContent, DialogActions, Button } from '@material-ui/core'
 import GitIcon from '../assets/octocat.png'
 
 const imgAlt = "not found"

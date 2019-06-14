@@ -1,7 +1,7 @@
-import React from 'react';
-import ReactExpandableGrid from './components/TileGrid';
-import './App.css';
-import TopBar from './components/TopBar';
+import React from 'react'
+import ReactExpandableGrid from './components/TileGrid'
+import './App.css'
+import TopBar from './components/TopBar'
 
 const data = [
   { // Formatted as it will be from the real API
@@ -57,7 +57,7 @@ function App() {
         ExpandedDetail_closeX_bool={false}
       />
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
