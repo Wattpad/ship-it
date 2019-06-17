@@ -31,11 +31,11 @@ const imgAlt = 'not found'
 class ExpandedDetail extends React.Component {
   constructor(props) {
     super(props)
-    console.log(this.props)
     this.state = {}
   }
 
   render() {
+    console.log(this.props)
     return (
       <MuiThemeProvider theme={theme} >
         <div className="flex-container">
