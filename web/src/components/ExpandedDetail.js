@@ -30,7 +30,7 @@ const theme = createMuiTheme({
 const linkTheme = createMuiTheme({
   palette: {
     primary: {
-      main: '#FF6612'
+      main: '#000000'
     },
     secondary: {
       main: '#FEAF0A'
@@ -56,7 +56,7 @@ class ExpandedDetail extends React.Component {
                     <Typography variant="h5">{this.props.data.artifacts.chart.version}</Typography>
                   </div>
                 </div>
-                
+
                 <MuiThemeProvider theme={theme}>
                   <div className="switch-status">
                     <FormControlLabel
@@ -67,25 +67,26 @@ class ExpandedDetail extends React.Component {
                     />
                   </div>
                 </MuiThemeProvider>
-
-                <div className="dataDog-status">
-                  <div className="right-padded">
-                    <img src={DataDogIcon} width="32" height="32" alt={imgAlt} />
+                <MuiThemeProvider theme={linkTheme}>
+                  <div className="dataDog-status">
+                    <div className="right-padded">
+                      <img src={DataDogIcon} width="32" height="32" alt={imgAlt} />
+                    </div>
+                    <div>
+                      <Typography variant="h6">
+                        <Link href={this.props.data.monitoring.datadog.dashboard}>Dashboard</Link>
+                      </Typography>
+                    </div>
+                    <div>
+                      <Typography variant="h6">&nbsp;|&nbsp;</Typography>
+                    </div>
+                    <div>
+                      <Typography variant="h6">
+                        <Link href={this.props.data.monitoring.datadog.monitors}>Monitor</Link>
+                      </Typography>
+                    </div>
                   </div>
-                  <div>
-                    <Typography variant="h6">
-                      <Link href={this.props.data.monitoring.datadog.dashboard}>Dashboard</Link>
-                    </Typography>
-                  </div>
-                  <div>
-                    <Typography variant="h6">&nbsp;|&nbsp;</Typography>
-                  </div>
-                  <div>
-                    <Typography variant="h6">
-                      <Link href={this.props.data.monitoring.datadog.monitors}>Monitor</Link>
-                    </Typography>
-                  </div>
-                </div>
+                </MuiThemeProvider>
               </div>
               <div className="flex-container">
                 <div className="kube-status">
