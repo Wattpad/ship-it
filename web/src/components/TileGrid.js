@@ -48,7 +48,6 @@ class SingleGridCell extends React.Component {
   }
 
   cellClick(event) {
-    this.forceUpdate()
     this.props.handleCellClick(event)
   }
 
@@ -145,10 +144,6 @@ class ReactExpandableGrid extends React.Component {
     var thisIdNumber = this.findIdNode(target)
     var detail = document.getElementById('expandedDetail')
 
-    if (this.state.expanded) {
-      cardID = thisIdNumber
-    }
-
     var ol = document.getElementById("grid_cell_" + thisIdNumber.toString()).parentNode
     var lengthOfList = parseInt(ol.childNodes.length)
     var startingIndex = thisIdNumber + 1
@@ -184,7 +179,7 @@ class ReactExpandableGrid extends React.Component {
 
   handleCellClick(event) {
     var target = event.target
-
+    cardID = this.findIdNode(target)
     if (this.state.expanded) {
       if (this.state.selected_id === event.target.id) { // Clicking on already opened detail
         this.closeExpandedDetail()
@@ -233,8 +228,7 @@ class ReactExpandableGrid extends React.Component {
       padding: '20px',
       transition: 'display 2s ease-in-out 0.5s',
     }
-    console.log("Generate Called")
-    console.log(cardID)
+
     grid.push( // Expanded Detail here
       <li style={cssforExpandedDetail} key='expandedDetail' id='expandedDetail'>
         <ExpandedDetail data={gridData} id={cardID}/>
