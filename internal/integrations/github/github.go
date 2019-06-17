@@ -43,5 +43,5 @@ func (github *GitHub) GetTravisCIBuildURLForRef(repo string, ref string) (string
 		}
 	}
 
-	return "", errors.New("Could not find a TravisCI build for specified ref")
+	return "", errors.New("could not find a TravisCI build for specified ref")
 }
