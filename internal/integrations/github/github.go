@@ -14,6 +14,7 @@ var errTravisCIBuildNotFound = errors.New("could not find a TravisCI build for s
 type Github struct {
 	Org    string
 	Client *github.Client
+	Checks *github.ChecksService
 }
 
 // New creates a new GitHub integration
@@ -24,13 +25,14 @@ func New(ctx context.Context, org string, accessToken string) *Github {
 
 	return &Github{
 		Client: client,
+		Checks: client.Checks,
 		Org:    org,
 	}
 }
 
 // GetTravisCIBuildURLForRef uses the Checks API to find the URL to the Travis build for the specified ref
 func (g *Github) GetTravisCIBuildURLForRef(ctx context.Context, repo string, ref string) (string, error) {
-	checks, _, err := g.Client.Checks.ListCheckRunsForRef(ctx, g.Org, repo, ref, nil)
+	checks, _, err := g.Checks.ListCheckRunsForRef(ctx, g.Org, repo, ref, nil)
 
 	if err != nil {
 		return "", err
