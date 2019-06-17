@@ -68,13 +68,14 @@ class SingleGridCell extends React.Component {
     }
 
     // Re written to put material ui components in the tile original component only took images
+    var deployDate = new Date(this.props.SingleGridCellData.lastDeployed)
     return (
       <div style={SingleGridCellStyle} id={this.props.id} className='SingleGridCell'>
         <div>
           <Card style={cardStyle}>
             <CardContent>
               <Typography variant="h5" component="h2">
-                ServiceName
+                {this.props.SingleGridCellData.name}
               </Typography>
               <MuiThemeProvider theme={deployTagTheme}>
                 <Chip
@@ -89,7 +90,7 @@ class SingleGridCell extends React.Component {
                 <IconButton>
                   <img src={TimePassed} alt={imgAlt} />
                 </IconButton>
-                5 min ago
+                {deployDate.toDateString()}
               </div>
               <div className='row-align'>
                 <SelectionDialog />
@@ -121,7 +122,7 @@ class ReactExpandableGrid extends React.Component {
     this.state = {
       expanded: false,
       selected_id: '',
-      gridData: JSON.parse(this.props.gridData)
+      gridData: this.props.gridData
     }
   }
 
@@ -270,7 +271,7 @@ class ReactExpandableGrid extends React.Component {
 }
 
 ReactExpandableGrid.propTypes = {
-  gridData: PropTypes.string,
+  gridData: PropTypes.array,
   cellSize: PropTypes.number,
   cellMargin: PropTypes.number,
   bgColor: PropTypes.string,
@@ -279,7 +280,7 @@ ReactExpandableGrid.propTypes = {
 }
 
 ReactExpandableGrid.defaultProps = {
-  gridData: "",
+  gridData: [],
   cellSize: 250,
   cellMargin: 25,
   bgColor: '#f2f2f2',
