@@ -61,7 +61,7 @@ class ExpandedDetail extends React.Component {
                   <div className="switch-status">
                     <FormControlLabel
                       control={
-                        <Switch color="primary" />
+                        <Switch color="primary" checked={this.props.data.autoDeploy} />
                       }
                       label="AutoDeploy"
                     />
@@ -102,13 +102,17 @@ class ExpandedDetail extends React.Component {
                     <img src={SumoIcon} width="32" height="32" alt={imgAlt} />
                   </div>
                   <div>
-                    <Typography variant="h6">Logs</Typography>
+                    <Typography variant="h6">
+                      <Link href={this.props.data.monitoring.sumologic}>Logs</Link>
+                    </Typography>
                   </div>
                   <div className="double-padded">
                     <img src={TravisIcon} width="32" height="32" alt={imgAlt} />
                   </div>
                   <div>
-                    <Typography variant="h6">Build</Typography>
+                    <Typography variant="h6">
+                      <Link href={this.props.data.build.travis}>Build</Link>
+                    </Typography>
                   </div>
                 </div>
               </div>
