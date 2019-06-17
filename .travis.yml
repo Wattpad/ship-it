@@ -26,11 +26,11 @@ jobs:
     - stage: Test
       name: GoLint
       install: 
-        - go get "golang.org/x/lint/golint"
+        - go get "github.com/golangci/golangci-lint/cmd/golangci-lint"
         - go get "honnef.co/go/tools/cmd/staticcheck"
       script:
         - go vet ./...
-        - ./ci/golint.sh
+        - golangci-lint run ./...
         - staticcheck ./...
     
     - stage: Test
