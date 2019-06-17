@@ -231,7 +231,7 @@ class ReactExpandableGrid extends React.Component {
 
     grid.push( // Expanded Detail here
       <li style={cssforExpandedDetail} key='expandedDetail' id='expandedDetail'>
-        <ExpandedDetail data={gridData} id={cardID}/>
+        <ExpandedDetail data={gridData[cardID]} />
       </li>
     )
 
