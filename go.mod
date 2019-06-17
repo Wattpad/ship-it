@@ -13,7 +13,7 @@ require (
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/mock v1.3.1 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/stretchr/testify v1.3.0 // indirect
+	github.com/stretchr/testify v1.3.0
 	golang.org/x/net v0.0.0-20190607181551-461777fb6f67 // indirect
 	golang.org/x/text v0.3.1-0.20181227161524-e6919f6577db // indirect
 )
