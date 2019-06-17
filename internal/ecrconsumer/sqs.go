@@ -11,7 +11,9 @@ import (
 	"github.com/go-kit/kit/metrics"
 )
 
-func NewSQSConsumer(logger log.Logger, hist metrics.Histogram, name string, svc sqsconsumer.SQSAPI) (*sqsconsumer.Consumer, error) {
+// New returns a SQS consumer which processes ECR PushImage events by updating
+// the associated service's chart values in a remote Git repository.
+func New(logger log.Logger, hist metrics.Histogram, name string, svc sqsconsumer.SQSAPI) (*sqsconsumer.Consumer, error) {
 	service, err := sqsconsumer.NewSQSService(name, svc)
 	if err != nil {
 		return nil, err

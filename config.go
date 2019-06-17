@@ -7,6 +7,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
+// Config provides the service's configuration options.
 type Config struct {
 	AWSRegion     string `envconfig:"AWS_REGION" required:"true"`
 	DogstatsdHost string `split_words:"true" required:"true"`
@@ -15,16 +16,19 @@ type Config struct {
 	ServicePort   string `split_words:"true" default:"80"`
 }
 
+// DataDogAddress returns the local address of the datadog agent.
 func (c *Config) DataDogAddress() string {
 	return net.JoinHostPort(c.DogstatsdHost, c.DogstatsdPort)
 }
 
+// AWS returns an AWS config using the service's config values.
 func (c *Config) AWS() *aws.Config {
 	return &aws.Config{
 		Region: aws.String(c.AWSRegion),
 	}
 }
 
+// FromEnv returns a config using environment values.
 func FromEnv() (*Config, error) {
 	env := new(Config)
 	if err := envconfig.Process("", env); err != nil {
