@@ -38,7 +38,7 @@ func TestGetTravisCIBuildURLForRef_Empty(t *testing.T) {
 	github := New(ctx, "Wattpad", "fake-access-token")
 	_, err := github.GetTravisCIBuildURLForRef(ctx, "highlander", "2c76895cdb9f3ff5100ecf93a7a6c6747aaeda8c")
 
-	assert.Equal(t, "could not find a TravisCI build for specified ref", err.Error())
+	assert.EqualError(t, errTravisCIBuildNotFound, err.Error())
 }
 
 func TestGetTravisCIBuildURLForRef_500(t *testing.T) {

@@ -8,6 +8,8 @@ import (
 	"golang.org/x/oauth2"
 )
 
+var errTravisCIBuildNotFound = errors.New("could not find a TravisCI build for specified ref")
+
 // Github handles integrations with the Github API
 type Github struct {
 	Org    string
@@ -40,5 +42,5 @@ func (g *Github) GetTravisCIBuildURLForRef(ctx context.Context, repo string, ref
 		}
 	}
 
-	return "", errors.New("could not find a TravisCI build for specified ref")
+	return "", errTravisCIBuildNotFound
 }
