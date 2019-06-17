@@ -114,7 +114,7 @@ class SingleGridCell extends React.Component {
   }
 }
 
-var cardID
+var cardID = 0
 class ReactExpandableGrid extends React.Component {
   
   constructor(props) {
