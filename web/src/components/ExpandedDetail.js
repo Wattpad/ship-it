@@ -27,19 +27,26 @@ const theme = createMuiTheme({
   }
 })
 
+const linkTheme = createMuiTheme({
+  palette: {
+    primary: {
+      main: '#FF6612'
+    },
+    secondary: {
+      main: '#FEAF0A'
+    }
+  }
+})
+
 const imgAlt = 'not found'
 
 class ExpandedDetail extends React.Component {
-  constructor(props) {
-    super(props)
-  }
-
   render() {
     return (
       <div>
         {
           this.props.data ? 
-            <MuiThemeProvider theme={theme} >
+            <div>
               <div className="flex-container">
                 <div className="helm-status">
                   <div className="right-padded">
@@ -49,15 +56,17 @@ class ExpandedDetail extends React.Component {
                     <Typography variant="h5">{this.props.data.artifacts.chart.version}</Typography>
                   </div>
                 </div>
-
-                <div className="switch-status">
-                  <FormControlLabel
-                    control={
-                      <Switch color="primary" />
-                    }
-                    label="AutoDeploy"
-                  />
-                </div>
+                
+                <MuiThemeProvider theme={theme}>
+                  <div className="switch-status">
+                    <FormControlLabel
+                      control={
+                        <Switch color="primary" />
+                      }
+                      label="AutoDeploy"
+                    />
+                  </div>
+                </MuiThemeProvider>
 
                 <div className="dataDog-status">
                   <div className="right-padded">
@@ -131,7 +140,7 @@ class ExpandedDetail extends React.Component {
                   </List>
                 </Paper>
               </div>
-            </MuiThemeProvider> : <CircularProgress />
+            </div> : <CircularProgress />
         }
       </div>
     )
