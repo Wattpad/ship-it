@@ -14,8 +14,8 @@ type Config struct {
 	DogstatsdPort string `split_words:"true" default:"8125"`
 	QueueName     string `split_words:"true" required:"true"`
 	ServicePort   string `split_words:"true" default:"80"`
-	GitHubToken   string `split_words:"true" required:"true"`
-	GitHubOrg     string `split_words:"true" required:"true"`
+	GithubToken   string `split_words:"true" required:"true"`
+	GithubOrg     string `split_words:"true" required:"true"`
 }
 
 // DataDogAddress returns the local address of the datadog agent.
