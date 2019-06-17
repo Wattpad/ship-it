@@ -50,7 +50,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	consumer, err := ecrconsumer.NewSQSConsumer(logger, hist, envConf.QueueName, sqs.New(s))
+	consumer, err := ecrconsumer.New(logger, hist, envConf.QueueName, sqs.New(s))
 	if err != nil {
 		logger.Log("error", err)
 		os.Exit(1)

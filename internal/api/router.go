@@ -10,6 +10,7 @@ func health(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+// New returns an 'http.Handler' that serves the ship-it API.
 func New() http.Handler {
 	r := chi.NewRouter()
 
