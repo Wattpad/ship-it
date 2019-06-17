@@ -27,8 +27,8 @@ func New(ctx context.Context, org string, accessToken string) *Github {
 }
 
 // GetTravisCIBuildURLForRef uses the Checks API to find the URL to the Travis build for the specified ref
-func (github *Github) GetTravisCIBuildURLForRef(ctx context.Context, repo string, ref string) (string, error) {
-	checks, _, err := github.Client.Checks.ListCheckRunsForRef(ctx, github.Org, repo, ref, nil)
+func (g *Github) GetTravisCIBuildURLForRef(ctx context.Context, repo string, ref string) (string, error) {
+	checks, _, err := g.Client.Checks.ListCheckRunsForRef(ctx, g.Org, repo, ref, nil)
 
 	if err != nil {
 		return "", err
