@@ -30,7 +30,7 @@ jobs:
         - go get "honnef.co/go/tools/cmd/staticcheck"
       script:
         - go vet ./...
-        - test -z "$(go list ./... | grep -v /vendor | golint)"
+        - ./ci/golint.sh
         - staticcheck ./...
     
     - stage: Test
