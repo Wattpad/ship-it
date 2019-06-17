@@ -8,29 +8,26 @@ import (
 	"golang.org/x/oauth2"
 )
 
-// GitHub handles integrations with the GitHub API
-type GitHub struct {
+// Github handles integrations with the Github API
+type Github struct {
 	Org    string
 	Client *github.Client
 }
 
 // New creates a new GitHub integration
-func New(org string, accessToken string) (*GitHub, error) {
-	ctx := context.Background()
+func New(ctx context.Context, org string, accessToken string) *Github {
 	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: accessToken})
 	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
 
-	return &GitHub{
+	return &Github{
 		Client: client,
 		Org:    org,
-	}, nil
+	}
 }
 
 // GetTravisCIBuildURLForRef uses the Checks API to find the URL to the Travis build for the specified ref
-func (github *GitHub) GetTravisCIBuildURLForRef(repo string, ref string) (string, error) {
-	ctx := context.Background()
-
+func (github *Github) GetTravisCIBuildURLForRef(ctx context.Context, repo string, ref string) (string, error) {
 	checks, _, err := github.Client.Checks.ListCheckRunsForRef(ctx, github.Org, repo, ref, nil)
 
 	if err != nil {
@@ -38,8 +35,8 @@ func (github *GitHub) GetTravisCIBuildURLForRef(repo string, ref string) (string
 	}
 
 	for _, checkRun := range checks.CheckRuns {
-		if *checkRun.App.Name == "Travis CI" {
-			return *checkRun.DetailsURL, nil
+		if checkRun.GetApp().GetName() == "Travis CI" {
+			return checkRun.GetDetailsURL(), nil
 		}
 	}
 
