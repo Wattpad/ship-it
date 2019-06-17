@@ -1,0 +1,82 @@
+{
+    "total_count": 1,
+    "check_runs": [
+      {
+        "id": 149963217,
+        "node_id": "MDg6Q2hlY2tSdW4xNDk5NjMyMTc=",
+        "head_sha": "2c76895cdb9f3ff5100ecf93a7a6c6747aaeda8c",
+        "external_id": "115827260",
+        "url": "https://api.github.com/repos/Wattpad/highlander/check-runs/149963217",
+        "html_url": "https://github.com/Wattpad/highlander/runs/149963217",
+        "details_url": "https://travis-ci.com/Wattpad/highlander/builds/115827260",
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": "2019-06-17T15:49:49Z",
+        "completed_at": "2019-06-17T15:59:25Z",
+        "output": {
+          "title": "Build Passed",
+          "summary": "<a href='https://travis-ci.com/Wattpad/highlander/builds/115827260'><img src='https://travis-ci.com/images/stroke-icons/icon-passed.png' height='11'> The build</a> **passed**, just like the previous build.",
+          "text": "This is a normal build for the master branch. You should be able to reproduce it by checking out the branch locally.\n\n## Jobs and Stages\nThis build has **four jobs**, running in parallel.\n\n<table>\n<thead>\n  <tr>\n    <th>Job</th>\n    <th>Go</th>\n    <th>ENV</th>\n    <th>State</th>\n  </tr>\n</thead>\n<tbody>\n  <tr>\n    <td><a href='https://travis-ci.com/Wattpad/highlander/jobs/208648537'><img src='https://travis-ci.com/images/stroke-icons/icon-passed.png' height='11'> 14058.1</a></td>\n    <td>1.12.1</td>\n    <td>\\[\"SHARD=0\"\\]</td>\n    <td>passed</td>\n  </tr>\n  <tr>\n    <td><a href='https://travis-ci.com/Wattpad/highlander/jobs/208648538'><img src='https://travis-ci.com/images/stroke-icons/icon-passed.png' height='11'> 14058.2</a></td>\n    <td>1.12.1</td>\n    <td>\\[\"SHARD=1\"\\]</td>\n    <td>passed</td>\n  </tr>\n  <tr>\n    <td><a href='https://travis-ci.com/Wattpad/highlander/jobs/208648539'><img src='https://travis-ci.com/images/stroke-icons/icon-passed.png' height='11'> 14058.3</a></td>\n    <td>1.12.1</td>\n    <td>\\[\"SHARD=2\"\\]</td>\n    <td>passed</td>\n  </tr>\n  <tr>\n    <td><a href='https://travis-ci.com/Wattpad/highlander/jobs/208648540'><img src='https://travis-ci.com/images/stroke-icons/icon-passed.png' height='11'> 14058.4</a></td>\n    <td>1.12.1</td>\n    <td>\\[\"SHARD=3\"\\]</td>\n    <td>passed</td>\n  </tr>\n</tbody>\n</table>\n\n## Build Configuration\n\nBuild Option     | Setting\n-----------------|--------------\nLanguage         | Go\nOperating System | Linux (Trusty)\nGo Version       | 1.12.1\n\n<details>\n<summary>Build Configuration</summary>\n<pre lang='yaml'>\n{\n  \"go\": [\n    \"1.12.1\"\n  ],\n  \"os\": \"linux\",\n  \"env\": [\n    \"SHARD=0\",\n    \"SHARD=1\",\n    \"SHARD=2\",\n    \"SHARD=3\"\n  ],\n  \"dist\": \"trusty\",\n  \"cache\": {\n    \"directories\": [\n      \"$HOME/.gocache\"\n    ]\n  },\n  \"group\": \"stable\",\n  \"script\": [\n    \"docker version\",\n    \"echo \\\"TRAVIS_PULL_REQUEST $TRAVIS_PULL_REQUEST TRAVIS_PULL_REQUEST_BRANCH $TRAVIS_PULL_REQUEST_BRANCH TRAVIS_COMMIT_RANGE $TRAVIS_COMMIT_RANGE\\\"\",\n    \"if [[ \\\"$TRAVIS_PULL_REQUEST\\\" != \\\"false\\\" && \\\"$TRAVIS_PULL_REQUEST_SHA\\\" != \\\"\\\" ]] ; then base_version=$(git merge-base master ${TRAVIS_PULL_REQUEST_SHA}) ; export AFFECTED_COMMIT_RANGE=\\\"${base_version}..${TRAVIS_PULL_REQUEST_SHA}\\\" ; elif [[ \\\"$TRAVIS_COMMIT_RANGE\\\" != \\\"\\\" ]] ; then export AFFECTED_COMMIT_RANGE=\\\"${TRAVIS_COMMIT_RANGE}\\\" ; else export AFFECTED_COMMIT_RANGE=\\\"master\\\" ; fi\",\n    \"if [[ \\\"$AFFECTED_COMMIT_RANGE\\\" != \\\"master\\\" ]] && git log --pretty=format:'%s %b' $AFFECTED_COMMIT_RANGE | grep '\\\\[build all\\\\]' &gt; /dev/null ; then export AFFECTED_COMMIT_RANGE=\\\"master\\\" ; fi\",\n    \"ci/make_shard.sh ${SHARD} ${NUM_SHARDS} \\\"${AFFECTED_COMMIT_RANGE}\\\" test ;\",\n    \"if [[ \\\"$TRAVIS_PULL_REQUEST\\\" == \\\"false\\\" && \\\"$TRAVIS_BRANCH\\\" == \\\"master\\\" ]] ; then ci/make_shard.sh ${SHARD} ${NUM_SHARDS} \\\"${AFFECTED_COMMIT_RANGE}\\\" push_image ; fi\"\n  ],\n  \".result\": \"configured\",\n  \"install\": [\n    \"go get github.com/Wattpad/affected\"\n  ],\n  \"branches\": {\n    \"only\": [\n      \"master\",\n      \"/feature/\"\n    ]\n  },\n  \"language\": \"go\",\n  \"services\": [\n    \"docker\",\n    \"mysql\"\n  ],\n  \"notifications\": {\n    \"slack\": {\n      \"secure\": \"AYKyPcXcrnCcDKD3D80539Z0bweg9hEsFTImiD3NudgV96qiVqGXZ8/0QMkcFIeLZT1wtbPOmmYcQTMEmTWkPqUzfs4PEeoYIEW5A1vgsW3R4Sy+wtwFshgbmKDkfZbH2H30ho0uIhPPMBtzmC5/CzTYjfaWwsOrSRiggwG7AZ42PxcYJ+PJxdyF81kSvCm5lonOptn3ax8zxsNAjYX9XZCpvOxJx+gMZhwoPDVKuAlK0hoJBHgSibdMZlSRuB7T15UHzZuQjxov/KVHBW+nu0CSYUNMYWmgUmRB9U5+lHIArhUvABIJZpoEDPmovXLRPLjsOR9MQZqXx+SElxWUk5MD0Sd4roK9pG2ytHFz1683kz3CJUhkI3rhA8eOxZMZdqcbAXLlElzQmnMI4knGb386fCLqI9RUgu4voTF2sXK7NhXbLve9atGE/DgH6Y7Bfsx7SeYYer+2BThTXrF/5YUhmYS2SooCcqwDAVi2g8Q8J0eTHotQGj4Dg6qtK+YI1BmMQBjdL9aWhF1154rIH68fjxH4C/Kg/eZs1G1CDeUz92304XxVjJbuKamnQasE/AyTfeXeOXC+9s/vwkg633VncgVy9DCpXkb5i2M7LmXZlz+AkFEnPYkd5aA6VsuVFxpkb3w0vhR3+JAU5wnycLsKtXsC2RqWjU/iiwMIKv0=\"\n    }\n  },\n  \"before_install\": [\n    \"export PATH=${PATH}:${TRAVIS_BUILD_DIR}/vendor/bin\",\n    \"export GOPATH=\\\"${TRAVIS_BUILD_DIR}/vendor:${TRAVIS_BUILD_DIR}/wattpad\\\"\",\n    \"pip install --user awscli\",\n    \"export PATH=$PATH:$HOME/.local/bin\",\n    \"$(aws ecr get-login --no-include-email --region us-east-1)\",\n    \"export NUM_SHARDS=4\"\n  ]\n}\n</pre>\n</details>",
+          "annotations_count": 0,
+          "annotations_url": "https://api.github.com/repos/Wattpad/highlander/check-runs/149963217/annotations"
+        },
+        "name": "Travis CI - Branch",
+        "check_suite": {
+          "id": 142013998
+        },
+        "app": {
+          "id": 67,
+          "node_id": "MDM6QXBwNjc=",
+          "owner": {
+            "login": "travis-ci",
+            "id": 639823,
+            "node_id": "MDEyOk9yZ2FuaXphdGlvbjYzOTgyMw==",
+            "avatar_url": "https://avatars2.githubusercontent.com/u/639823?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/travis-ci",
+            "html_url": "https://github.com/travis-ci",
+            "followers_url": "https://api.github.com/users/travis-ci/followers",
+            "following_url": "https://api.github.com/users/travis-ci/following{/other_user}",
+            "gists_url": "https://api.github.com/users/travis-ci/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/travis-ci/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/travis-ci/subscriptions",
+            "organizations_url": "https://api.github.com/users/travis-ci/orgs",
+            "repos_url": "https://api.github.com/users/travis-ci/repos",
+            "events_url": "https://api.github.com/users/travis-ci/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/travis-ci/received_events",
+            "type": "Organization",
+            "site_admin": false
+          },
+          "name": "Travis CI",
+          "description": "Test and deploy with confidence. Trusted by over 800,000 users, Travis CI is the leading hosted continuous integration system.\r\n\r\nSupporting over 30 different languages, including Ruby, Mac/iOS, and Docker, Travis CI is built for everyone.\r\n\r\nFree for open source, and with a 100 build trial for private projects, getting setup takes just 2 minutes.",
+          "external_url": "https://travis-ci.com",
+          "html_url": "https://github.com/apps/travis-ci",
+          "created_at": "2016-06-21T16:22:21Z",
+          "updated_at": "2018-09-14T20:36:16Z",
+          "permissions": {
+            "checks": "write",
+            "contents": "read",
+            "deployments": "write",
+            "members": "read",
+            "metadata": "read",
+            "pull_requests": "read",
+            "repository_hooks": "write",
+            "statuses": "write"
+          },
+          "events": [
+            "check_run",
+            "check_suite",
+            "create",
+            "delete",
+            "member",
+            "pull_request",
+            "push",
+            "repository"
+          ]
+        },
+        "pull_requests": [
+  
+        ]
+      }
+    ]
+  }

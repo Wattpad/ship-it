@@ -37,10 +37,6 @@ func (github *GitHub) GetTravisCIBuildURLForRef(repo string, ref string) (string
 		return "", err
 	}
 
-	if checks.GetTotal() == 0 {
-		return "", errors.New("Could not find any checks for specified ref")
-	}
-
 	for _, checkRun := range checks.CheckRuns {
 		if *checkRun.App.Name == "Travis CI" {
 			return *checkRun.DetailsURL, nil
