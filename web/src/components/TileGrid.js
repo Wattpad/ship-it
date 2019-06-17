@@ -114,8 +114,9 @@ class SingleGridCell extends React.Component {
   }
 }
 
+var cardID
 class ReactExpandableGrid extends React.Component {
-
+  
   constructor(props) {
     super(props)
 
@@ -138,10 +139,14 @@ class ReactExpandableGrid extends React.Component {
     }
     return -1
   }
-
+  
   renderExpandedDetail(target) {
     var thisIdNumber = this.findIdNode(target)
     var detail = document.getElementById('expandedDetail')
+    
+    if (this.state.expanded) {
+      cardID = thisIdNumber
+    }
 
     var ol = document.getElementById("grid_cell_" + thisIdNumber.toString()).parentNode
     var lengthOfList = parseInt(ol.childNodes.length)
@@ -230,7 +235,7 @@ class ReactExpandableGrid extends React.Component {
 
     grid.push( // Expanded Detail here
       <li style={cssforExpandedDetail} key='expandedDetail' id='expandedDetail'>
-        <ExpandedDetail />
+        <ExpandedDetail data={gridData} id={this.cardID}/>
       </li>
     )
 
