@@ -1,4 +1,4 @@
-.PHONY: build push run
+.PHONY: build push run jsonschema
 
 ECR_REGISTRY := 723255503624.dkr.ecr.us-east-1.amazonaws.com
 PROJECT_NAME := ship-it
@@ -26,3 +26,7 @@ run: build
 	    -e AWS_SECURITY_TOKEN=${AWS_SECURITY_TOKEN} \
 	    -e AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN} \
 	    $(shell docker images -q $(PROJECT_NAME) | head -n 1)
+
+jsonschema:
+	go run cmd/jsonschema/main.go
+	# docker run -it --rm -v $(shell pwd):/workspace -w /workspace golang:1.12 go run cmd/jsonschema/main.go
