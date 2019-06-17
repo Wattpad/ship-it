@@ -10,11 +10,16 @@ import (
 
 var errTravisCIBuildNotFound = errors.New("could not find a TravisCI build for specified ref")
 
+// ChecksService wraps github.ChecksService
+type ChecksService interface {
+	ListCheckRunsForRef(context.Context, string, string, string, *github.ListCheckRunsOptions) (*github.ListCheckRunsResults, *github.Response, error)
+}
+
 // Github handles integrations with the Github API
 type Github struct {
 	Org    string
 	Client *github.Client
-	Checks *github.ChecksService
+	Checks ChecksService
 }
 
 // New creates a new GitHub integration

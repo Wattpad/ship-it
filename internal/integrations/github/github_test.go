@@ -2,55 +2,79 @@ package github
 
 import (
 	"context"
-	"io/ioutil"
+	"errors"
 	"testing"
 
+	"github.com/google/go-github/v26/github"
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/h2non/gock.v1"
+	"github.com/stretchr/testify/mock"
 )
 
+type MockChecksService struct {
+	mock.Mock
+}
+
+func (m *MockChecksService) ListCheckRunsForRef(context context.Context, owner string, repo string, ref string, opt *github.ListCheckRunsOptions) (*github.ListCheckRunsResults, *github.Response, error) {
+	args := m.Called()
+	results := args.Get(0)
+
+	if results != nil {
+		return args.Get(0).(*github.ListCheckRunsResults), nil, nil
+	}
+
+	return nil, nil, args.Error(2)
+
+}
+
 func TestGetTravisCIBuildURLForRef_Success(t *testing.T) {
-	defer gock.Off()
 	ctx := context.Background()
+	g := New(ctx, "Wattpad", "fake-access-token")
 
-	mockResponse, _ := ioutil.ReadFile("testdata/check_runs_response_success.json")
-	gock.New("https://api.github.com").
-		Get("/repos/Wattpad/highlander/commits/2c76895cdb9f3ff5100ecf93a7a6c6747aaeda8c/check-runs").
-		Reply(200).
-		JSON(mockResponse)
+	m := new(MockChecksService)
+	m.On("ListCheckRunsForRef").Return(&github.ListCheckRunsResults{
+		Total: github.Int(0),
+		CheckRuns: []*github.CheckRun{
+			&github.CheckRun{
+				DetailsURL: github.String("https://travis-ci.com/Wattpad/highlander/builds/115827260"),
+				App: &github.App{
+					Name: github.String("Travis CI"),
+				},
+			},
+		},
+	}, nil, nil)
+	g.Checks = m
 
-	github := New(ctx, "Wattpad", "fake-access-token")
-	url, _ := github.GetTravisCIBuildURLForRef(ctx, "highlander", "2c76895cdb9f3ff5100ecf93a7a6c6747aaeda8c")
+	url, _ := g.GetTravisCIBuildURLForRef(ctx, "highlander", "master")
 
 	assert.Equal(t, "https://travis-ci.com/Wattpad/highlander/builds/115827260", url)
 }
 
 func TestGetTravisCIBuildURLForRef_Empty(t *testing.T) {
-	defer gock.Off()
 	ctx := context.Background()
+	g := New(ctx, "Wattpad", "fake-access-token")
 
-	mockResponse, _ := ioutil.ReadFile("testdata/check_runs_response_empty.json")
-	gock.New("https://api.github.com").
-		Get("/repos/Wattpad/highlander/commits/2c76895cdb9f3ff5100ecf93a7a6c6747aaeda8c/check-runs").
-		Reply(200).
-		JSON(mockResponse)
+	m := new(MockChecksService)
+	m.On("ListCheckRunsForRef").Return(&github.ListCheckRunsResults{
+		Total:     github.Int(1),
+		CheckRuns: []*github.CheckRun{},
+	}, nil, nil)
+	g.Checks = m
 
-	github := New(ctx, "Wattpad", "fake-access-token")
-	_, err := github.GetTravisCIBuildURLForRef(ctx, "highlander", "2c76895cdb9f3ff5100ecf93a7a6c6747aaeda8c")
+	_, err := g.GetTravisCIBuildURLForRef(ctx, "highlander", "master")
 
 	assert.EqualError(t, errTravisCIBuildNotFound, err.Error())
 }
 
-func TestGetTravisCIBuildURLForRef_500(t *testing.T) {
-	defer gock.Off()
+func TestGetTravisCIBuildURLForRef_Error(t *testing.T) {
 	ctx := context.Background()
+	g := New(ctx, "Wattpad", "fake-access-token")
 
-	gock.New("https://api.github.com").
-		Get("/repos/Wattpad/highlander/commits/2c76895cdb9f3ff5100ecf93a7a6c6747aaeda8c/check-runs").
-		Reply(500)
+	fakeError := errors.New("fake")
+	m := new(MockChecksService)
+	m.On("ListCheckRunsForRef").Return(nil, nil, fakeError)
+	g.Checks = m
 
-	github := New(ctx, "Wattpad", "fake-access-token")
-	_, err := github.GetTravisCIBuildURLForRef(ctx, "highlander", "2c76895cdb9f3ff5100ecf93a7a6c6747aaeda8c")
+	_, err := g.GetTravisCIBuildURLForRef(ctx, "highlander", "master")
 
-	assert.Error(t, err)
+	assert.EqualError(t, err, fakeError.Error())
 }
