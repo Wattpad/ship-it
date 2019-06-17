@@ -3,6 +3,7 @@ package main
 import (
 	"net"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/kelseyhightower/envconfig"
 )
 
@@ -14,8 +15,14 @@ type Config struct {
 	ServicePort   string `split_words:"true" default:"80"`
 }
 
-func (e *Config) DataDogAddress() string {
-	return net.JoinHostPort(e.DogstatsdHost, e.DogstatsdPort)
+func (c *Config) DataDogAddress() string {
+	return net.JoinHostPort(c.DogstatsdHost, c.DogstatsdPort)
+}
+
+func (c *Config) AWS() *aws.Config {
+	return &aws.Config{
+		Region: aws.String(c.AWSRegion),
+	}
 }
 
 func FromEnv() (*Config, error) {
