@@ -26,7 +26,7 @@ jobs:
     - stage: Test
       name: GoLint
       install: go get "github.com/golangci/golangci-lint/cmd/golangci-lint"
-      script: golangci-lint run -E goimports -E interfacer ./...
+      script: golangci-lint run -D errcheck -E goimports -E interfacer ./...
     
     - stage: Test
       name: JSLint
