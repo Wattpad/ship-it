@@ -10,7 +10,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
 
@@ -45,9 +44,7 @@ func main() {
 	go dd.SendLoop(time.Tick(time.Second), "udp", envConf.DataDogAddress())
 	hist := dd.NewTiming("worker.time", 1.0).With("worker", "ecrconsumer", "queue", envConf.QueueName)
 
-	s, err := session.NewSession(&aws.Config{
-		Region: &envConf.AWSRegion,
-	})
+	s, err := session.NewSession(envConf.AWS())
 	if err != nil {
 		logger.Log("error", err)
 		os.Exit(1)
@@ -62,7 +59,7 @@ func main() {
 	go consumer.Run(ctx)
 
 	srv := http.Server{
-		Addr:    ":80",
+		Addr:    ":" + envConf.ServicePort,
 		Handler: api.New(),
 	}
 
