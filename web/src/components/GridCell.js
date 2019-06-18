@@ -11,7 +11,8 @@ import TimePassed from '../assets/time_passed.png'
 import SlackIcon from '../assets/slack_icon.png'
 import DockerIcon from '../assets/docker_icon.png'
 import StatusChip from './StatusChip';
-import InfoDialog from './InfoDialog';
+import SlackInfoDialog from './SlackInfoDialog';
+import ImageInfoDialog from './ImageInfoDialog';
 
 const imgAlt = "not found"
 
@@ -24,7 +25,8 @@ class SingleGridCell extends React.Component {
       selected_id: '',
       window_width: window.innerWidth,
       repoSelector: false,
-      slackInfo: false
+      slackInfo: false,
+      imageInfo: false,
     }
   }
 
@@ -38,6 +40,14 @@ class SingleGridCell extends React.Component {
 
   slackClosed = () => {
     this.setState({ slackInfo: false })
+  }
+
+  dockerClicked = () => {
+    this.setState({imageInfo: true})
+  }
+
+  dockerClosed = () => {
+    this.setState({imageInfo: false})
   }
 
   render() {
@@ -79,11 +89,14 @@ class SingleGridCell extends React.Component {
                   <img src={SlackIcon} width="32" height="32" alt={imgAlt} />
                 </IconButton>
                 {
-                  this.state.slackInfo ? <InfoDialog open={this.state.slackInfo} owner={this.props.SingleGridCellData.owner.team} slack={this.props.SingleGridCellData.owner.slack} handleClose={this.slackClosed}/> : null
+                  this.state.slackInfo ? <SlackInfoDialog open={this.state.slackInfo} owner={this.props.SingleGridCellData.owner.team} slack={this.props.SingleGridCellData.owner.slack} handleClose={this.slackClosed}/> : null
                 }
-                <IconButton>
+                <IconButton onClick={this.dockerClicked}>
                   <img src={DockerIcon} width="32" height="32" alt={imgAlt} />
                 </IconButton>
+                {
+                  this.state.imageInfo ? <ImageInfoDialog open={this.state.imageInfo} handleClose={this.dockerClosed} docker={this.props.SingleGridCellData.artifacts.docker} /> : null
+                }
               </div>
               <div>
                 <IconButton onClick={this.cellClick.bind(this)}>

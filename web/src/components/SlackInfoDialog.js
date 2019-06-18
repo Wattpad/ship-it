@@ -2,7 +2,7 @@ import React from 'react'
 import Dialog from '@material-ui/core/Dialog'
 import { DialogContent, DialogActions, Button, DialogTitle, Typography } from '@material-ui/core';
 
-class InfoDialog extends React.Component {
+class SlackInfoDialog extends React.Component {
   render() {
     return (
       <Dialog open={this.props.open} onClose={this.props.handleClose}>
@@ -19,4 +19,4 @@ class InfoDialog extends React.Component {
   }
 }
 
-export default InfoDialog
+export default SlackInfoDialog
