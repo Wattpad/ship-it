@@ -6,8 +6,6 @@ import PropTypes from 'prop-types'
 import Card from '@material-ui/core/Card'
 import CardContent from '@material-ui/core/CardContent'
 import Typography from '@material-ui/core/Typography'
-import Chip from '@material-ui/core/Chip'
-import DoneIcon from '@material-ui/icons/Done'
 import ExpandIcon from '@material-ui/icons/ExpandMore'
 import IconButton from '@material-ui/core/IconButton'
 import SelectionDialog from './SelectionDialog'
@@ -18,6 +16,7 @@ import DockerIcon from '../assets/docker_icon.png'
 import ExpandedDetail from './ExpandedDetail'
 
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles'
+import StatusChip from './StatusChip';
 
 const deployTagTheme = createMuiTheme({
   palette: {
@@ -78,13 +77,7 @@ class SingleGridCell extends React.Component {
                 {this.props.SingleGridCellData.name}
               </Typography>
               <MuiThemeProvider theme={deployTagTheme}>
-                <Chip
-                  icon={<DoneIcon />}
-                  label="Deployed"
-                  color="primary"
-                  variant="outlined"
-                  clickable
-                />
+                <StatusChip status={this.props.SingleGridCellData.deployment.status}/>
               </MuiThemeProvider>
               <div>
                 <IconButton>

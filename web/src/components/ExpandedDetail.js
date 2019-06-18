@@ -14,7 +14,7 @@ import Paper from '@material-ui/core/Paper'
 import ListItem from '@material-ui/core/ListItem'
 import ListItemText from '@material-ui/core/ListItemText'
 import List from '@material-ui/core/List'
-import { CircularProgress, Link, ListItemIcon, Collapse } from '@material-ui/core'
+import { CircularProgress, Link, Collapse } from '@material-ui/core'
 import ExpandLess from '@material-ui/icons/ExpandLess'
 import ExpandMore from '@material-ui/icons/ExpandMore'
 import axios from 'axios';
