@@ -40,16 +40,23 @@ const linkTheme = createMuiTheme({
   }
 })
 
+const nestedStyle = {
+  paddingLeft: theme.spacing(4)
+}
+
 const imgAlt = 'not found'
 
 class ExpandedDetail extends React.Component {
 
   constructor(props) {
     super(props)
-    this.state = {podList: false}
+    this.state = {
+      podList: false,
+      resourceList: false
+    }
   }
 
-  handleClick = (event) => {
+  podClick = (event) => {
     console.log(event)
     this.setState({podList: !this.state.podList})
   }
@@ -134,38 +141,20 @@ class ExpandedDetail extends React.Component {
                   <List
                     component="nav"
                   >
-                    <ListItem button onClick={this.handleClick}>
+                    <ListItem button onClick={this.podClick}>
                       <ListItemText>Pods</ListItemText>
-                      {this.state.podList ? <ExpandLess/> : <ExpandMore />}
+                      {this.state.podList ? <ExpandLess /> : <ExpandMore />}
                     </ListItem>
                     <Collapse in={this.state.podList} timeout='auto' unmountOnExit>
                       <List component="div" disablePadding>
-                        <ListItem button>
+                        <ListItem button style={nestedStyle}>
                           <ListItemText>Pod 1</ListItemText>
                         </ListItem>
                       </List>
                     </Collapse>
-                    {/* <ListItem button>
-                      <ListItemText>Pod</ListItemText>
-                    </ListItem>
                     <ListItem button>
-                      <ListItemText>Pod</ListItemText>
+                      <ListItemText>Other Resources</ListItemText>
                     </ListItem>
-                    <ListItem button>
-                      <ListItemText>Pod</ListItemText>
-                    </ListItem>
-                    <ListItem button>
-                      <ListItemText>Pod</ListItemText>
-                    </ListItem>
-                    <ListItem button>
-                      <ListItemText>Pod</ListItemText>
-                    </ListItem>
-                    <ListItem button>
-                      <ListItemText>Pod</ListItemText>
-                    </ListItem>
-                    <ListItem button>
-                      <ListItemText>Pod</ListItemText>
-                    </ListItem> */}
                   </List>
                 </Paper>
               </div>
