@@ -48,6 +48,28 @@ func TestGetTravisCIBuildURLForRef_Success(t *testing.T) {
 	assert.Equal(t, "https://travis-ci.com/Wattpad/highlander/builds/115827260", url)
 }
 
+func TestGetTravisCIBuildURLForRef_NoTravisCI(t *testing.T) {
+	ctx := context.Background()
+	g := New(ctx, "Wattpad", "fake-access-token")
+
+	m := new(mockChecksService)
+	m.On("ListCheckRunsForRef").Return(&github.ListCheckRunsResults{
+		CheckRuns: []*github.CheckRun{
+			&github.CheckRun{
+				DetailsURL: github.String("https://codeship.com/build/12345678"),
+				App: &github.App{
+					Name: github.String("Codeship"),
+				},
+			},
+		},
+	}, nil, nil)
+	g.Checks = m
+
+	_, err := g.GetTravisCIBuildURLForRef(ctx, "highlander", "master")
+
+	assert.EqualError(t, errTravisCIBuildNotFound, err.Error())
+}
+
 func TestGetTravisCIBuildURLForRef_Empty(t *testing.T) {
 	ctx := context.Background()
 	g := New(ctx, "Wattpad", "fake-access-token")
