@@ -10,11 +10,11 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-type MockChecksService struct {
+type mockChecksService struct {
 	mock.Mock
 }
 
-func (m *MockChecksService) ListCheckRunsForRef(context context.Context, owner string, repo string, ref string, opt *github.ListCheckRunsOptions) (*github.ListCheckRunsResults, *github.Response, error) {
+func (m *mockChecksService) ListCheckRunsForRef(context context.Context, owner string, repo string, ref string, opt *github.ListCheckRunsOptions) (*github.ListCheckRunsResults, *github.Response, error) {
 	args := m.Called()
 	results := args.Get(0)
 
@@ -30,7 +30,7 @@ func TestGetTravisCIBuildURLForRef_Success(t *testing.T) {
 	ctx := context.Background()
 	g := New(ctx, "Wattpad", "fake-access-token")
 
-	m := new(MockChecksService)
+	m := new(mockChecksService)
 	m.On("ListCheckRunsForRef").Return(&github.ListCheckRunsResults{
 		CheckRuns: []*github.CheckRun{
 			&github.CheckRun{
@@ -52,7 +52,7 @@ func TestGetTravisCIBuildURLForRef_Empty(t *testing.T) {
 	ctx := context.Background()
 	g := New(ctx, "Wattpad", "fake-access-token")
 
-	m := new(MockChecksService)
+	m := new(mockChecksService)
 	m.On("ListCheckRunsForRef").Return(&github.ListCheckRunsResults{
 		CheckRuns: []*github.CheckRun{},
 	}, nil, nil)
@@ -67,7 +67,7 @@ func TestGetTravisCIBuildURLForRef_Error(t *testing.T) {
 	ctx := context.Background()
 	g := New(ctx, "Wattpad", "fake-access-token")
 
-	m := new(MockChecksService)
+	m := new(mockChecksService)
 	m.On("ListCheckRunsForRef").Return(nil, nil, errors.New("fake"))
 	g.Checks = m
 
