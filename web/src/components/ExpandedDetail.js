@@ -17,6 +17,7 @@ import List from '@material-ui/core/List'
 import { CircularProgress, Link, ListItemIcon, Collapse } from '@material-ui/core'
 import ExpandLess from '@material-ui/icons/ExpandLess'
 import ExpandMore from '@material-ui/icons/ExpandMore'
+import axios from 'axios';
 
 const theme = createMuiTheme({
   palette: {
@@ -52,13 +53,30 @@ class ExpandedDetail extends React.Component {
     super(props)
     this.state = {
       podList: false,
-      resourceList: false
+      resourceList: false,
+      pods: null,
+      resources: null
     }
   }
 
   podClick = (event) => {
     console.log(event)
     this.setState({podList: !this.state.podList})
+    axios.get('http://localhost:8080/resources').then(response => {
+      var pods = []
+      var resources = []
+      for (var i = 0; i < response.data.length; i++) {
+        if (response.data[i].kind === "Pod") {
+          pods.push(response.data[i])
+        } else {
+          resources.push(response.data[i])
+        }
+      }
+      this.setState({
+        pods: pods,
+        resources: resources
+      })
+    })
   }
 
   resourceClick = (event) => {
@@ -152,9 +170,19 @@ class ExpandedDetail extends React.Component {
                     </ListItem>
                     <Collapse in={this.state.podList} timeout='auto' unmountOnExit>
                       <List component="div" disablePadding>
-                        <ListItem button style={nestedStyle}>
-                          <ListItemText>Pod 1</ListItemText>
-                        </ListItem>
+                        {
+                          this.state.pods ? 
+                          <div>
+                            {
+                              this.state.pods.map((pod) =>
+                                <ListItem button style={nestedStyle} key={pod.metadata.name}>
+                                  <ListItemText>{pod.metadata.name}</ListItemText>
+                                </ListItem>
+                              )
+                            }
+                          </div>
+                          : <CircularProgress/>
+                        }
                       </List>
                     </Collapse>
                     <ListItem button onClick={this.resourceClick}>
