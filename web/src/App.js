@@ -5,7 +5,7 @@ import TopBar from './components/TopBar'
 import axios from 'axios';
 import { CircularProgress } from '@material-ui/core';
 
-const apiAddress = 'http://localhost:8080/service'
+const apiAddress = 'http://localhost:8080/service' // will be releases in prod
 
 class App extends React.Component {
   constructor(props) {

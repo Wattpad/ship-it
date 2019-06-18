@@ -11,78 +11,92 @@ import TimePassed from '../assets/time_passed.png'
 import SlackIcon from '../assets/slack_icon.png'
 import DockerIcon from '../assets/docker_icon.png'
 import StatusChip from './StatusChip';
+import { thisTypeAnnotation } from '@babel/types';
+import InfoDialog from './InfoDialog';
 
 const imgAlt = "not found"
 
 class SingleGridCell extends React.Component {
-    constructor(props) {
-        super(props)
+  constructor(props) {
+    super(props)
 
-        this.state = {
-            expanded: false,
-            selected_id: '',
-            window_width: window.innerWidth,
-            repoSelector: false,
-        }
+    this.state = {
+      expanded: false,
+      selected_id: '',
+      window_width: window.innerWidth,
+      repoSelector: false,
+      slackInfo: false
+    }
+  }
+
+  cellClick(event) {
+    this.props.handleCellClick(event)
+  }
+
+  slackClicked = () => {
+    this.setState({ slackInfo: true })
+  }
+
+  slackClosed = () => {
+    this.setState({ slackInfo: false })
+  }
+
+  render() {
+    var SingleGridCellStyle = {
+      backgroundSize: this.props.cellSize,
+      width: this.props.cellSize,
+      height: this.props.cellSize,
+      display: 'inline-block',
+      margin: this.props.cellMargin,
+      marginBottom: 25,
+      position: 'relative'
     }
 
-    cellClick(event) {
-        this.props.handleCellClick(event)
+    var cardStyle = {
+      width: this.props.cellSize,
+      height: this.props.cellSize
     }
 
-    render() {
-        var SingleGridCellStyle = {
-            backgroundSize: this.props.cellSize,
-            width: this.props.cellSize,
-            height: this.props.cellSize,
-            display: 'inline-block',
-            margin: this.props.cellMargin,
-            marginBottom: 25,
-            position: 'relative'
-        }
-
-        var cardStyle = {
-            width: this.props.cellSize,
-            height: this.props.cellSize
-        }
-
-        // Re written to put material ui components in the tile original component only took images
-        var deployDate = new Date(this.props.SingleGridCellData.lastDeployed)
-        return (
-            <div style={SingleGridCellStyle} id={this.props.id} className='SingleGridCell'>
-                <div>
-                    <Card style={cardStyle}>
-                        <CardContent>
-                            <Typography variant="h5" component="h2">
-                                {this.props.SingleGridCellData.name}
-                            </Typography>
-                            <StatusChip status={this.props.SingleGridCellData.deployment.status} />
-                            <div>
-                                <IconButton>
-                                    <img src={TimePassed} alt={imgAlt} />
-                                </IconButton>
-                                {deployDate.toDateString()}
-                            </div>
-                            <div className='row-align'>
-                                <SelectionDialog />
-                                <IconButton>
-                                    <img src={SlackIcon} width="32" height="32" alt={imgAlt} />
-                                </IconButton>
-                                <IconButton>
-                                    <img src={DockerIcon} width="32" height="32" alt={imgAlt} />
-                                </IconButton>
-                            </div>
-                            <div>
-                                <IconButton onClick={this.cellClick.bind(this)}>
-                                    <ExpandIcon />
-                                </IconButton>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
-        )
-    }
+    // Re written to put material ui components in the tile original component only took images
+    var deployDate = new Date(this.props.SingleGridCellData.lastDeployed)
+    return (
+      <div style={SingleGridCellStyle} id={this.props.id} className='SingleGridCell'>
+        <div>
+          <Card style={cardStyle}>
+            <CardContent>
+              <Typography variant="h5" component="h2">
+                {this.props.SingleGridCellData.name}
+              </Typography>
+              <StatusChip status={this.props.SingleGridCellData.deployment.status} />
+              <div>
+                <IconButton>
+                  <img src={TimePassed} alt={imgAlt} />
+                </IconButton>
+                {deployDate.toDateString()}
+              </div>
+              <div className='row-align'>
+                <SelectionDialog />
+                <IconButton onClick={this.slackClicked}>
+                  <img src={SlackIcon} width="32" height="32" alt={imgAlt} />
+                </IconButton>
+                {
+                  this.state.slackInfo ? <InfoDialog open={this.state.slackInfo} owner={this.props.SingleGridCellData.owner.team} slack={this.props.SingleGridCellData.owner.slack} handleClose={this.slackClosed}/> : null
+                }
+                <IconButton>
+                  <img src={DockerIcon} width="32" height="32" alt={imgAlt} />
+                </IconButton>
+              </div>
+              <div>
+                <IconButton onClick={this.cellClick.bind(this)}>
+                  <ExpandIcon />
+                </IconButton>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
 }
 
 export default SingleGridCell
