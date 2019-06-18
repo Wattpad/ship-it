@@ -60,7 +60,6 @@ class ExpandedDetail extends React.Component {
   }
 
   podClick = (event) => {
-    console.log(event)
     this.setState({podList: !this.state.podList})
     axios.get('http://localhost:8080/resources').then(response => {
       var pods = []
@@ -80,7 +79,6 @@ class ExpandedDetail extends React.Component {
   }
 
   resourceClick = (event) => {
-    console.log(event)
     this.setState({resourceList: !this.state.resourceList})
   }
 
@@ -191,9 +189,18 @@ class ExpandedDetail extends React.Component {
                     </ListItem>
                     <Collapse in={this.state.resourceList} timeout='auto' unmountOnExit>
                       <List component="div" disablePadding>
-                        <ListItem style={nestedStyle}>
-                          <ListItemText>Resource 1</ListItemText>
-                        </ListItem>
+                        {
+                          this.state.resources ? 
+                          <div>
+                            {
+                              this.state.resources.map((resource) => 
+                                <ListItem style={nestedStyle} key={resource.kind}>
+                                  <ListItemText>{resource.kind}</ListItemText>
+                                </ListItem>
+                              )
+                            }
+                          </div> : <CircularProgress/>
+                        }
                       </List>
                     </Collapse>
                   </List>
