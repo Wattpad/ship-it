@@ -32,7 +32,6 @@ func TestGetTravisCIBuildURLForRef_Success(t *testing.T) {
 
 	m := new(MockChecksService)
 	m.On("ListCheckRunsForRef").Return(&github.ListCheckRunsResults{
-		Total: github.Int(0),
 		CheckRuns: []*github.CheckRun{
 			&github.CheckRun{
 				DetailsURL: github.String("https://travis-ci.com/Wattpad/highlander/builds/115827260"),
@@ -55,7 +54,6 @@ func TestGetTravisCIBuildURLForRef_Empty(t *testing.T) {
 
 	m := new(MockChecksService)
 	m.On("ListCheckRunsForRef").Return(&github.ListCheckRunsResults{
-		Total:     github.Int(1),
 		CheckRuns: []*github.CheckRun{},
 	}, nil, nil)
 	g.Checks = m
