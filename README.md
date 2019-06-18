@@ -1,2 +1,5 @@
 # ship-it [![Build Status](https://travis-ci.com/Wattpad/ship-it.svg?branch=master)](https://travis-ci.com/Wattpad/ship-it) [![Go Report Card](https://goreportcard.com/badge/github.com/Wattpad/ship-it)](https://goreportcard.com/report/github.com/Wattpad/ship-it)
-A service for continuously deploying containerized software
+
+<img src="https://media.giphy.com/media/143vPc6b08locw/giphy.gif" width="300">
+
+_Ship-it_ is Wattpad's tool for continuously deploying code.
