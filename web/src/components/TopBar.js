@@ -5,7 +5,7 @@ import { fade } from '@material-ui/core/styles/colorManipulator'
 import PropTypes from 'prop-types'
 import SearchIcon from '@material-ui/icons/Search'
 import IconButton from '@material-ui/core/IconButton'
-import WattpadLogo from '../assets/wattpad_logo.png'
+import ShipIcon from '../assets/passenger_ship.png'
 
 const styles = theme => ({
   root: {
@@ -74,7 +74,6 @@ const theme = createMuiTheme({
     },
     secondary: {
       main: '#FEAF0A'
-      //main: '#FFFFFF'
     }
   }
 })
@@ -99,10 +98,10 @@ class TopBar extends React.Component {
         <AppBar position="static" color="primary">
           <Toolbar>
             <IconButton>
-              <img src={WattpadLogo} width="32" height="32" alt={imgAlt} />
+              <img src={ShipIcon} width="32" height="32" alt={imgAlt} />
             </IconButton>
             <Typography variant="h6">
-              Kube Deploy V2!
+              Ship-it!
                     </Typography>
             <div className={classes.search}>
               <div className={classes.searchIcon}>

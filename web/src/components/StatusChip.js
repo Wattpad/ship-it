@@ -24,13 +24,25 @@ class StatusChip extends React.Component {
 
   getChip(state) {
     switch (state) {
-      case 'deploying':
+      case 'deployed':
         return (
           <MuiThemeProvider theme={tagTheme}>
             <Chip
               icon={<DoneIcon />}
               label="Deployed"
               color="primary"
+              variant="outlined"
+              clickable
+            />
+          </MuiThemeProvider>
+        )
+      case 'deploying':
+        return (
+          <MuiThemeProvider theme={tagTheme}>
+            <Chip
+              icon={<RollBackIcon />}
+              label="Deploying"
+              color="default"
               variant="outlined"
               clickable
             />
