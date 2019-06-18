@@ -14,23 +14,7 @@ import TimePassed from '../assets/time_passed.png'
 import SlackIcon from '../assets/slack_icon.png'
 import DockerIcon from '../assets/docker_icon.png'
 import ExpandedDetail from './ExpandedDetail'
-
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles'
 import StatusChip from './StatusChip';
-
-const deployTagTheme = createMuiTheme({
-  palette: {
-    primary: {
-      main: '#4caf50'
-    },
-    secondary: {
-      main: '#f44336'
-    },
-    default: {
-      main: '#9e9e9e'
-    }
-  }
-})
 
 const imgAlt = "not found"
 
@@ -76,9 +60,7 @@ class SingleGridCell extends React.Component {
               <Typography variant="h5" component="h2">
                 {this.props.SingleGridCellData.name}
               </Typography>
-              <MuiThemeProvider theme={deployTagTheme}>
-                <StatusChip status={this.props.SingleGridCellData.deployment.status}/>
-              </MuiThemeProvider>
+              <StatusChip status={this.props.SingleGridCellData.deployment.status}/>
               <div>
                 <IconButton>
                   <img src={TimePassed} alt={imgAlt} />

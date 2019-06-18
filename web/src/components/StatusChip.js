@@ -3,48 +3,83 @@ import Chip from '@material-ui/core/Chip'
 import DoneIcon from '@material-ui/icons/Done'
 import RollBackIcon from '@material-ui/icons/Cached'
 import FailIcon from '@material-ui/icons/Clear'
+import { MuiThemeProvider } from '@material-ui/core/styles';
+import { createMuiTheme } from '@material-ui/core/styles'
+
+const deployTagTheme = createMuiTheme({
+  palette: {
+    primary: {
+      main: '#4caf50'
+    }
+  }
+})
+
+const tagTheme = createMuiTheme({
+  palette: {
+    primary: {
+      main: '#4caf50'
+    },
+    secondary: {
+      main: '#f44336'
+    },
+    default: {
+      main: '#9e9e9e'
+    }
+  }
+})
 
 class StatusChip extends React.Component {
 
-    getChip(state) {
-        switch(state) {
-            case 'deploying':
-                return <Chip
-                    icon={<DoneIcon />}
-                    label="Deployed"
-                    color="primary"
-                    variant="outlined"
-                    clickable
-                />
-            case 'failed':
-                return <Chip
-                    icon={<FailIcon />}
-                    label="Failed"
-                    color="primary"
-                    variant="outlined"
-                    clickable
-                />
-            case 'rollback':
-                return <Chip
-                    icon={<RollBackIcon />}
-                    label="Rolled Back"
-                    color="primary"
-                    variant="outlined"
-                    clickable
-                />
-            default:
-                return null
-        }
-    }
-
-    render() {
+  getChip(state) {
+    switch (state) {
+      case 'deploying':
         return (
-            <div>
-                {console.log(this.props.status)}
-                {this.getChip(this.props.status)}
-            </div>
+          <MuiThemeProvider theme={tagTheme}>
+            <Chip
+              icon={<DoneIcon />}
+              label="Deployed"
+              color="primary"
+              variant="outlined"
+              clickable
+            />
+          </MuiThemeProvider>
         )
+      case 'failed':
+        return (
+          <MuiThemeProvider theme={tagTheme}>
+            <Chip
+              icon={<FailIcon />}
+              label="Failed"
+              color="secondary"
+              variant="outlined"
+              clickable
+            />
+          </MuiThemeProvider>
+        )
+      case 'rollback':
+        return (
+          <MuiThemeProvider theme={tagTheme}>
+            <Chip
+              icon={<RollBackIcon />}
+              label="Rolled Back"
+              color="default"
+              variant="outlined"
+              clickable
+            />
+          </MuiThemeProvider>
+        )
+      default:
+        return null
     }
+  }
+
+  render() {
+    return (
+      <div>
+        {this.getChip(this.props.status)}
+      </div>
+    )
+  }
 }
 
 export default StatusChip
