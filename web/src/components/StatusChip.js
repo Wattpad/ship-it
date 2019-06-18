@@ -6,14 +6,6 @@ import FailIcon from '@material-ui/icons/Clear'
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import { createMuiTheme } from '@material-ui/core/styles'
 
-const deployTagTheme = createMuiTheme({
-  palette: {
-    primary: {
-      main: '#4caf50'
-    }
-  }
-})
-
 const tagTheme = createMuiTheme({
   palette: {
     primary: {
