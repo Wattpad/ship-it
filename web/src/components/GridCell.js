@@ -11,7 +11,6 @@ import TimePassed from '../assets/time_passed.png'
 import SlackIcon from '../assets/slack_icon.png'
 import DockerIcon from '../assets/docker_icon.png'
 import StatusChip from './StatusChip';
-import { thisTypeAnnotation } from '@babel/types';
 import InfoDialog from './InfoDialog';
 
 const imgAlt = "not found"
@@ -75,7 +74,7 @@ class SingleGridCell extends React.Component {
                 {deployDate.toDateString()}
               </div>
               <div className='row-align'>
-                <SelectionDialog />
+                <SelectionDialog gitref={this.props.SingleGridCellData.code.ref} highlanderPath={this.props.SingleGridCellData.code.github} serviceName={this.props.SingleGridCellData.name}/>
                 <IconButton onClick={this.slackClicked}>
                   <img src={SlackIcon} width="32" height="32" alt={imgAlt} />
                 </IconButton>

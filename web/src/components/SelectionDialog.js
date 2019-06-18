@@ -2,9 +2,10 @@ import React from 'react'
 import Dialog from '@material-ui/core/Dialog'
 import DialogTitle from '@material-ui/core/DialogTitle'
 import List from '@material-ui/core/List'
-import { ListItem, IconButton, DialogContent, DialogActions, Button } from '@material-ui/core'
+import { ListItem, IconButton, DialogContent, DialogActions, Button, Link } from '@material-ui/core'
 import GitIcon from '../assets/octocat.png'
 
+const urljoin = require('url-join')
 const imgAlt = "not found"
 
 class SelectionDialog extends React.Component {
@@ -21,7 +22,19 @@ class SelectionDialog extends React.Component {
     this.setState({ open: true })
   }
 
+  getMirandaURL() {
+    var url = urljoin('https://github.com/Wattpad/highlander/tree/master/k8s/charts/services', this.props.serviceName)
+    return url
+  }
+
+  getHighlanderURL() {
+    var url = urljoin('https://github.com/Wattpad/highlander/tree/', this.props.gitref, this.props.highlanderPath)
+    return url
+  }
+
   render() {
+    var highlanderURL = this.getHighlanderURL()
+    var mirandaURL = this.getMirandaURL()
     return (
       <div>
         {
@@ -31,17 +44,17 @@ class SelectionDialog extends React.Component {
               <DialogContent>
                 <List>
                   <ListItem>
-                    <IconButton>
+                    <IconButton href={mirandaURL}>
                       <img src={GitIcon} width="32" height="32" alt={imgAlt} />
                     </IconButton>
-                    Miranda
-                            </ListItem>
+                    <Link href={mirandaURL}>Miranda</Link>
+                  </ListItem>
                   <ListItem>
-                    <IconButton>
+                    <IconButton href={highlanderURL}>
                       <img src={GitIcon} width="32" height="32" alt={imgAlt} />
                     </IconButton>
-                    Highlander
-                            </ListItem>
+                    <Link href={highlanderURL}>Highlander</Link>
+                  </ListItem>
                 </List>
               </DialogContent>
               <DialogActions>

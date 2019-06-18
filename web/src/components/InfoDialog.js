@@ -1,6 +1,6 @@
 import React from 'react'
 import Dialog from '@material-ui/core/Dialog'
-import { DialogContent, DialogContentText, DialogActions, Button, DialogTitle, Typography } from '@material-ui/core';
+import { DialogContent, DialogActions, Button, DialogTitle, Typography } from '@material-ui/core';
 
 class InfoDialog extends React.Component {
   render() {
