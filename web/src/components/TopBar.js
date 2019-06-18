@@ -103,7 +103,7 @@ class TopBar extends React.Component {
             <Typography variant="h6">
               Ship-it!
                     </Typography>
-            <div className={classes.search}>
+            {/* <div className={classes.search}>
               <div className={classes.searchIcon}>
                 <SearchIcon />
               </div>
@@ -116,7 +116,7 @@ class TopBar extends React.Component {
                 }}
                 color="secondary"
               />
-            </div>
+            </div> */}
           </Toolbar>
         </AppBar>
       </MuiThemeProvider>
