@@ -14,7 +14,9 @@ import Paper from '@material-ui/core/Paper'
 import ListItem from '@material-ui/core/ListItem'
 import ListItemText from '@material-ui/core/ListItemText'
 import List from '@material-ui/core/List'
-import { CircularProgress, Link } from '@material-ui/core';
+import { CircularProgress, Link, ListItemIcon, Collapse } from '@material-ui/core'
+import ExpandLess from '@material-ui/icons/ExpandLess'
+import ExpandMore from '@material-ui/icons/ExpandMore'
 
 const theme = createMuiTheme({
   palette: {
@@ -41,6 +43,17 @@ const linkTheme = createMuiTheme({
 const imgAlt = 'not found'
 
 class ExpandedDetail extends React.Component {
+
+  constructor(props) {
+    super(props)
+    this.state = {podList: false}
+  }
+
+  handleClick = (event) => {
+    console.log(event)
+    this.setState({podList: !this.state.podList})
+  }
+
   render() {
     return (
       <div>
@@ -121,7 +134,18 @@ class ExpandedDetail extends React.Component {
                   <List
                     component="nav"
                   >
-                    <ListItem button>
+                    <ListItem button onClick={this.handleClick}>
+                      <ListItemText>Pods</ListItemText>
+                      {this.state.podList ? <ExpandLess/> : <ExpandMore />}
+                    </ListItem>
+                    <Collapse in={this.state.podList} timeout='auto' unmountOnExit>
+                      <List component="div" disablePadding>
+                        <ListItem button>
+                          <ListItemText>Pod 1</ListItemText>
+                        </ListItem>
+                      </List>
+                    </Collapse>
+                    {/* <ListItem button>
                       <ListItemText>Pod</ListItemText>
                     </ListItem>
                     <ListItem button>
@@ -141,7 +165,7 @@ class ExpandedDetail extends React.Component {
                     </ListItem>
                     <ListItem button>
                       <ListItemText>Pod</ListItemText>
-                    </ListItem>
+                    </ListItem> */}
                   </List>
                 </Paper>
               </div>
