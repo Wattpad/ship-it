@@ -61,6 +61,11 @@ class ExpandedDetail extends React.Component {
     this.setState({podList: !this.state.podList})
   }
 
+  resourceClick = (event) => {
+    console.log(event)
+    this.setState({resourceList: !this.state.resourceList})
+  }
+
   render() {
     return (
       <div>
@@ -152,9 +157,17 @@ class ExpandedDetail extends React.Component {
                         </ListItem>
                       </List>
                     </Collapse>
-                    <ListItem button>
+                    <ListItem button onClick={this.resourceClick}>
                       <ListItemText>Other Resources</ListItemText>
+                      {this.state.resourceList ? <ExpandLess /> : <ExpandMore />}
                     </ListItem>
+                    <Collapse in={this.state.resourceList} timeout='auto' unmountOnExit>
+                      <List component="div" disablePadding>
+                        <ListItem style={nestedStyle}>
+                          <ListItemText>Resource 1</ListItemText>
+                        </ListItem>
+                      </List>
+                    </Collapse>
                   </List>
                 </Paper>
               </div>
