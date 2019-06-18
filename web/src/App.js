@@ -5,7 +5,10 @@ import TopBar from './components/TopBar'
 import axios from 'axios';
 import { CircularProgress } from '@material-ui/core';
 
-const apiAddress = 'http://localhost:8080/releases'
+const urljoin = require('url-join')
+
+//const apiAddress = 'http://' + window.location.hostname + ':8080/releases' // testing
+const apiAddress = urljoin('https://' + window.location.hostname, 'releases') // prod
 
 class App extends React.Component {
   constructor(props) {
