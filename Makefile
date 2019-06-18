@@ -28,5 +28,4 @@ run: build
 	    $(shell docker images -q $(PROJECT_NAME) | head -n 1)
 
 jsonschema:
-	go run cmd/jsonschema/main.go
-	# docker run -it --rm -v $(shell pwd):/workspace -w /workspace golang:1.12 go run cmd/jsonschema/main.go
+	go run tools/jsonschema/main.go

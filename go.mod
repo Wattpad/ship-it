@@ -5,6 +5,7 @@ go 1.12
 require (
 	github.com/VividCortex/gohistogram v1.0.0 // indirect
 	github.com/Wattpad/sqsconsumer v0.0.0-20190611184259-511082fa45b3
+	github.com/alecthomas/jsonschema v0.0.0-20190530235721-fd8d96416671 // indirect
 	github.com/aws/aws-sdk-go v1.19.47
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-chi/chi v4.0.2+incompatible
