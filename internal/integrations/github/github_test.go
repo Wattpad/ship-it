@@ -67,12 +67,11 @@ func TestGetTravisCIBuildURLForRef_Error(t *testing.T) {
 	ctx := context.Background()
 	g := New(ctx, "Wattpad", "fake-access-token")
 
-	fakeError := errors.New("fake")
 	m := new(MockChecksService)
-	m.On("ListCheckRunsForRef").Return(nil, nil, fakeError)
+	m.On("ListCheckRunsForRef").Return(nil, nil, errors.New("fake"))
 	g.Checks = m
 
 	_, err := g.GetTravisCIBuildURLForRef(ctx, "highlander", "master")
 
-	assert.EqualError(t, err, fakeError.Error())
+	assert.Error(t, err)
 }
