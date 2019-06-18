@@ -1,9 +1,6 @@
 import React from 'react'
-import { AppBar, Toolbar, Typography, InputBase } from '@material-ui/core'
-import { withStyles, createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles'
-import { fade } from '@material-ui/core/styles/colorManipulator'
-import PropTypes from 'prop-types'
-import SearchIcon from '@material-ui/icons/Search'
+import { AppBar, Toolbar, Typography } from '@material-ui/core'
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles'
 import IconButton from '@material-ui/core/IconButton'
 import ShipIcon from '../assets/passenger_ship.png'
 
@@ -34,7 +31,6 @@ class TopBar extends React.Component {
   }
 
   render() {
-    const { classes } = this.props
     return (
       <MuiThemeProvider theme={theme}>
         <AppBar position="static" color="primary">
@@ -50,10 +46,6 @@ class TopBar extends React.Component {
       </MuiThemeProvider>
     )
   }
-}
-
-TopBar.propTypes = {
-  classes: PropTypes.object.isRequired,
 }
 
 export default TopBar
