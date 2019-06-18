@@ -29,7 +29,6 @@ func New(ctx context.Context, org string, accessToken string) *Github {
 	client := github.NewClient(tc)
 
 	return &Github{
-		Client: client,
 		Checks: client.Checks,
 		Org:    org,
 	}
