@@ -25,11 +25,12 @@ func New(s *service.Service) http.Handler {
 
 	r := chi.NewRouter()
 
+	hist := s.DDTimer.With("method", "get", "releases")
+	r.Use(middleware.Timer(hist))
+
 	r.Get("/health", health)
 
 	r.Get("/releases", c.ListReleases)
-	hist := s.DDTimer.With("method", "get", "releases")
-	r.Use(middleware.Timer(hist))
 
 	r.Mount("/dashboard", http.FileServer(http.Dir("")))
 	r.Mount("/static", http.FileServer(http.Dir("dashboard")))
