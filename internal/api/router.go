@@ -29,7 +29,7 @@ func New(s *service.Service) http.Handler {
 
 	r.Get("/releases", c.ListReleases)
 
-	r.Route("/releases/{releaseName}", func(r chi.Router) {
+	r.Route("/releases/{name}", func(r chi.Router) {
 		r.Use(middleware.Timer(s.DDTimer))
 		r.Get("/", c.ListReleases)
 	})
