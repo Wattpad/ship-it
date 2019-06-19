@@ -24,15 +24,11 @@ func New(s *service.Service) http.Handler {
 	c := newController(s)
 
 	r := chi.NewRouter()
+	r.Use(middleware.Timer(s.DDTimer))
 
 	r.Get("/health", health)
 
 	r.Get("/releases", c.ListReleases)
-
-	r.Route("/releases/{name}", func(r chi.Router) {
-		r.Use(middleware.Timer(s.DDTimer))
-		r.Get("/", c.ListReleases)
-	})
 
 	r.Mount("/dashboard", http.FileServer(http.Dir("")))
 	r.Mount("/static", http.FileServer(http.Dir("dashboard")))
