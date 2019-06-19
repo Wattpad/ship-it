@@ -60,7 +60,7 @@ func main() {
 
 	srv := http.Server{
 		Addr:    ":" + envConf.ServicePort,
-		Handler: api.New(service.New(dd.NewTiming("api.time", 1.0))),
+		Handler: api.New(service.New(), dd.NewTiming("api.time", 1.0)),
 	}
 
 	exit := make(chan error)
