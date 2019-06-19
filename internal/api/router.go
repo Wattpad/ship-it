@@ -24,13 +24,13 @@ func New(s *service.Service) http.Handler {
 	c := newController(s)
 
 	r := chi.NewRouter()
-	r.Use(middleware.Timer(s.DDTimer))
+
 	r.Get("/health", health)
 
 	r.Get("/releases", c.ListReleases)
 
 	r.Route("/releases/{releaseName}", func(r chi.Router) {
-		//r.Use(middleware.Timer(s.DDTimer))
+		r.Use(middleware.Timer(s.DDTimer))
 		r.Get("/", c.ListReleases)
 	})
 

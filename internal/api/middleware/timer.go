@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"regexp"
 	"strings"
 
 	"github.com/go-chi/chi"
@@ -14,6 +15,11 @@ import (
 
 func getHist(r *http.Request, t *dogstatsd.Timing) metrics.Histogram {
 	str := strings.ReplaceAll(chi.RouteContext(r.Context()).RoutePattern(), "/", ".")
+	fmt.Println(str)
+	regx := regexp.MustCompile(`\{[^}]*\}`)
+	if regx.MatchString(str) {
+		str = regx.ReplaceAllString(str, "")
+	}
 	fmt.Println(str)
 	return t.With(str, "method", r.Method)
 }
