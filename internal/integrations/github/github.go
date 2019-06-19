@@ -18,7 +18,6 @@ type ChecksService interface {
 // Github handles integrations with the Github API
 type Github struct {
 	Org    string
-	Client *github.Client
 	Checks ChecksService
 }
 
