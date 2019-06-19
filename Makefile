@@ -27,5 +27,11 @@ run: build
 	    -e AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN} \
 	    $(shell docker images -q $(PROJECT_NAME) | head -n 1)
 
-jsonschema:
+# empty target
+internal/models/*.go:
+
+# api docs should be rebuilt when model code changes
+api/*.json: internal/models/*.go
 	go run tools/jsonschema/main.go
+
+jsonschema: api/*.json
