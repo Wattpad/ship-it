@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"regexp"
 	"strings"
@@ -18,7 +17,6 @@ func getIdentifier(ctx context.Context) string {
 
 	str = regx.ReplaceAllString(str, "")
 	str = strings.Replace(str, ".", "", 1)
-	fmt.Println(str)
 	return str
 }
 
