@@ -1,18 +1,18 @@
 package middleware
 
 import (
+	"context"
 	"net/http"
-	"time"
-
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/go-kit/kit/metrics"
 )
 
-func getHist(r *http.Request, t metrics.Histogram) metrics.Histogram {
-	str := strings.ReplaceAll(chi.RouteContext(r.Context()).RoutePattern(), "/", ".")
+func getIdentifier(ctx context.Context) string {
+	str := strings.ReplaceAll(chi.RouteContext(ctx).RoutePattern(), "/", ".")
 	regx := regexp.MustCompile(`[{}]`)
 	if regx.MatchString(str) {
 		str = regx.ReplaceAllString(str, "")
@@ -20,7 +20,7 @@ func getHist(r *http.Request, t metrics.Histogram) metrics.Histogram {
 
 	str = strings.Replace(str, ".", "", 1)
 
-	return t.With(str, "method", r.Method)
+	return str
 }
 
 func Timer(t metrics.Histogram) func(http.Handler) http.Handler {
@@ -28,9 +28,9 @@ func Timer(t metrics.Histogram) func(http.Handler) http.Handler {
 		return http.HandlerFunc(
 			func(w http.ResponseWriter, r *http.Request) {
 				next.ServeHTTP(w, r)
-				h := getHist(r, t)
+				id := getIdentifier(r.Context())
 				defer func(t0 time.Time) {
-					h.Observe(millisecondsSince(t0))
+					t.With(id, "method", r.Method).Observe(millisecondsSince(t0))
 				}(time.Now())
 			},
 		)
