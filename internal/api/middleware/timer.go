@@ -12,21 +12,21 @@ import (
 	"github.com/go-kit/kit/metrics/dogstatsd"
 )
 
-func getHist(route string, t *dogstatsd.Timing) metrics.Histogram {
-	str := strings.ReplaceAll(route, "/", ".")
+func getHist(r *http.Request, t *dogstatsd.Timing) metrics.Histogram {
+	str := strings.ReplaceAll(chi.RouteContext(r.Context()).RoutePattern(), "/", ".")
 	fmt.Println(str)
-	return t.With(str)
+	return t.With(str, "method", r.Method)
 }
 
 func Timer(t *dogstatsd.Timing) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(
 			func(w http.ResponseWriter, r *http.Request) {
-				h := getHist(chi.RouteContext(r.Context()).RoutePattern(), t)
+				next.ServeHTTP(w, r)
+				h := getHist(r, t)
 				defer func(t0 time.Time) {
 					h.Observe(millisecondsSince(t0))
 				}(time.Now())
-				next.ServeHTTP(w, r)
 			},
 		)
 	}
