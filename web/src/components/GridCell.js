@@ -35,11 +35,11 @@ class SingleGridCell extends React.Component {
   }
 
   slackClicked = () => {
-    this.setState({ slackInfo: true })
+    this.setState({slackInfo: true})
   }
 
   slackClosed = () => {
-    this.setState({ slackInfo: false })
+    this.setState({slackInfo: false})
   }
 
   dockerClicked = () => {

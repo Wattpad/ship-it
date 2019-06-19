@@ -8,14 +8,13 @@ import { CircularProgress } from '@material-ui/core';
 const urljoin = require('url-join')
 
 const apiAddress = urljoin('https://' + window.location.hostname, 'releases') // Point to local IP for testing
-
+//const apiAddress = 'http://localhost:8080/releases'
 class App extends React.Component {
   constructor(props) {
     super(props)
     this.state = {}
     axios.get(apiAddress).then(response => {
-      console.log(response)
-      this.setState({data : response.data })
+      this.setState({data : response.data})
     })
   }
 

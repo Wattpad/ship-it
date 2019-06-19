@@ -53,16 +53,17 @@ class ExpandedDetail extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      podList: false,
-      resourceList: false,
+      podsVisible: false,
+      resourceVisible: false,
       pods: null,
       resources: null
     }
   }
 
   podClick = (event) => {
-    this.setState({podList: !this.state.podList})
+    this.setState({podsVisible: !this.state.podsVisible})
     var api = urljoin('https://' + window.location.host, '/releases/', this.props.data.name, 'resources') // point to local IP for testing
+    //var api = 'http://localhost:8080/resources'
     axios.get(api).then(response => {
       var pods = []
       var resources = []
@@ -81,7 +82,7 @@ class ExpandedDetail extends React.Component {
   }
 
   resourceClick = (event) => {
-    this.setState({resourceList: !this.state.resourceList})
+    this.setState({resourceVisible: !this.state.resourceVisible})
   }
 
   render() {
@@ -166,9 +167,9 @@ class ExpandedDetail extends React.Component {
                   >
                     <ListItem button onClick={this.podClick}>
                       <ListItemText>Pods</ListItemText>
-                      {this.state.podList ? <ExpandLess /> : <ExpandMore />}
+                      {this.state.podsVisible ? <ExpandLess /> : <ExpandMore />}
                     </ListItem>
-                    <Collapse in={this.state.podList} timeout='auto' unmountOnExit>
+                    <Collapse in={this.state.podsVisible} timeout='auto' unmountOnExit>
                       <List component="div" disablePadding>
                         {
                           this.state.pods ? 
@@ -187,9 +188,9 @@ class ExpandedDetail extends React.Component {
                     </Collapse>
                     <ListItem button onClick={this.resourceClick}>
                       <ListItemText>Other Resources</ListItemText>
-                      {this.state.resourceList ? <ExpandLess /> : <ExpandMore />}
+                      {this.state.resourceVisible ? <ExpandLess /> : <ExpandMore />}
                     </ListItem>
-                    <Collapse in={this.state.resourceList} timeout='auto' unmountOnExit>
+                    <Collapse in={this.state.resourceVisible} timeout='auto' unmountOnExit>
                       <List component="div" disablePadding>
                         {
                           this.state.resources ? 

@@ -3,8 +3,7 @@ import Chip from '@material-ui/core/Chip'
 import DoneIcon from '@material-ui/icons/Done'
 import RollBackIcon from '@material-ui/icons/Cached'
 import FailIcon from '@material-ui/icons/Clear'
-import { MuiThemeProvider } from '@material-ui/core/styles';
-import { createMuiTheme } from '@material-ui/core/styles'
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles'
 
 const tagTheme = createMuiTheme({
   palette: {

@@ -22,19 +22,18 @@ class SelectionDialog extends React.Component {
     this.setState({ open: true })
   }
 
-  getMirandaURL() {
-    var url = urljoin('https://github.com/Wattpad/highlander/tree/master/k8s/charts/services', this.props.serviceName)
-    return url
+  getChartURL(url) {
+    return urljoin(url, this.props.serviceName)
+    
   }
 
-  getHighlanderURL() {
-    var url = urljoin('https://github.com/Wattpad/highlander/tree/', this.props.gitref, this.props.highlanderPath)
-    return url
+  getSourceURL(url) {
+    return urljoin(url, this.props.gitref, this.props.highlanderPath)
   }
 
   render() {
-    var highlanderURL = this.getHighlanderURL()
-    var mirandaURL = this.getMirandaURL()
+    var highlanderURL = this.getSourceURL('https://github.com/Wattpad/highlander/tree/')
+    var mirandaURL = this.getChartURL('https://github.com/Wattpad/highlander/tree/master/k8s/charts/services')
     return (
       <div>
         {
