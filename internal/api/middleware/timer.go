@@ -9,10 +9,9 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-kit/kit/metrics"
-	"github.com/go-kit/kit/metrics/dogstatsd"
 )
 
-func getHist(r *http.Request, t *dogstatsd.Timing) metrics.Histogram {
+func getHist(r *http.Request, t metrics.Histogram) metrics.Histogram {
 	str := strings.ReplaceAll(chi.RouteContext(r.Context()).RoutePattern(), "/", ".")
 	regx := regexp.MustCompile(`[{}]`)
 	if regx.MatchString(str) {
@@ -24,7 +23,7 @@ func getHist(r *http.Request, t *dogstatsd.Timing) metrics.Histogram {
 	return t.With(str, "method", r.Method)
 }
 
-func Timer(t *dogstatsd.Timing) func(http.Handler) http.Handler {
+func Timer(t metrics.Histogram) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(
 			func(w http.ResponseWriter, r *http.Request) {
