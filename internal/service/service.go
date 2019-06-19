@@ -5,21 +5,15 @@ import (
 	"errors"
 
 	"ship-it/internal/models"
-
-	"github.com/go-kit/kit/metrics/dogstatsd"
 )
 
 var ErrNotImplemented = errors.New("not implemented")
 
-func New(t *dogstatsd.Timing) *Service {
-	return &Service{
-		DDTimer: t,
-	}
+func New() *Service {
+	return &Service{}
 }
 
-type Service struct {
-	DDTimer *dogstatsd.Timing
-}
+type Service struct{}
 
 func (s *Service) ListReleases(ctx context.Context) ([]models.Release, error) {
 	return nil, ErrNotImplemented

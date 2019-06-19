@@ -6,9 +6,9 @@ import (
 
 	"ship-it/internal/api/middleware"
 	"ship-it/internal/models"
-	"ship-it/internal/service"
 
 	"github.com/go-chi/chi"
+	"github.com/go-kit/kit/metrics/dogstatsd"
 )
 
 func health(w http.ResponseWriter, _ *http.Request) {
@@ -20,11 +20,11 @@ type Service interface {
 }
 
 // New returns an 'http.Handler' that serves the ship-it API.
-func New(s *service.Service) http.Handler {
+func New(s Service, t *dogstatsd.Timing) http.Handler {
 	c := newController(s)
 
 	r := chi.NewRouter()
-	r.Use(middleware.Timer(s.DDTimer))
+	r.Use(middleware.Timer(t))
 
 	r.Get("/health", health)
 

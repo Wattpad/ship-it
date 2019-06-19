@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -15,7 +14,6 @@ import (
 
 func getHist(r *http.Request, t *dogstatsd.Timing) metrics.Histogram {
 	str := strings.ReplaceAll(chi.RouteContext(r.Context()).RoutePattern(), "/", ".")
-	fmt.Println(str)
 	regx := regexp.MustCompile(`[{}]`)
 	if regx.MatchString(str) {
 		str = regx.ReplaceAllString(str, "")
@@ -23,7 +21,6 @@ func getHist(r *http.Request, t *dogstatsd.Timing) metrics.Histogram {
 
 	str = strings.Replace(str, ".", "", 1)
 
-	fmt.Println(str)
 	return t.With(str, "method", r.Method)
 }
 
