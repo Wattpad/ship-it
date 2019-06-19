@@ -23,14 +23,14 @@ func getIdentifier(ctx context.Context) string {
 	return str
 }
 
-func Timer(t metrics.Histogram) func(http.Handler) http.Handler {
+func Timer(h metrics.Histogram) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(
 			func(w http.ResponseWriter, r *http.Request) {
 				next.ServeHTTP(w, r)
 				id := getIdentifier(r.Context())
 				defer func(t0 time.Time) {
-					t.With(id, "method", r.Method).Observe(millisecondsSince(t0))
+					h.With("endpoint", id, "method", r.Method).Observe(millisecondsSince(t0))
 				}(time.Now())
 			},
 		)
