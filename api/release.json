@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$ref": "#/definitions/Release",
+  "definitions": {
+    "": {
+      "required": [
+        "squad",
+        "slack"
+      ],
+      "properties": {
+        "slack": {
+          "type": "string"
+        },
+        "squad": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Release": {
+      "required": [
+        "name",
+        "created",
+        "lastDeployed",
+        "owner",
+        "autoDeploy",
+        "code",
+        "build",
+        "monitoring",
+        "artifacts",
+        "status"
+      ],
+      "properties": {
+        "artifacts": {
+          "$ref": "#/definitions/"
+        },
+        "autoDeploy": {
+          "type": "boolean"
+        },
+        "build": {
+          "$ref": "#/definitions/"
+        },
+        "code": {
+          "$ref": "#/definitions/"
+        },
+        "created": {
+          "type": "string"
+        },
+        "lastDeployed": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "monitoring": {
+          "$ref": "#/definitions/"
+        },
+        "name": {
+          "type": "string"
+        },
+        "owner": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/"
+        },
+        "status": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    }
+  }
+}
