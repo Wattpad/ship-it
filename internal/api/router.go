@@ -25,10 +25,11 @@ func New(s Service) http.Handler {
 
 	r.Get("/health", health)
 
-	r.Get("/releases", c.ListReleases)
+	r.Route("/api", func(r chi.Router) {
+		r.Get("/releases", c.ListReleases)
+	})
 
-	r.Mount("/dashboard", http.FileServer(http.Dir("")))
-	r.Mount("/static", http.FileServer(http.Dir("dashboard")))
+	r.Mount("/", http.FileServer(http.Dir("dashboard")))
 
 	return r
 }
