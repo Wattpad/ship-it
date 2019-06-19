@@ -62,8 +62,7 @@ class ExpandedDetail extends React.Component {
 
   podClick = (event) => {
     this.setState({podList: !this.state.podList})
-    // var api = urljoin('http://' + window.location.host + ':8080/releases/', this.props.data.name, 'resources') // testing
-    var api = urljoin('https://' + window.location.host, '/releases/', this.props.data.name, 'resources') // prod
+    var api = urljoin('https://' + window.location.host, '/releases/', this.props.data.name, 'resources') // point to local IP for testing
     axios.get(api).then(response => {
       var pods = []
       var resources = []

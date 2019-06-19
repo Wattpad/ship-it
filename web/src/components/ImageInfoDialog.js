@@ -24,7 +24,7 @@ class ImageInfoDialog extends React.Component {
 
     render() {
         return (
-            <Dialog open={this.props.open} onClose={this.props.handleClose} maxWidth={true}>
+            <Dialog open={this.props.open} onClose={this.props.handleClose} maxWidth="xl">
                 <DialogTitle>Docker Image Information</DialogTitle>
                 <DialogContent>
                     <Typography>Docker Registry: {this.getRegistry()}</Typography>

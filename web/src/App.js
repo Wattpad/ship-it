@@ -7,8 +7,7 @@ import { CircularProgress } from '@material-ui/core';
 
 const urljoin = require('url-join')
 
-//const apiAddress = 'http://' + window.location.hostname + ':8080/releases' // testing
-const apiAddress = urljoin('https://' + window.location.hostname, 'releases') // prod
+const apiAddress = urljoin('https://' + window.location.hostname, 'releases') // Point to local IP for testing
 
 class App extends React.Component {
   constructor(props) {
