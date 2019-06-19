@@ -20,6 +20,12 @@ func getHist(r *http.Request, t *dogstatsd.Timing) metrics.Histogram {
 	if regx.MatchString(str) {
 		str = regx.ReplaceAllString(str, "")
 	}
+
+	regx = regexp.MustCompile(`\.+`)
+	if regx.MatchString(str) {
+		str = regx.ReplaceAllString(str, ".")
+	}
+
 	fmt.Println(str)
 	return t.With(str, "method", r.Method)
 }
