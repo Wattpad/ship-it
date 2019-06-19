@@ -43,7 +43,6 @@ func main() {
 
 	dd := dogstatsd.New("wattpad.ship-it.", logger)
 	go dd.SendLoop(time.Tick(time.Second), "udp", envConf.DataDogAddress())
-	hist := dd.NewTiming("worker.time", 1.0).With("worker", "ecrconsumer", "queue", envConf.QueueName)
 
 	s, err := session.NewSession(envConf.AWS())
 	if err != nil {
@@ -51,7 +50,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	consumer, err := ecrconsumer.New(logger, hist, envConf.QueueName, sqs.New(s))
+	consumer, err := ecrconsumer.New(logger, dd.NewTiming("worker.time", 1.0).With("worker", "ecrconsumer", "queue", envConf.QueueName), envConf.QueueName, sqs.New(s))
 	if err != nil {
 		logger.Log("error", err)
 		os.Exit(1)
@@ -61,7 +60,7 @@ func main() {
 
 	srv := http.Server{
 		Addr:    ":" + envConf.ServicePort,
-		Handler: api.New(service.New()),
+		Handler: api.New(service.New(dd.NewTiming("api.time", 1.0))),
 	}
 
 	exit := make(chan error)
