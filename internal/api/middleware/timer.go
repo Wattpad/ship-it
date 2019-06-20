@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -11,10 +10,12 @@ import (
 )
 
 func getIdentifier(route string) string {
+	if route == "/" {
+		return "root"
+	}
 	r := strings.NewReplacer("{", "", "}", "", "/", ".")
 	str := r.Replace(route)
-	fmt.Println(str[1:])
-	return str[1:]
+	return strings.Trim(str, ".")
 }
 
 func Timer(h metrics.Histogram) func(http.Handler) http.Handler {
@@ -24,9 +25,7 @@ func Timer(h metrics.Histogram) func(http.Handler) http.Handler {
 				t0 := time.Now()
 				next.ServeHTTP(w, r)
 				id := getIdentifier(chi.RouteContext(r.Context()).RoutePattern())
-				defer func(t0 time.Time) {
-					h.With("endpoint", id, "method", r.Method).Observe(millisecondsSince(t0))
-				}(t0)
+				h.With("endpoint", id, "method", r.Method).Observe(millisecondsSince(t0))
 			},
 		)
 	}
