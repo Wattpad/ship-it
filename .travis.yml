@@ -31,8 +31,8 @@ jobs:
         - go test ./...
     
     - stage: Test
-      name: JSLint
-      script: cd web && npm install -D && npm run lint
+      name: JSLint & Test
+      script: cd web && npm install -D && npm run lint && npm run test
 
     - stage: Push
       name: Push
