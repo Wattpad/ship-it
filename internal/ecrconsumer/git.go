@@ -175,10 +175,6 @@ func (c *GitHub) SaveDirectory(branch string, repoPath string, localPath string)
 	if dir == nil {
 		path := filepath.Join(localPath, *file.Path)
 
-		if err != nil {
-			return err
-		}
-
 		if err := os.MkdirAll(filepath.Dir(path), os.ModePerm); err != nil { // create all folders in the relative path
 			return err
 		}

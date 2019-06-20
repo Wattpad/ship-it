@@ -1,6 +1,9 @@
 package ecrconsumer
 
+// TODO
 // Handle nil val path case
+// load path dynamically (should not be dependent on miranda folder structure)
+// // Take image type return image type in set image tag function
 
 import (
 	"fmt"
