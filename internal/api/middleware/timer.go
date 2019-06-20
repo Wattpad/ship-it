@@ -3,7 +3,6 @@ package middleware
 import (
 	"context"
 	"net/http"
-	"regexp"
 	"strings"
 	"time"
 
@@ -12,12 +11,10 @@ import (
 )
 
 func getIdentifier(ctx context.Context) string {
-	str := strings.ReplaceAll(chi.RouteContext(ctx).RoutePattern(), "/", ".")
-	regx := regexp.MustCompile(`[{}]`)
+	r := strings.NewReplacer("{", "", "}", "", "/", ".")
+	str := r.Replace(chi.RouteContext(ctx).RoutePattern())
 
-	str = regx.ReplaceAllString(str, "")
-	str = strings.Replace(str, ".", "", 1)
-	return str
+	return str[1:]
 }
 
 func Timer(h metrics.Histogram) func(http.Handler) http.Handler {
