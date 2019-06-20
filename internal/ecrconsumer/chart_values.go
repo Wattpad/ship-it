@@ -3,7 +3,8 @@ package ecrconsumer
 // TODO:
 // Handle nil val path case
 // load path dynamically (should not be dependent on miranda folder structure)
-// Take image type return image type in set image tag function
+// Take image type return image type in set image tag function (done)
+// Make metadata type
 
 import (
 	"fmt"
@@ -37,6 +38,13 @@ type Image struct {
 	Tag        string
 }
 
+type Metadata struct {
+	AutoDeploy bool
+	ChartPath  string
+	ValuesPath string
+	GitRepo    string
+}
+
 func LoadChart(serviceName string, localPath string, client GitHub) (*HelmChart, error) {
 	// Grab metadata.yml
 	err := client.SaveDirectory("master", "k8s/clusters/prod-v3", localPath)
@@ -44,24 +52,24 @@ func LoadChart(serviceName string, localPath string, client GitHub) (*HelmChart,
 		return nil, err
 	}
 
-	autoDeploy, chartPath, valPath, gitRepo, err := readMetadata("k8s/clusters/prod-v3/metadata.yml", serviceName)
+	metadata, err := readMetadata("k8s/clusters/prod-v3/metadata.yml", serviceName)
 	if err != nil {
 		return nil, err
 	}
 
-	err = client.SaveDirectory("master", chartPath, localPath)
+	err = client.SaveDirectory("master", metadata.ChartPath, localPath)
 	if err != nil {
 		return nil, err
 	}
 
-	path := filepath.Join(localPath, chartPath)
+	path := filepath.Join(localPath, metadata.ChartPath)
 	fmt.Println(path)
 	c, err := chartutil.Load(path)
 	if err != nil {
 		return nil, err
 	}
 
-	vals, err := chartutil.ReadValuesFile(valPath)
+	vals, err := chartutil.ReadValuesFile(metadata.ValuesPath)
 	if err != nil {
 		return nil, err
 	}
@@ -70,11 +78,11 @@ func LoadChart(serviceName string, localPath string, client GitHub) (*HelmChart,
 		Metadata:   *c.Metadata,
 		Templates:  c.Templates,
 		Values:     vals,
-		ChartPath:  chartPath,
-		ValuesPath: valPath,
+		ChartPath:  metadata.ChartPath,
+		ValuesPath: metadata.ValuesPath,
 		LocalPath:  path,
-		AutoDeploy: autoDeploy,
-		GitRepo:    gitRepo,
+		AutoDeploy: metadata.AutoDeploy,
+		GitRepo:    metadata.GitRepo,
 	}, nil
 }
 
@@ -110,22 +118,30 @@ func (c *HelmChart) imageValues() chartutil.Values {
 	return c.Values["image"].(map[string]interface{})
 }
 
-func readMetadata(metadataPath string, serviceName string) (bool, string, string, string, error) {
+func readMetadata(metadataPath string, serviceName string) (*Metadata, error) {
 	v, err := chartutil.ReadValuesFile(metadataPath)
 	if err != nil {
-		return false, "", "", "", err
+		return nil, err
 	}
 
 	service, err := v.Table("services." + serviceName)
 	if err != nil {
-		return false, "", "", "", err
+		return nil, err
 	}
 
+	var valuesPath string
 	if service["helmValuesPath"] == nil {
-		return service["autoDeploy"].(bool), service["helmChartPath"].(string), path.Join(service["helmChartPath"].(string), "values.yaml"), service["gitRepo"].(string), nil
+		valuesPath = path.Join(service["helmChartPath"].(string), "values.yaml")
+	} else {
+		valuesPath = service["helmValuesPath"].(string)
 	}
 
-	return service["autoDeploy"].(bool), service["helmChartPath"].(string), service["helmValuesPath"].(string), service["gitRepo"].(string), nil
+	return &Metadata{
+		AutoDeploy: service["autoDeploy"].(bool),
+		ChartPath:  service["helmChartPath"].(string),
+		ValuesPath: valuesPath,
+		GitRepo:    service["gitRepo"].(string),
+	}, nil
 }
 
 func (c *HelmChart) UpdateImage(img *Image, client GitHub) error {
