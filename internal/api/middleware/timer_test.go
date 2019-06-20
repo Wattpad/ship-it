@@ -1,11 +1,12 @@
 package middleware
+
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
-var tests = []struct{
-	input string
+var tests = []struct {
+	input    string
 	expected string
 }{
 	{"/dashboard/", "dashboard."},
