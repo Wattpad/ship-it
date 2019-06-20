@@ -24,11 +24,11 @@ func New(s Service, t metrics.Histogram) http.Handler {
 	c := newController(s)
 
 	r := chi.NewRouter()
+	r.Use(middleware.Timer(t))
 
 	r.Get("/health", health)
 
 	r.Route("/api", func(r chi.Router) {
-		r.Use(middleware.Timer(t))
 		r.Get("/releases", c.ListReleases)
 	})
 
