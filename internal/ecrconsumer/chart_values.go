@@ -7,6 +7,7 @@ package ecrconsumer
 
 import (
 	"fmt"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -123,14 +124,15 @@ func readMetadata(path string, serviceName string) (bool, string, string, string
 	return service["autoDeploy"].(bool), service["helmChartPath"].(string), service["helmValuesPath"].(string), service["gitRepo"].(string), nil
 }
 
-func (c *HelmChart) SetImageTag(tag string, client GitHub) error {
-	c.imageValues()["image"].(map[string]interface{})["tag"] = tag
+func (c *HelmChart) UpdateImage(img *Image, client GitHub) error {
+	c.imageValues()["image"].(map[string]interface{})["tag"] = img.Tag
+	c.imageValues()["image"].(map[string]interface{})["repository"] = path.Join(img.Registry, img.Repository)
 
 	// encode new values with updated into bytes
 	str := chartutil.ToYaml(c.Values)
 
 	valueData := []byte(str)
-	_, err := client.UpdateFile("Update Image Tag: "+tag, "master", c.ValuesPath, valueData) // change to a path join call
+	_, err := client.UpdateFile("Update Image Tag: "+img.Tag, "master", c.ValuesPath, valueData) // change to a path join call
 
 	if err != nil {
 		return err
