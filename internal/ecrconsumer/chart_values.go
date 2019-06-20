@@ -1,9 +1,9 @@
 package ecrconsumer
 
-// TODO
+// TODO:
 // Handle nil val path case
 // load path dynamically (should not be dependent on miranda folder structure)
-// // Take image type return image type in set image tag function
+// Take image type return image type in set image tag function
 
 import (
 	"fmt"
@@ -110,8 +110,8 @@ func (c *HelmChart) imageValues() chartutil.Values {
 	return c.Values["image"].(map[string]interface{})
 }
 
-func readMetadata(path string, serviceName string) (bool, string, string, string, error) {
-	v, err := chartutil.ReadValuesFile(path)
+func readMetadata(metadataPath string, serviceName string) (bool, string, string, string, error) {
+	v, err := chartutil.ReadValuesFile(metadataPath)
 	if err != nil {
 		return false, "", "", "", err
 	}
@@ -119,6 +119,10 @@ func readMetadata(path string, serviceName string) (bool, string, string, string
 	service, err := v.Table("services." + serviceName)
 	if err != nil {
 		return false, "", "", "", err
+	}
+
+	if service["helmValuesPath"] == nil {
+		return service["autoDeploy"].(bool), service["helmChartPath"].(string), path.Join(service["helmChartPath"].(string), "values.yaml"), service["gitRepo"].(string), nil
 	}
 
 	return service["autoDeploy"].(bool), service["helmChartPath"].(string), service["helmValuesPath"].(string), service["gitRepo"].(string), nil
@@ -132,7 +136,7 @@ func (c *HelmChart) UpdateImage(img *Image, client GitHub) error {
 	str := chartutil.ToYaml(c.Values)
 
 	valueData := []byte(str)
-	_, err := client.UpdateFile("Update Image Tag: "+img.Tag, "master", c.ValuesPath, valueData) // change to a path join call
+	_, err := client.UpdateFile("Update Image Tag: "+img.Tag, "master", c.ValuesPath, valueData)
 
 	if err != nil {
 		return err
