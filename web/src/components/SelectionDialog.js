@@ -4,8 +4,9 @@ import DialogTitle from '@material-ui/core/DialogTitle'
 import List from '@material-ui/core/List'
 import { ListItem, IconButton, DialogContent, DialogActions, Button, Link } from '@material-ui/core'
 import GitIcon from '../assets/octocat.png'
+import HelmIcon from '../assets/helm_icon.png'
+import urljoin from 'url-join'
 
-const urljoin = require('url-join')
 const imgAlt = "not found"
 
 class SelectionDialog extends React.Component {
@@ -22,18 +23,7 @@ class SelectionDialog extends React.Component {
     this.setState({ open: true })
   }
 
-  getChartURL(url) {
-    return urljoin(url, this.props.serviceName)
-    
-  }
-
-  getSourceURL(url) {
-    return urljoin(url, this.props.gitref, this.props.highlanderPath)
-  }
-
   render() {
-    var highlanderURL = this.getSourceURL('https://github.com/Wattpad/highlander/tree/')
-    var mirandaURL = this.getChartURL('https://github.com/Wattpad/highlander/tree/master/k8s/charts/services')
     return (
       <div>
         {
@@ -43,16 +33,16 @@ class SelectionDialog extends React.Component {
               <DialogContent>
                 <List>
                   <ListItem>
-                    <IconButton href={mirandaURL}>
-                      <img src={GitIcon} width="32" height="32" alt={imgAlt} />
+                    <IconButton href={this.props.chart}>
+                      <img src={HelmIcon} width="32" height="32" alt={imgAlt} />
                     </IconButton>
-                    <Link href={mirandaURL}>Miranda</Link>
+                    <Link href={this.props.chart}>Chart Download</Link>
                   </ListItem>
                   <ListItem>
-                    <IconButton href={highlanderURL}>
+                    <IconButton href={this.props.source}>
                       <img src={GitIcon} width="32" height="32" alt={imgAlt} />
                     </IconButton>
-                    <Link href={highlanderURL}>Highlander</Link>
+                    <Link href={this.props.source}>Source</Link>
                   </ListItem>
                 </List>
               </DialogContent>

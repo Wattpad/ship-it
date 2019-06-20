@@ -30,7 +30,7 @@ class SingleGridCell extends React.Component {
     }
   }
 
-  cellClick(event) {
+  cellClick = (event) => {
     this.props.handleCellClick(event)
   }
 
@@ -51,7 +51,7 @@ class SingleGridCell extends React.Component {
   }
 
   render() {
-    var SingleGridCellStyle = {
+    var singleGridCellStyle = {
       backgroundSize: this.props.cellSize,
       width: this.props.cellSize,
       height: this.props.cellSize,
@@ -69,7 +69,7 @@ class SingleGridCell extends React.Component {
     // Re written to put material ui components in the tile original component only took images
     var deployDate = new Date(this.props.SingleGridCellData.lastDeployed)
     return (
-      <div style={SingleGridCellStyle} id={this.props.id} className='SingleGridCell'>
+      <div style={singleGridCellStyle} id={this.props.id} className='SingleGridCell'>
         <div>
           <Card style={cardStyle}>
             <CardContent>
@@ -84,7 +84,7 @@ class SingleGridCell extends React.Component {
                 {deployDate.toDateString()}
               </div>
               <div className='row-align'>
-                <SelectionDialog gitref={this.props.SingleGridCellData.code.ref} highlanderPath={this.props.SingleGridCellData.code.github} serviceName={this.props.SingleGridCellData.name}/>
+                <SelectionDialog source={this.props.SingleGridCellData.code.github} chart={this.props.SingleGridCellData.artifacts.chart.path}/>
                 <IconButton onClick={this.slackClicked}>
                   <img src={SlackIcon} width="32" height="32" alt={imgAlt} />
                 </IconButton>
@@ -99,7 +99,7 @@ class SingleGridCell extends React.Component {
                 }
               </div>
               <div>
-                <IconButton onClick={this.cellClick.bind(this)}>
+                <IconButton onClick={this.cellClick}>
                   <ExpandIcon />
                 </IconButton>
               </div>

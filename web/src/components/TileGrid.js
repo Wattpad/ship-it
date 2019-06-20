@@ -20,8 +20,8 @@ class ReactExpandableGrid extends React.Component {
   }
 
   findIdNode(target) { // takes event target and returns the id (written to make sure the expanded detail renders from the correct reference point as in the original component each tile on the grid was just an img tag)
-    var t = target
-    var found = false
+    let t = target
+    let found = false
     while (!found && t != null) {
       if (String(t.className) === "SingleGridCell") {
         found = true
@@ -33,14 +33,14 @@ class ReactExpandableGrid extends React.Component {
   }
   
   renderExpandedDetail(target) {
-    var thisIdNumber = this.findIdNode(target)
-    var detail = document.getElementById('expandedDetail')
+    let thisIdNumber = this.findIdNode(target)
+    let detail = document.getElementById('expandedDetail')
 
-    var ol = document.getElementById("grid_cell_" + thisIdNumber.toString()).parentNode
-    var lengthOfList = parseInt(ol.childNodes.length)
-    var startingIndex = thisIdNumber + 1
+    let ol = document.getElementById("grid_cell_" + thisIdNumber.toString()).parentNode
+    let lengthOfList = parseInt(ol.childNodes.length)
+    let startingIndex = thisIdNumber + 1
 
-    var insertedFlag = false
+    let insertedFlag = false
 
     ol.insertBefore(detail, ol.childNodes[lengthOfList])
 
@@ -64,13 +64,13 @@ class ReactExpandableGrid extends React.Component {
       expanded: false,
       selected_id: ''
     }, function afterStateChange() {
-      var detail = document.getElementById('expandedDetail')
+      let detail = document.getElementById('expandedDetail')
       detail.style.display = 'none'
     })
   }
 
   handleCellClick(event) {
-    var target = event.target
+    let target = event.target
     cardID = this.findIdNode(target)
     if (this.state.expanded) {
       if (this.state.selected_id === event.target.id) { // Clicking on already opened detail

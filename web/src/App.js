@@ -4,16 +4,15 @@ import './App.css'
 import TopBar from './components/TopBar'
 import axios from 'axios';
 import { CircularProgress } from '@material-ui/core';
+import urljoin from 'url-join'
 
-const urljoin = require('url-join')
-
-const apiAddress = urljoin('https://' + window.location.hostname, 'releases') // Point to local IP for testing
-//const apiAddress = 'http://localhost:8080/releases'
+//const API_ADDRESS = urljoin('https://' + window.location.hostname, 'releases') // Point to local IP for testing
+const API_ADDRESS = 'http://localhost:8080/releases'
 class App extends React.Component {
   constructor(props) {
     super(props)
     this.state = {}
-    axios.get(apiAddress).then(response => {
+    axios.get(API_ADDRESS).then(response => {
       this.setState({data : response.data})
     })
   }
@@ -29,7 +28,7 @@ class App extends React.Component {
             detailHeight={300}
             ExpandedDetail_image_size={300}
             cellSize={250}
-            apiAddress={apiAddress}
+            API_ADDRESS={API_ADDRESS}
             ExpandedDetail_closeX_bool={false}
           /> : <CircularProgress />
         }

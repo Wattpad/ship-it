@@ -3,7 +3,6 @@ import Dialog from '@material-ui/core/Dialog'
 import { DialogContent, DialogActions, Button, DialogTitle, Typography } from '@material-ui/core';
 
 class ImageInfoDialog extends React.Component {
-
     getRegistry() {
         var arr = this.props.docker.image.split('/')
         return arr[0]
