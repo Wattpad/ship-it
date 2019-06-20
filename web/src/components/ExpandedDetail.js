@@ -62,9 +62,9 @@ class ExpandedDetail extends React.Component {
 
   podClick = () => {
     this.setState({podsVisible: !this.state.podsVisible})
-    //let api = urljoin('https://' + window.location.host, '/releases/', this.props.data.name, 'resources') // point to local IP for testing
-    let api = 'http://localhost:8080/resources'
-    axios.get(api).then(response => {
+    let API_ADDRESS = urljoin('https://' + window.location.host, '/releases/', this.props.data.name, 'resources') // point to local IP for testing
+    //let API_ADDRESS = 'http://localhost:8080/resources'
+    axios.get(API_ADDRESS).then(response => {
       this.setState({
         pods: response.data.filter((d) => d.kind === 'Pod'),
         resources: response.data.filter((d) => d.kind !== 'Pod')
