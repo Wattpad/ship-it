@@ -99,6 +99,7 @@ func (c *HelmChart) Image() (*Image, error) {
 
 	arr := strings.Split(str, "/")
 
+	// add error handling here to prevent out of bounds crash
 	repository := arr[1]
 	registry := arr[0]
 
