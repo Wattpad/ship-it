@@ -21,10 +21,8 @@ class ReactExpandableGrid extends React.Component {
 
   findIdNode(target) { // takes event target and returns the id (written to make sure the expanded detail renders from the correct reference point as in the original component each tile on the grid was just an img tag)
     let t = target
-    let found = false
-    while (!found && t != null) {
+    while (t != null) {
       if (String(t.className) === "SingleGridCell") {
-        found = true
         return parseInt(t.id.substring(10))
       }
       t = t.parentNode
@@ -123,7 +121,7 @@ class ReactExpandableGrid extends React.Component {
 
     grid.push( // Expanded Detail here
       <li style={cssforExpandedDetail} key='expandedDetail' id='expandedDetail'>
-        <ExpandedDetail data={gridData[cardID]} />
+        <ExpandedDetail data={gridData[cardID]} API_ADDRESS={this.props.API_ADDRESS} />
       </li>
     )
 

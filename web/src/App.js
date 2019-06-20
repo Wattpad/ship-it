@@ -6,13 +6,13 @@ import axios from 'axios';
 import { CircularProgress } from '@material-ui/core';
 import urljoin from 'url-join'
 
-const API_ADDRESS = urljoin('https://' + window.location.hostname, 'releases') // Point to local IP for testing
-//const API_ADDRESS = 'http://localhost:8080/releases'
+//const API_ADDRESS = urljoin('https://' + window.location.hostname, 'api') // Point to local IP for testing
+const API_ADDRESS = 'http://localhost:8080/'
 class App extends React.Component {
   constructor(props) {
     super(props)
     this.state = {}
-    axios.get(API_ADDRESS).then(response => {
+    axios.get(urljoin(API_ADDRESS, 'releases')).then(response => {
       this.setState({data : response.data})
     })
   }
