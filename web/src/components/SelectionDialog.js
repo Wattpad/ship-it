@@ -2,8 +2,9 @@ import React from 'react'
 import Dialog from '@material-ui/core/Dialog'
 import DialogTitle from '@material-ui/core/DialogTitle'
 import List from '@material-ui/core/List'
-import { ListItem, IconButton, DialogContent, DialogActions, Button } from '@material-ui/core'
+import { ListItem, IconButton, DialogContent, DialogActions, Button, Link } from '@material-ui/core'
 import GitIcon from '../assets/octocat.png'
+import HelmIcon from '../assets/helm_icon.png'
 
 const imgAlt = "not found"
 
@@ -31,17 +32,17 @@ class SelectionDialog extends React.Component {
               <DialogContent>
                 <List>
                   <ListItem>
-                    <IconButton>
-                      <img src={GitIcon} width="32" height="32" alt={imgAlt} />
+                    <IconButton href={this.props.chart}>
+                      <img src={HelmIcon} width="32" height="32" alt={imgAlt} />
                     </IconButton>
-                    Miranda
-                            </ListItem>
+                    <Link href={this.props.chart}>Chart Download</Link>
+                  </ListItem>
                   <ListItem>
-                    <IconButton>
+                    <IconButton href={this.props.source}>
                       <img src={GitIcon} width="32" height="32" alt={imgAlt} />
                     </IconButton>
-                    Highlander
-                            </ListItem>
+                    <Link href={this.props.source}>Source</Link>
+                  </ListItem>
                 </List>
               </DialogContent>
               <DialogActions>

@@ -3,150 +3,42 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
-import Card from '@material-ui/core/Card'
-import CardContent from '@material-ui/core/CardContent'
-import Typography from '@material-ui/core/Typography'
-import Chip from '@material-ui/core/Chip'
-import DoneIcon from '@material-ui/icons/Done'
-import ExpandIcon from '@material-ui/icons/ExpandMore'
-import IconButton from '@material-ui/core/IconButton'
-import SelectionDialog from './SelectionDialog'
-
-import TimePassed from '../assets/time_passed.png'
-import SlackIcon from '../assets/slack_icon.png'
-import DockerIcon from '../assets/docker_icon.png'
 import ExpandedDetail from './ExpandedDetail'
+import SingleGridCell from './GridCell'
 
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles'
-
-const deployTagTheme = createMuiTheme({
-  palette: {
-    primary: {
-      main: '#4caf50'
-    },
-    secondary: {
-      main: '#f44336'
-    },
-    default: {
-      main: '#9e9e9e'
-    }
-  }
-})
-
-const imgAlt = "not found"
-
-class SingleGridCell extends React.Component {
-  constructor(props) {
-    super(props)
-
-    this.state = {
-      expanded: false,
-      selected_id: '',
-      window_width: window.innerWidth,
-      repoSelector: false,
-    }
-  }
-
-  cellClick(event) {
-    this.props.handleCellClick(event)
-  }
-
-  render() {
-    var SingleGridCellStyle = {
-      backgroundSize: this.props.cellSize,
-      width: this.props.cellSize,
-      height: this.props.cellSize,
-      display: 'inline-block',
-      margin: this.props.cellMargin,
-      marginBottom: 25,
-      position: 'relative'
-    }
-
-    var cardStyle = {
-      width: this.props.cellSize,
-      height: this.props.cellSize
-    }
-
-    // Re written to put material ui components in the tile original component only took images
-    return (
-      <div style={SingleGridCellStyle} id={this.props.id} className='SingleGridCell'>
-        <div>
-          <Card style={cardStyle}>
-            <CardContent>
-              <Typography variant="h5" component="h2">
-                ServiceName
-              </Typography>
-              <MuiThemeProvider theme={deployTagTheme}>
-                <Chip
-                  icon={<DoneIcon />}
-                  label="Deployed"
-                  color="primary"
-                  variant="outlined"
-                  clickable
-                />
-              </MuiThemeProvider>
-              <div>
-                <IconButton>
-                  <img src={TimePassed} alt={imgAlt} />
-                </IconButton>
-                5 min ago
-              </div>
-              <div className='row-align'>
-                <SelectionDialog />
-                <IconButton>
-                  <img src={SlackIcon} width="32" height="32" alt={imgAlt} />
-                </IconButton>
-                <IconButton>
-                  <img src={DockerIcon} width="32" height="32" alt={imgAlt} />
-                </IconButton>
-              </div>
-              <div>
-                <IconButton onClick={this.cellClick.bind(this)}>
-                  <ExpandIcon />
-                </IconButton>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    )
-  }
-}
-
+let cardID = 0
 class ReactExpandableGrid extends React.Component {
-
+  
   constructor(props) {
     super(props)
 
     this.state = {
       expanded: false,
       selected_id: '',
-      gridData: JSON.parse(this.props.gridData)
+      gridData: this.props.gridData
     }
   }
 
   findIdNode(target) { // takes event target and returns the id (written to make sure the expanded detail renders from the correct reference point as in the original component each tile on the grid was just an img tag)
-    var t = target
-    var found = false
-    while (!found && t != null) {
+    let t = target
+    while (t != null) {
       if (String(t.className) === "SingleGridCell") {
-        found = true
         return parseInt(t.id.substring(10))
       }
       t = t.parentNode
     }
     return -1
   }
-
+  
   renderExpandedDetail(target) {
-    var thisIdNumber = this.findIdNode(target)
-    var detail = document.getElementById('expandedDetail')
+    let thisIdNumber = this.findIdNode(target)
+    let detail = document.getElementById('expandedDetail')
 
-    var ol = document.getElementById("grid_cell_" + thisIdNumber.toString()).parentNode
-    var lengthOfList = parseInt(ol.childNodes.length)
-    var startingIndex = thisIdNumber + 1
+    let ol = document.getElementById("grid_cell_" + thisIdNumber.toString()).parentNode
+    let lengthOfList = parseInt(ol.childNodes.length)
+    let startingIndex = thisIdNumber + 1
 
-    var insertedFlag = false
+    let insertedFlag = false
 
     ol.insertBefore(detail, ol.childNodes[lengthOfList])
 
@@ -170,14 +62,14 @@ class ReactExpandableGrid extends React.Component {
       expanded: false,
       selected_id: ''
     }, function afterStateChange() {
-      var detail = document.getElementById('expandedDetail')
+      let detail = document.getElementById('expandedDetail')
       detail.style.display = 'none'
     })
   }
 
   handleCellClick(event) {
-    var target = event.target
-
+    let target = event.target
+    cardID = this.findIdNode(target)
     if (this.state.expanded) {
       if (this.state.selected_id === event.target.id) { // Clicking on already opened detail
         this.closeExpandedDetail()
@@ -187,7 +79,7 @@ class ReactExpandableGrid extends React.Component {
           expanded: true,
           selected_id: event.target.id
         }, function afterStateChange() {
-          var detail = document.getElementById('expandedDetail')
+          let detail = document.getElementById('expandedDetail')
 
           this.renderExpandedDetail(target)
 
@@ -199,7 +91,7 @@ class ReactExpandableGrid extends React.Component {
         expanded: true,
         selected_id: event.target.id
       }, function afterStateChange() {
-        var detail = document.getElementById('expandedDetail')
+        let detail = document.getElementById('expandedDetail')
 
         this.renderExpandedDetail(target)
 
@@ -209,16 +101,16 @@ class ReactExpandableGrid extends React.Component {
   }
 
   generateGrid() {
-    var grid = []
-    var idCounter = -1 // To help simplify mapping to object array indices. For example, <li> with 0th id corresponds to 0th child of <ol>
-    var gridData = this.state.gridData
+    let grid = []
+    let idCounter = -1 // To help simplify mapping to object array indices. For example, <li> with 0th id corresponds to 0th child of <ol>
+    let gridData = this.state.gridData
     for (var i in gridData) {
       idCounter = idCounter + 1
-      var thisUniqueKey = 'grid_cell_' + idCounter.toString()
+      let thisUniqueKey = 'grid_cell_' + idCounter.toString()
       grid.push(<SingleGridCell handleCellClick={this.handleCellClick.bind(this)} key={thisUniqueKey} id={thisUniqueKey} cellMargin={this.props.cellMargin} SingleGridCellData={gridData[i]} cellSize={this.props.cellSize} />)
     }
 
-    var cssforExpandedDetail = {
+    const cssforExpandedDetail = {
       backgroundColor: this.props.detailBackgroundColor,
       height: this.props.detailHeight,
       display: 'none',
@@ -229,7 +121,7 @@ class ReactExpandableGrid extends React.Component {
 
     grid.push( // Expanded Detail here
       <li style={cssforExpandedDetail} key='expandedDetail' id='expandedDetail'>
-        <ExpandedDetail />
+        <ExpandedDetail data={gridData[cardID]} API_ADDRESS={this.props.API_ADDRESS} />
       </li>
     )
 
@@ -237,21 +129,21 @@ class ReactExpandableGrid extends React.Component {
   }
 
   render() {
-    var rows = this.generateGrid()
+    let rows = this.generateGrid()
 
-    var cssForGridDetailExpansion = {
+    const cssForGridDetailExpansion = {
       width: '100%',
       position: 'relative'
     }
 
-    var cssForGridList = {
+    const cssForGridList = {
       listStyle: 'none',
       padding: 0,
       display: 'inline-block',
       width: '100%'
     }
 
-    var cssForTheGridHolder = {
+    const cssForTheGridHolder = {
       width: '100%',
       backgroundColor: this.props.bgColor,
       margin: 0,
@@ -270,7 +162,7 @@ class ReactExpandableGrid extends React.Component {
 }
 
 ReactExpandableGrid.propTypes = {
-  gridData: PropTypes.string,
+  gridData: PropTypes.array,
   cellSize: PropTypes.number,
   cellMargin: PropTypes.number,
   bgColor: PropTypes.string,
@@ -279,7 +171,7 @@ ReactExpandableGrid.propTypes = {
 }
 
 ReactExpandableGrid.defaultProps = {
-  gridData: "",
+  gridData: [],
   cellSize: 250,
   cellMargin: 25,
   bgColor: '#f2f2f2',
