@@ -54,7 +54,7 @@ class ExpandedDetail extends React.Component {
     super(props)
     this.state = {
       podsVisible: false,
-      resourceVisible: false,
+      resourcesVisible: false,
       pods: null,
       resources: null
     }
@@ -65,15 +65,8 @@ class ExpandedDetail extends React.Component {
     //let api = urljoin('https://' + window.location.host, '/releases/', this.props.data.name, 'resources') // point to local IP for testing
     let api = 'http://localhost:8080/resources'
     axios.get(api).then(response => {
-      var pods = []
-      var resources = []
-      for (var i = 0; i < response.data.length; i++) {
-        if (response.data[i].kind === "Pod") {
-          pods.push(response.data[i])
-        } else {
-          resources.push(response.data[i])
-        }
-      }
+      let pods = response.data.filter((d) => d.kind === 'Pod')
+      let resources = response.data.filter((d) => d.kind !== 'Pod')
       this.setState({
         pods: pods,
         resources: resources
@@ -82,7 +75,7 @@ class ExpandedDetail extends React.Component {
   }
 
   resourceClick = (event) => {
-    this.setState({resourceVisible: !this.state.resourceVisible})
+    this.setState({resourcesVisible: !this.state.resourcesVisible})
   }
 
   render() {
@@ -188,9 +181,9 @@ class ExpandedDetail extends React.Component {
                     </Collapse>
                     <ListItem button onClick={this.resourceClick}>
                       <ListItemText>Other Resources</ListItemText>
-                      {this.state.resourceVisible ? <ExpandLess /> : <ExpandMore />}
+                      {this.state.resourcesVisible ? <ExpandLess /> : <ExpandMore />}
                     </ListItem>
-                    <Collapse in={this.state.resourceVisible} timeout='auto' unmountOnExit>
+                    <Collapse in={this.state.resourcesVisible} timeout='auto' unmountOnExit>
                       <List component="div" disablePadding>
                         {
                           this.state.resources ? 

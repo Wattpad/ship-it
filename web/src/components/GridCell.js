@@ -51,7 +51,7 @@ class SingleGridCell extends React.Component {
   }
 
   render() {
-    var singleGridCellStyle = {
+    const singleGridCellStyle = {
       backgroundSize: this.props.cellSize,
       width: this.props.cellSize,
       height: this.props.cellSize,
@@ -61,7 +61,7 @@ class SingleGridCell extends React.Component {
       position: 'relative'
     }
 
-    var cardStyle = {
+    const cardStyle = {
       width: this.props.cellSize,
       height: this.props.cellSize
     }

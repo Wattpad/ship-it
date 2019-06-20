@@ -6,7 +6,7 @@ import PropTypes from 'prop-types'
 import ExpandedDetail from './ExpandedDetail'
 import SingleGridCell from './GridCell'
 
-var cardID = 0
+let cardID = 0
 class ReactExpandableGrid extends React.Component {
   
   constructor(props) {
@@ -112,7 +112,7 @@ class ReactExpandableGrid extends React.Component {
       grid.push(<SingleGridCell handleCellClick={this.handleCellClick.bind(this)} key={thisUniqueKey} id={thisUniqueKey} cellMargin={this.props.cellMargin} SingleGridCellData={gridData[i]} cellSize={this.props.cellSize} />)
     }
 
-    var cssforExpandedDetail = {
+    const cssforExpandedDetail = {
       backgroundColor: this.props.detailBackgroundColor,
       height: this.props.detailHeight,
       display: 'none',
@@ -131,7 +131,7 @@ class ReactExpandableGrid extends React.Component {
   }
 
   render() {
-    var rows = this.generateGrid()
+    let rows = this.generateGrid()
 
     const cssForGridDetailExpansion = {
       width: '100%',
