@@ -5,7 +5,6 @@ import List from '@material-ui/core/List'
 import { ListItem, IconButton, DialogContent, DialogActions, Button, Link } from '@material-ui/core'
 import GitIcon from '../assets/octocat.png'
 import HelmIcon from '../assets/helm_icon.png'
-import urljoin from 'url-join'
 
 const imgAlt = "not found"
 

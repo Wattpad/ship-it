@@ -17,7 +17,8 @@ import List from '@material-ui/core/List'
 import { CircularProgress, Link, Collapse } from '@material-ui/core'
 import ExpandLess from '@material-ui/icons/ExpandLess'
 import ExpandMore from '@material-ui/icons/ExpandMore'
-import axios from 'axios';
+import axios from 'axios'
+import urljoin from 'url-join'
 
 const theme = createMuiTheme({
   palette: {
@@ -46,7 +47,6 @@ const nestedStyle = {
 }
 
 const imgAlt = 'not found'
-const urljoin = require('url-join')
 
 class ExpandedDetail extends React.Component {
 

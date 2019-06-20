@@ -4,12 +4,12 @@ import { DialogContent, DialogActions, Button, DialogTitle, Typography } from '@
 
 class ImageInfoDialog extends React.Component {
     getRegistry() {
-        var arr = this.props.docker.image.split('/')
+        let arr = this.props.docker.image.split('/')
         return arr[0]
     }
 
     getRepo() {
-        var arr = this.props.docker.image.split('/')
+        let arr = this.props.docker.image.split('/')
         return arr[1]
     }
 

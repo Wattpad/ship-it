@@ -66,8 +66,7 @@ class SingleGridCell extends React.Component {
       height: this.props.cellSize
     }
 
-    // Re written to put material ui components in the tile original component only took images
-    var deployDate = new Date(this.props.SingleGridCellData.lastDeployed)
+    let deployDate = new Date(this.props.SingleGridCellData.lastDeployed)
     return (
       <div style={singleGridCellStyle} id={this.props.id} className='SingleGridCell'>
         <div>

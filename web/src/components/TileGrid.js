@@ -81,7 +81,7 @@ class ReactExpandableGrid extends React.Component {
           expanded: true,
           selected_id: event.target.id
         }, function afterStateChange() {
-          var detail = document.getElementById('expandedDetail')
+          let detail = document.getElementById('expandedDetail')
 
           this.renderExpandedDetail(target)
 
@@ -93,7 +93,7 @@ class ReactExpandableGrid extends React.Component {
         expanded: true,
         selected_id: event.target.id
       }, function afterStateChange() {
-        var detail = document.getElementById('expandedDetail')
+        let detail = document.getElementById('expandedDetail')
 
         this.renderExpandedDetail(target)
 
@@ -103,12 +103,12 @@ class ReactExpandableGrid extends React.Component {
   }
 
   generateGrid() {
-    var grid = []
-    var idCounter = -1 // To help simplify mapping to object array indices. For example, <li> with 0th id corresponds to 0th child of <ol>
-    var gridData = this.state.gridData
+    let grid = []
+    let idCounter = -1 // To help simplify mapping to object array indices. For example, <li> with 0th id corresponds to 0th child of <ol>
+    let gridData = this.state.gridData
     for (var i in gridData) {
       idCounter = idCounter + 1
-      var thisUniqueKey = 'grid_cell_' + idCounter.toString()
+      let thisUniqueKey = 'grid_cell_' + idCounter.toString()
       grid.push(<SingleGridCell handleCellClick={this.handleCellClick.bind(this)} key={thisUniqueKey} id={thisUniqueKey} cellMargin={this.props.cellMargin} SingleGridCellData={gridData[i]} cellSize={this.props.cellSize} />)
     }
 
@@ -133,19 +133,19 @@ class ReactExpandableGrid extends React.Component {
   render() {
     var rows = this.generateGrid()
 
-    var cssForGridDetailExpansion = {
+    const cssForGridDetailExpansion = {
       width: '100%',
       position: 'relative'
     }
 
-    var cssForGridList = {
+    const cssForGridList = {
       listStyle: 'none',
       padding: 0,
       display: 'inline-block',
       width: '100%'
     }
 
-    var cssForTheGridHolder = {
+    const cssForTheGridHolder = {
       width: '100%',
       backgroundColor: this.props.bgColor,
       margin: 0,

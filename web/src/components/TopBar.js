@@ -23,13 +23,6 @@ class TopBar extends React.Component {
     this.state = {}
   }
 
-  handleChange = (event) => {
-    this.setState({
-      searchText: event.target.value
-    })
-    console.log(this.state.searchText)
-  }
-
   render() {
     return (
       <MuiThemeProvider theme={theme}>
