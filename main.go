@@ -10,6 +10,7 @@ import (
 
 	"ship-it/internal/api"
 	"ship-it/internal/ecrconsumer"
+	"ship-it/internal/integrations/k8s"
 	"ship-it/internal/service"
 
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -58,9 +59,21 @@ func main() {
 
 	go consumer.Run(ctx)
 
+	k8s, err := k8s.New()
+	if err != nil {
+		logger.Log("error", err)
+		os.Exit(1)
+	}
+
+	svc, err := service.New(k8s)
+	if err != nil {
+		logger.Log("error", err)
+		os.Exit(1)
+	}
+
 	srv := http.Server{
 		Addr:    ":" + envConf.ServicePort,
-		Handler: api.New(service.New(), dd.NewTiming("api.time", 1.0)),
+		Handler: api.New(svc, dd.NewTiming("api.time", 1.0)),
 	}
 
 	exit := make(chan error)
