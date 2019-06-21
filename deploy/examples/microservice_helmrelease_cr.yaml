@@ -1,4 +1,4 @@
-apiVersion: helmrelease.k8s.wattpad.com/v1alpha1
+apiVersion: helmreleases.k8s.wattpad.com/v1alpha1
 kind: HelmRelease
 metadata:
   name: example-microservice
@@ -12,8 +12,8 @@ spec:
 
   values:
     image:
-      repository: ""
-      tag: ""
+      repository: dkr.ecr.amazonaws.com/foo
+      tag: foo
 
     iamRoleName: foo
     serviceAccountName: foo
