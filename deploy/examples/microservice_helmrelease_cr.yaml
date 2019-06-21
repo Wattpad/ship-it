@@ -1,0 +1,24 @@
+apiVersion: helmrelease.k8s.wattpad.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: example-microservice
+spec:
+  releaseName: example-release
+
+  chart:
+    repository: wattpad.s3.amazonaws.com/helm-charts
+    path: microservice
+    revision: HEAD
+
+  values:
+    image:
+      repository: ""
+      tag: ""
+
+    iamRoleName: foo
+    serviceAccountName: foo
+
+    autoscaler:
+      minPods: 1
+      maxPods: 2
+      targetCPUUtilizationPercent: 80
