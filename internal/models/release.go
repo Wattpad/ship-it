@@ -6,7 +6,7 @@ import (
 
 type Release struct {
 	Name         string    `json:"name"`
-	Created      string    `json:"created"`
+	Created      time.Time `json:"created"`
 	LastDeployed time.Time `json:"lastDeployed"`
 	Owner        struct {
 		Squad string `json:"squad"`
