@@ -2,19 +2,24 @@ package service
 
 import (
 	"context"
-	"errors"
 
 	"ship-it/internal/models"
+
+	v1 "k8s.io/api/core/v1"
 )
 
-var ErrNotImplemented = errors.New("not implemented")
-
-func New() *Service {
-	return &Service{}
+func New(k K8sInterface) (*Service, error) {
+	return &Service{k}, nil
 }
 
-type Service struct{}
+type K8sInterface interface {
+	ListAll(namespace string) ([]models.Release, error)
+}
+
+type Service struct {
+	kube K8sInterface
+}
 
 func (s *Service) ListReleases(ctx context.Context) ([]models.Release, error) {
-	return nil, ErrNotImplemented
+	return s.kube.ListAll(v1.NamespaceAll)
 }
