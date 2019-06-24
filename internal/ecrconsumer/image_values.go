@@ -9,7 +9,7 @@ import (
 )
 
 type ImageEditor interface {
-	Update() *error
+	Update() error
 }
 
 type Image struct {
