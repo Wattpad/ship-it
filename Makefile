@@ -1,7 +1,10 @@
 .PHONY: build push run
 
-ECR_REGISTRY := 723255503624.dkr.ecr.us-east-1.amazonaws.com
+REGISTRY := 723255503624.dkr.ecr.us-east-1.amazonaws.com
 VERSION := $(shell git rev-parse HEAD)
+
+TARGET_IMAGE := $(TARGET):$(VERSION)
+LATEST_IMAGE := $(TARGET):latest
 
 env-target:
 ifndef TARGET
@@ -9,13 +12,13 @@ ifndef TARGET
 endif
 
 build: env-target
-	docker build -t $(TARGET):$(VERSION) -f cmd/$(TARGET)/Dockerfile .
+	docker build -t $(TARGET_IMAGE) -f cmd/$(TARGET)/Dockerfile .
 
 push: build
-	docker tag $(IMAGE) $(ECR_REGISTRY)/$(TARGET):$(VERSION)
-	docker tag $(IMAGE) $(ECR_REGISTRY)/$(TARGET):latest
-	docker push $(ECR_REGISTRY)/$(TARGET):$(VERSION)
-	docker push $(ECR_REGISTRY)/$(TARGET):latest
+	docker tag $(IMAGE) $(REGISTRY)/$(TARGET_IMAGE)
+	docker tag $(IMAGE) $(REGISTRY)/$(LATEST_IMAGE)
+	docker push $(REGISTRY)/$(TARGET_IMAGE)
+	docker push $(REGISTRY)/$(LATEST_IMAGE)
 
 run: build
 	docker run -p 8080:80 \
