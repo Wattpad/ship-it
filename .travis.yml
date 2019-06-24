@@ -21,7 +21,9 @@ jobs:
   include:
     - stage: Build
       name: Docker
-      script: make build
+      script:
+        - TARGET=ship-it-api make build
+        - TARGET=ship-it-ecrconsumer make build
 
     - stage: Test
       name: Go
@@ -40,7 +42,9 @@ jobs:
       before_script:
         - export PATH=$PATH:$HOME/.local/bin
         - eval $(aws ecr get-login --no-include-email --region us-east-1)
-      script: make push
+      script:
+        - TARGET=ship-it-api make push
+        - TARGET=ship-it-ecrconsumer make push
 
 branches:
   only:
