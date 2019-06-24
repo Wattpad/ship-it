@@ -1,10 +1,8 @@
 package ecrconsumer
 
 // TODO:
-// Handle nil val path case
 // load path dynamically (should not be dependent on miranda folder structure)
-// Take image type return image type in set image tag function (done)
-// Make metadata type
+// Use CRD PR to refactor accordingly
 
 import (
 	"fmt"
@@ -12,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"gopkg.in/yaml.v2"
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 )
@@ -43,6 +42,37 @@ type Metadata struct {
 	ChartPath  string
 	ValuesPath string
 	GitRepo    string
+}
+
+func LoadImage(serviceName string, client GitHub) (*Image, error) {
+	imgBytes, err := client.DownloadFile("master", filepath.Join("k8s/custom-resources", serviceName+".yaml"))
+	if err != nil {
+		return nil, err
+	}
+
+	customResource := CRYaml{}
+
+	err = yaml.Unmarshal(imgBytes, &customResource)
+	if err != nil {
+		return nil, err
+	}
+
+	arr := strings.Split(customResource.Spec.Values.Image.Repository, "/")
+
+	var registry string
+	var repository string
+	if len(arr) == 2 {
+		repository = arr[1]
+		registry = arr[0]
+	} else {
+		return nil, fmt.Errorf("repository field is invalid! (lacking either the full registry name or repository name)")
+	}
+
+	return &Image{
+		Registry:   registry,
+		Repository: repository,
+		Tag:        customResource.Spec.Values.Image.Tag,
+	}, nil
 }
 
 func LoadChart(serviceName string, localPath string, client GitHub) (*HelmChart, error) {
@@ -99,9 +129,14 @@ func (c *HelmChart) Image() (*Image, error) {
 
 	arr := strings.Split(str, "/")
 
-	// add error handling here to prevent out of bounds crash
-	repository := arr[1]
-	registry := arr[0]
+	var registry string
+	var repository string
+	if len(arr) == 2 {
+		repository = arr[1]
+		registry = arr[0]
+	} else {
+		return nil, fmt.Errorf("repository field is invalid! (lacking either the full registry name or repository name)")
+	}
 
 	tag, err := getChartValue(image, "tag")
 	if err != nil {

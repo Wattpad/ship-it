@@ -2,6 +2,7 @@ package ecrconsumer
 
 import (
 	"context"
+	"encoding/base64"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -141,7 +142,12 @@ func (c *GitHub) DownloadFile(branch string, path string) ([]byte, error) {
 		return nil, err
 	}
 
-	return []byte(*contents.Content), nil
+	data, err := base64.StdEncoding.DecodeString(*contents.Content)
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }
 
 func (c *GitHub) GetFile(branch string, path string) (*github.RepositoryContent, error) {
