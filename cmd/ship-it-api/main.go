@@ -10,9 +10,8 @@ import (
 
 	"ship-it/internal/api"
 	"ship-it/internal/api/config"
+	"ship-it/internal/api/integrations/k8s"
 	"ship-it/internal/api/service"
-	"ship-it/internal/integrations/k8s"
-	"ship-it/internal/service"
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics/dogstatsd"
@@ -58,7 +57,7 @@ func main() {
 
 	srv := http.Server{
 		Addr:    ":" + cfg.ServicePort,
-		Handler: api.New(service.New(), dd.NewTiming("api.time", 1.0)),
+		Handler: api.New(svc, dd.NewTiming("api.time", 1.0)),
 	}
 
 	exit := make(chan error)
