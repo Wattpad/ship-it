@@ -5,7 +5,7 @@ import (
 )
 
 // Definition of Custom Resource YAML
-type CRYaml struct {
+type HelmRelease struct {
 	metav1.TypeMeta   `yaml:",inline"`
 	metav1.ObjectMeta `yaml:"metadata"`
 	Spec              struct {
