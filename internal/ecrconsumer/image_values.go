@@ -113,7 +113,7 @@ func breadthSearch(graph map[string]interface{}, start string, end string) strin
 //return breadthSearch([]string{"image"}, m)
 //}
 
-func walk(v reflect.Value) {
+func walk(v reflect.Value, imgMap *map[string]string) {
 	fmt.Printf("Visiting %v\n", v)
 	// Indirect through pointers and interfaces
 	for v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface {
@@ -122,11 +122,23 @@ func walk(v reflect.Value) {
 	switch v.Kind() {
 	case reflect.Array, reflect.Slice:
 		for i := 0; i < v.Len(); i++ {
-			walk(v.Index(i))
+			walk(v.Index(i), imgMap)
 		}
 	case reflect.Map:
 		for _, k := range v.MapKeys() {
-			walk(v.MapIndex(k))
+			_, ok := v.MapIndex(k).Interface().(map[string]interface{})
+			if ok {
+				//*path = *path + "." + k.Interface().(string)
+			}
+			//*path = *path + "." + k.Interface().(string)
+			if k.Interface().(string) == "image" {
+				i := v.MapIndex(k).Interface().(map[string]interface{})
+				*imgMap = map[string]string{
+					"repository": i["repo"].(string),
+					"tag":        i["tag"].(string),
+				}
+			}
+			walk(v.MapIndex(k), imgMap)
 		}
 	default:
 		// handle other types
@@ -147,7 +159,28 @@ func LoadImage(serviceName string, client GitCommands) (*Image, error) {
 		return nil, err
 	}
 	getKeys(customResource.Spec.Values)
-	walk(reflect.ValueOf(customResource.Spec.Values))
+	m := chartutil.Values{
+		"apples": "delicious",
+		"oranges": map[string]interface{}{
+			"foo": 123456,
+			"image1": map[string]interface{}{
+				"repo": "bar",
+				"tag":  "hello, world",
+			},
+			"image": map[string]interface{}{
+				"repo": "bar",
+				"tag":  "hello, world",
+			},
+		},
+		// "image": map[string]interface{}{
+		// 	"foo": 123456,
+		// 	"bar": "hello, world",
+		// },
+	}
+	imgMap := map[string]string{}
+	walk(reflect.ValueOf(m), &imgMap)
+	fmt.Println("184", imgMap)
+	//fmt.Println(path)
 	return nil, nil
 	//return parseImage(serviceName, customResource.Spec.Values.Image.Repository, customResource.Spec.Values.Image.Tag)
 }
