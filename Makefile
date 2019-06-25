@@ -15,8 +15,8 @@ build: env-target
 	docker build -t $(TARGET_IMAGE) -f cmd/$(TARGET)/Dockerfile .
 
 push: build
-	docker tag $(IMAGE) $(REGISTRY)/$(TARGET_IMAGE)
-	docker tag $(IMAGE) $(REGISTRY)/$(LATEST_IMAGE)
+	docker tag $(TARGET_IMAGE) $(REGISTRY)/$(TARGET_IMAGE)
+	docker tag $(TARGET_IMAGE) $(REGISTRY)/$(LATEST_IMAGE)
 	docker push $(REGISTRY)/$(TARGET_IMAGE)
 	docker push $(REGISTRY)/$(LATEST_IMAGE)
 
