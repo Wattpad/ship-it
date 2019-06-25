@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"ship-it/internal/models"
+	"ship-it/internal/api/models"
 
 	"github.com/stretchr/testify/assert"
 )

@@ -1,20 +1,24 @@
 .PHONY: build push run
 
-ECR_REGISTRY := 723255503624.dkr.ecr.us-east-1.amazonaws.com
-PROJECT_NAME := ship-it
+REGISTRY := 723255503624.dkr.ecr.us-east-1.amazonaws.com
 VERSION := $(shell git rev-parse HEAD)
 
-IMAGE := $(PROJECT_NAME):$(VERSION)
-LATEST_IMAGE := $(PROJECT_NAME):latest
+TARGET_IMAGE := $(TARGET):$(VERSION)
+LATEST_IMAGE := $(TARGET):latest
 
-build:
-	docker build -t $(IMAGE) .
+env-target:
+ifndef TARGET
+	    $(error TARGET is undefined)
+endif
+
+build: env-target
+	docker build -t $(TARGET_IMAGE) -f cmd/$(TARGET)/Dockerfile .
 
 push: build
-	docker tag $(IMAGE) $(ECR_REGISTRY)/$(IMAGE)
-	docker tag $(IMAGE) $(ECR_REGISTRY)/$(LATEST_IMAGE)
-	docker push $(ECR_REGISTRY)/$(IMAGE)
-	docker push $(ECR_REGISTRY)/$(LATEST_IMAGE)
+	docker tag $(IMAGE) $(REGISTRY)/$(TARGET_IMAGE)
+	docker tag $(IMAGE) $(REGISTRY)/$(LATEST_IMAGE)
+	docker push $(REGISTRY)/$(TARGET_IMAGE)
+	docker push $(REGISTRY)/$(LATEST_IMAGE)
 
 run: build
 	docker run -p 8080:80 \
@@ -25,4 +29,6 @@ run: build
 	    -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
 	    -e AWS_SECURITY_TOKEN=${AWS_SECURITY_TOKEN} \
 	    -e AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN} \
-	    $(shell docker images -q $(PROJECT_NAME) | head -n 1)
+	    -e GITHUB_TOKEN=fake \
+	    -e GITHUB_ORG="wattpad" \
+	    $(shell docker images -q $(TARGET) | head -n 1)
