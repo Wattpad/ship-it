@@ -121,6 +121,12 @@ func LoadImage(serviceName string, client GitCommands) (*Image, error) {
 	images[0].Tag = "this tag is updated img 0"
 	images[1].Tag = "this tag is updated img 1"
 
+	// get the image
+	// if there is more than 1 grab which ever one's repo name matches service name being queried.
+	// consider unexporting registry and repo fields as these should not be changed in the code
+
+	// write an update function that gets all images again and places the changed one in the correct array index by comparing repo names if there is more than one image
+
 	fmt.Println(customResource.WithImages(images))
 	return nil, nil
 }
