@@ -40,7 +40,7 @@ func parseImage(repo string, tag string) (*Image, error) {
 	}, nil
 }
 
-func findImages(v reflect.Value, arr *[]Image) {
+func findImage(v reflect.Value, image *Image, serviceName string) {
 	fmt.Printf("Visiting %v\n", v)
 	// Indirect through pointers and interfaces
 	for v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface {
@@ -49,7 +49,7 @@ func findImages(v reflect.Value, arr *[]Image) {
 	switch v.Kind() {
 	case reflect.Array, reflect.Slice:
 		for i := 0; i < v.Len(); i++ {
-			findImages(v.Index(i), arr)
+			findImage(v.Index(i), image, serviceName)
 		}
 	case reflect.Map:
 		for _, k := range v.MapKeys() {
@@ -60,13 +60,17 @@ func findImages(v reflect.Value, arr *[]Image) {
 					fmt.Println(err)
 					return
 				}
-				*arr = append(*arr, Image{
-					Registry:   img.Registry,
-					Repository: img.Repository,
-					Tag:        img.Tag,
-				})
+				if img.Repository == serviceName {
+					*image = *img
+					return
+				}
+				// *arr = append(*arr, Image{
+				// 	Registry:   img.Registry,
+				// 	Repository: img.Repository,
+				// 	Tag:        img.Tag,
+				// })
 			}
-			findImages(v.MapIndex(k), arr)
+			findImage(v.MapIndex(k), image, serviceName)
 		}
 	default:
 		// handle other types
@@ -115,25 +119,24 @@ func LoadImage(serviceName string, client GitCommands) (*Image, error) {
 		return nil, err
 	}
 
-	images := make([]Image, 0)
-	findImages(reflect.ValueOf(customResource.Spec.Values), &images)
-	fmt.Println(images)
-	images[0].Tag = "this tag is updated img 0"
-	images[1].Tag = "this tag is updated img 1"
+	image := Image{}
+	findImage(reflect.ValueOf(customResource.Spec.Values), &image, serviceName)
+	fmt.Println(image)
+	//images[0].Tag = "this tag is updated img 0"
+	//images[1].Tag = "this tag is updated img 1"
 
 	// get the image
 	// if there is more than 1 grab which ever one's repo name matches service name being queried.
-	// consider unexporting registry and repo fields as these should not be changed in the code
 
 	// write an update function that gets all images again and places the changed one in the correct array index by comparing repo names if there is more than one image
 
-	fmt.Println(customResource.WithImages(images))
+	//fmt.Println(customResource.WithImages(images))
 	return nil, nil
 }
 
-func (r HelmRelease) WithImages(imgs []Image) HelmRelease {
-	i := 0
-	newVals := update(reflect.ValueOf(r.Spec.Values), imgs, &i)
-	r.Spec.Values = newVals
-	return r
-}
+// func (r HelmRelease) WithImages(img Image) HelmRelease {
+// 	i := 0
+// 	newVals := update(reflect.ValueOf(r.Spec.Values), img, &i)
+// 	r.Spec.Values = newVals
+// 	return r
+// }
