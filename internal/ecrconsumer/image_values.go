@@ -63,10 +63,10 @@ func findImages(v reflect.Value, arr *[]Image) {
 	case reflect.Map:
 		for _, k := range v.MapKeys() {
 			if k.Interface().(string) == "image" {
-				i := v.MapIndex(k).Interface().(map[string]interface{})
+				i := v.MapIndex(k).Interface().(map[interface{}]interface{})
 				img, err := parseImage(i["repository"].(string), i["tag"].(string))
 				if err != nil {
-					fmt.Println("image parse failure")
+					fmt.Println(err)
 					return
 				}
 				*arr = append(*arr, Image{
@@ -95,8 +95,8 @@ func update(v reflect.Value, images []Image, iterator *int) map[string]interface
 	case reflect.Map:
 		for _, k := range v.MapKeys() {
 			if k.Interface().(string) == "image" {
-				v.MapIndex(k).Interface().(map[string]interface{})["repository"] = images[*iterator].Registry + "/" + images[*iterator].Repository
-				v.MapIndex(k).Interface().(map[string]interface{})["tag"] = images[*iterator].Tag
+				v.MapIndex(k).Interface().(map[interface{}]interface{})["repository"] = images[*iterator].Registry + "/" + images[*iterator].Repository
+				v.MapIndex(k).Interface().(map[interface{}]interface{})["tag"] = images[*iterator].Tag
 				*iterator++
 				if *iterator == len(images) { // when all images are updated
 					return v.Interface().(map[string]interface{})
@@ -123,32 +123,32 @@ func LoadImage(serviceName string, client GitCommands) (*Image, error) {
 	if err != nil {
 		return nil, err
 	}
-	m := map[string]interface{}{
-		"apples": "delicious",
-		"oranges": map[string]interface{}{
-			"foo": 123456,
-			"not-image": map[string]interface{}{
-				"repository": "bar/foo",
-				"tag":        "hello, world",
-			},
-			"image": map[string]interface{}{
-				"repository": "bar/foo",
-				"tag":        "hello, world",
-			},
-		},
-		"image": map[string]interface{}{
-			"repository": "bar/foo",
-			"tag":        "hello, world",
-		},
-	}
-	fmt.Println(m)
+	// m := map[string]interface{}{
+	// 	"apples": "delicious",
+	// 	"oranges": map[string]interface{}{
+	// 		"foo": 123456,
+	// 		"not-image": map[string]interface{}{
+	// 			"repository": "bar/foo",
+	// 			"tag":        "hello, world",
+	// 		},
+	// 		"image": map[string]interface{}{
+	// 			"repository": "bar/foo",
+	// 			"tag":        "hello, world",
+	// 		},
+	// 	},
+	// 	"image": map[string]interface{}{
+	// 		"repository": "bar/foo",
+	// 		"tag":        "hello, world",
+	// 	},
+	// }
+	// fmt.Println(m)
 	images := make([]Image, 0)
-	findImages(reflect.ValueOf(m), &images)
+	findImages(reflect.ValueOf(customResource.Spec.Values), &images)
 	fmt.Println(images)
 	images[0].Tag = "this tag is updated img 0"
-	images[1].Tag = "this tag is updated img 1"
+	//images[1].Tag = "this tag is updated img 1"
 	i := 0
-	fmt.Println(update(reflect.ValueOf(m), images, &i))
+	fmt.Println(update(reflect.ValueOf(customResource.Spec.Values), images, &i))
 	return nil, nil
 	//return parseImage(serviceName, customResource.Spec.Values.Image.Repository, customResource.Spec.Values.Image.Tag)
 }
