@@ -2,14 +2,13 @@ package helmrelease
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 )
 
 // HelmReleaseSpec defines the desired state of HelmRelease
 type HelmReleaseSpec struct {
-	ReleaseName string                          `json:"releaseName"`
-	Chart       ChartSpec                       `json:"chart"`
-	Values      map[string]runtime.Unstructured `json:"values"`
+	ReleaseName string                 `json:"releaseName"`
+	Chart       ChartSpec              `json:"chart"`
+	Values      map[string]interface{} `json:"values"`
 }
 
 // HelmReleaseSpec defines the desired Helm chart

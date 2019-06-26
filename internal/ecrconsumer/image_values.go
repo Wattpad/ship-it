@@ -6,6 +6,8 @@ import (
 	"reflect"
 	"strings"
 
+	"ship-it/internal/helmrelease"
+
 	"github.com/google/go-github/github"
 	"gopkg.in/yaml.v2"
 )
@@ -77,7 +79,7 @@ func findImage(v reflect.Value, image *Image, serviceName string) {
 	}
 }
 
-func update(v reflect.Value, images []Image, iterator *int) map[string]interface{} {
+func update(v reflect.Value, image Image) map[string]interface{} {
 	// Indirect through pointers and interfaces
 	for v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface {
 		v = v.Elem()
@@ -85,19 +87,26 @@ func update(v reflect.Value, images []Image, iterator *int) map[string]interface
 	switch v.Kind() {
 	case reflect.Array, reflect.Slice:
 		for i := 0; i < v.Len(); i++ {
-			update(v.Index(i), images, iterator)
+			update(v.Index(i), image)
 		}
 	case reflect.Map:
 		for _, k := range v.MapKeys() {
 			if k.Interface().(string) == "image" {
-				v.MapIndex(k).Interface().(map[interface{}]interface{})["repository"] = images[*iterator].Registry + "/" + images[*iterator].Repository
-				v.MapIndex(k).Interface().(map[interface{}]interface{})["tag"] = images[*iterator].Tag
-				*iterator++
-				if *iterator == len(images) { // when all images are updated
+				// parse image and check for service name match only then can the field be updated and returned
+				repo := v.MapIndex(k).Interface().(map[interface{}]interface{})["repository"].(string)
+				tag := v.MapIndex(k).Interface().(map[interface{}]interface{})["tag"].(string)
+				foundImage, err := parseImage(repo, tag)
+				if err != nil {
+					fmt.Println(err)
+					return nil
+				}
+				if foundImage.Repository == image.Repository {
+					v.MapIndex(k).Interface().(map[interface{}]interface{})["repository"] = image.Registry + "/" + image.Repository
+					v.MapIndex(k).Interface().(map[interface{}]interface{})["tag"] = image.Tag
 					return v.Interface().(map[string]interface{})
 				}
 			}
-			update(v.MapIndex(k), images, iterator)
+			update(v.MapIndex(k), image)
 		}
 	default:
 		// handle other types
@@ -112,13 +121,13 @@ func LoadImage(serviceName string, client GitCommands) (*Image, error) {
 		return nil, err
 	}
 
-	var customResource HelmRelease
+	var customResource helmrelease.HelmRelease
 
 	err = yaml.Unmarshal(resourceBytes, &customResource)
 	if err != nil {
 		return nil, err
 	}
-
+	fmt.Println(customResource)
 	image := Image{}
 	findImage(reflect.ValueOf(customResource.Spec.Values), &image, serviceName)
 	fmt.Println(image)
@@ -129,14 +138,14 @@ func LoadImage(serviceName string, client GitCommands) (*Image, error) {
 	// if there is more than 1 grab which ever one's repo name matches service name being queried.
 
 	// write an update function that gets all images again and places the changed one in the correct array index by comparing repo names if there is more than one image
-
-	//fmt.Println(customResource.WithImages(images))
+	image.Tag = "This is a new tag"
+	fmt.Println(WithImage(image, customResource))
 	return nil, nil
 }
 
-// func (r HelmRelease) WithImages(img Image) HelmRelease {
-// 	i := 0
-// 	newVals := update(reflect.ValueOf(r.Spec.Values), img, &i)
-// 	r.Spec.Values = newVals
-// 	return r
-// }
+func WithImage(img Image, r helmrelease.HelmRelease) helmrelease.HelmRelease {
+	newVals := update(reflect.ValueOf(r.Spec.Values), img)
+	// will have to cast map to runtime.Unstructured
+	r.Spec.Values = newVals
+	return r
+}
