@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"ship-it/internal/models"
+	"ship-it/internal/api/models"
 
 	"github.com/alecthomas/jsonschema"
 )

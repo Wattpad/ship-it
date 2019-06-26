@@ -37,7 +37,7 @@ run: build
 internal/models/*.go:
 
 # api docs should be rebuilt when model code changes
-api/*.json: internal/models/*.go
+api/*.json: internal/api/models/*.go
 	go run tools/jsonschema/main.go
 
 jsonschema: api/*.json
