@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"ship-it/internal/api/middleware"
-	"ship-it/internal/models"
+	"ship-it/internal/api/models"
 
 	"github.com/go-chi/chi"
 	"github.com/go-kit/kit/metrics"

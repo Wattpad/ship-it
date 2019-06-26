@@ -9,12 +9,10 @@ import (
 	"time"
 
 	"ship-it/internal/api"
-	"ship-it/internal/ecrconsumer"
-	"ship-it/internal/integrations/k8s"
-	"ship-it/internal/service"
+	"ship-it/internal/api/config"
+	"ship-it/internal/api/integrations/k8s"
+	"ship-it/internal/api/service"
 
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics/dogstatsd"
 )
@@ -36,28 +34,14 @@ func main() {
 		cancel()
 	}()
 
-	envConf, err := FromEnv()
+	cfg, err := config.FromEnv()
 	if err != nil {
 		logger.Log("error", err)
 		os.Exit(1)
 	}
 
 	dd := dogstatsd.New("wattpad.ship-it.", logger)
-	go dd.SendLoop(time.Tick(time.Second), "udp", envConf.DataDogAddress())
-
-	s, err := session.NewSession(envConf.AWS())
-	if err != nil {
-		logger.Log("error", err)
-		os.Exit(1)
-	}
-
-	consumer, err := ecrconsumer.New(logger, dd.NewTiming("worker.time", 1.0).With("worker", "ecrconsumer", "queue", envConf.QueueName), envConf.QueueName, sqs.New(s))
-	if err != nil {
-		logger.Log("error", err)
-		os.Exit(1)
-	}
-
-	go consumer.Run(ctx)
+	go dd.SendLoop(time.Tick(time.Second), "udp", cfg.DataDogAddress())
 
 	k8s, err := k8s.New()
 	if err != nil {
@@ -72,7 +56,7 @@ func main() {
 	}
 
 	srv := http.Server{
-		Addr:    ":" + envConf.ServicePort,
+		Addr:    ":" + cfg.ServicePort,
 		Handler: api.New(svc, dd.NewTiming("api.time", 1.0)),
 	}
 

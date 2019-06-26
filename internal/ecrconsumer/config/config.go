@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"net"
@@ -13,7 +13,6 @@ type Config struct {
 	DogstatsdHost string `split_words:"true" required:"true"`
 	DogstatsdPort string `split_words:"true" default:"8125"`
 	QueueName     string `split_words:"true" required:"true"`
-	ServicePort   string `split_words:"true" default:"80"`
 	GithubToken   string `split_words:"true" required:"true"`
 	GithubOrg     string `split_words:"true" required:"true"`
 }

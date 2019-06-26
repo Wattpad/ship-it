@@ -1,7 +1,7 @@
 package k8s
 
 import (
-	"ship-it/internal/models"
+	"ship-it/internal/api/models"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"

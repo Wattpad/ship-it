@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"ship-it/internal/models"
+	"ship-it/internal/api/models"
 
 	v1 "k8s.io/api/core/v1"
 )
