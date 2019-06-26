@@ -21,20 +21,20 @@ jobs:
   include:
     - stage: Build
       name: Docker
-      script: make build
+      script:
+        - TARGET=ship-it-api make build
+        - TARGET=ship-it-ecrconsumer make build
 
     - stage: Test
-      name: GoLint
+      name: Go
       install: go get "github.com/golangci/golangci-lint/cmd/golangci-lint"
-      script: golangci-lint run -D errcheck -E goimports -E interfacer ./...
+      script: 
+        - golangci-lint run -D errcheck -E goimports -E interfacer ./...
+        - go test ./...
     
     - stage: Test
-      name: JSLint
-      script: cd web && npm install -D && npm run lint
-
-    - stage: Test
-      name: Test
-      script: go test ./...
+      name: JavaScript
+      script: cd web && npm install -D && npm run lint && npm run test
 
     - stage: Push
       name: Push
@@ -42,7 +42,9 @@ jobs:
       before_script:
         - export PATH=$PATH:$HOME/.local/bin
         - eval $(aws ecr get-login --no-include-email --region us-east-1)
-      script: make push
+      script:
+        - TARGET=ship-it-api make push
+        - TARGET=ship-it-ecrconsumer make push
 
 branches:
   only:

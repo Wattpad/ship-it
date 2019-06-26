@@ -14,6 +14,11 @@ import Paper from '@material-ui/core/Paper'
 import ListItem from '@material-ui/core/ListItem'
 import ListItemText from '@material-ui/core/ListItemText'
 import List from '@material-ui/core/List'
+import { CircularProgress, Link, Collapse } from '@material-ui/core'
+import ExpandLess from '@material-ui/icons/ExpandLess'
+import ExpandMore from '@material-ui/icons/ExpandMore'
+import axios from 'axios'
+import urljoin from 'url-join'
 
 const theme = createMuiTheme({
   palette: {
@@ -26,100 +31,176 @@ const theme = createMuiTheme({
   }
 })
 
+const linkTheme = createMuiTheme({
+  palette: {
+    primary: {
+      main: '#000000'
+    },
+    secondary: {
+      main: '#FEAF0A'
+    }
+  }
+})
+
+const nestedStyle = {
+  paddingLeft: theme.spacing(4)
+}
+
 const imgAlt = 'not found'
 
 class ExpandedDetail extends React.Component {
+
   constructor(props) {
     super(props)
-    this.state = {}
+    this.state = {
+      podsVisible: false,
+      resourcesVisible: false,
+      pods: null,
+      resources: null
+    }
+  }
+
+  podClick = () => {
+    this.setState({podsVisible: !this.state.podsVisible})
+    axios.get(urljoin(this.props.API_ADDRESS, 'releases', this.props.data.name, 'resources')).then(response => {
+      this.setState({
+        pods: response.data.filter((d) => d.kind === 'Pod'),
+        resources: response.data.filter((d) => d.kind !== 'Pod')
+      })
+    })
+  }
+
+  resourceClick = () => {
+    this.setState({resourcesVisible: !this.state.resourcesVisible})
   }
 
   render() {
     return (
-      <MuiThemeProvider theme={theme} >
-        <div className="flex-container">
-          <div className="helm-status">
-            <div className="right-padded">
-              <img src={HelmIcon} width="32" height="32" alt={imgAlt} />
-            </div>
+      <div>
+        {
+          this.props.data ? 
             <div>
-              <Typography variant="h5">ChartVersion</Typography>
-            </div>
-          </div>
+              <div className="flex-container">
+                <div className="helm-status">
+                  <div className="right-padded">
+                    <img src={HelmIcon} width="32" height="32" alt={imgAlt} />
+                  </div>
+                  <div>
+                    <Typography variant="h5">{this.props.data.artifacts.chart.version}</Typography>
+                  </div>
+                </div>
 
-          <div className="switch-status">
-            <FormControlLabel
-              control={
-                <Switch color="primary" />
-              }
-              label="AutoDeploy"
-            />
-          </div>
-
-          <div className="dataDog-status">
-            <div className="right-padded">
-              <img src={DataDogIcon} width="32" height="32" alt={imgAlt} />
-            </div>
-            <div>
-              <Typography variant="h6">Dashboard | Monitor</Typography>
-            </div>
-
-          </div>
-        </div>
-        <div className="flex-container">
-          <div className="kube-status">
-            <div className="right-padded">
-              <img src={KubeIcon} width="32" height="32" alt={imgAlt} />
-            </div>
-            <div>
-              <Typography variant="h6">Resources</Typography>
-            </div>
-          </div>
-          <div className="log-status">
-            <div className="right-padded">
-              <img src={SumoIcon} width="32" height="32" alt={imgAlt} />
-            </div>
-            <div>
-              <Typography variant="h6">Logs</Typography>
-            </div>
-            <div className="double-padded">
-              <img src={TravisIcon} width="32" height="32" alt={imgAlt} />
-            </div>
-            <div>
-              <Typography variant="h6">Build</Typography>
-            </div>
-          </div>
-        </div>
-        <div className="kube-resource-list">
-          <Paper style={{ maxHeight: '200px', minWidth: '100%', overflow: 'auto' }}>
-            <List
-              component="nav"
-            >
-              <ListItem button>
-                <ListItemText>Pod</ListItemText>
-              </ListItem>
-              <ListItem button>
-                <ListItemText>Pod</ListItemText>
-              </ListItem>
-              <ListItem button>
-                <ListItemText>Pod</ListItemText>
-              </ListItem>
-              <ListItem button>
-                <ListItemText>Pod</ListItemText>
-              </ListItem>
-              <ListItem button>
-                <ListItemText>Pod</ListItemText>
-              </ListItem>
-              <ListItem button>
-                <ListItemText>Pod</ListItemText>
-              </ListItem>
-              <ListItem button>
-                <ListItemText>Pod</ListItemText>
-              </ListItem>
-            </List>
-          </Paper>
-        </div>
-      </MuiThemeProvider>
+                <MuiThemeProvider theme={theme}>
+                  <div className="switch-status">
+                    <FormControlLabel
+                      control={
+                        <Switch color="primary" checked={this.props.data.autoDeploy} />
+                      }
+                      label="AutoDeploy"
+                    />
+                  </div>
+                </MuiThemeProvider>
+                <MuiThemeProvider theme={linkTheme}>
+                  <div className="dataDog-status">
+                    <div className="right-padded">
+                      <img src={DataDogIcon} width="32" height="32" alt={imgAlt} />
+                    </div>
+                    <div>
+                      <Typography variant="h6">
+                        <Link href={this.props.data.monitoring.datadog.dashboard}>Dashboard</Link>
+                      </Typography>
+                    </div>
+                    <div>
+                      <Typography variant="h6">&nbsp;|&nbsp;</Typography>
+                    </div>
+                    <div>
+                      <Typography variant="h6">
+                        <Link href={this.props.data.monitoring.datadog.monitors}>Monitor</Link>
+                      </Typography>
+                    </div>
+                  </div>
+                </MuiThemeProvider>
+              </div>
+              <div className="flex-container">
+                <div className="kube-status">
+                  <div className="right-padded">
+                    <img src={KubeIcon} width="32" height="32" alt={imgAlt} />
+                  </div>
+                  <div>
+                    <Typography variant="h6">Resources</Typography>
+                  </div>
+                </div>
+                <div className="log-status">
+                  <div className="right-padded">
+                    <img src={SumoIcon} width="32" height="32" alt={imgAlt} />
+                  </div>
+                  <div>
+                    <Typography variant="h6">
+                      <Link href={this.props.data.monitoring.sumologic}>Logs</Link>
+                    </Typography>
+                  </div>
+                  <div className="double-padded">
+                    <img src={TravisIcon} width="32" height="32" alt={imgAlt} />
+                  </div>
+                  <div>
+                    <Typography variant="h6">
+                      <Link href={this.props.data.build.travis}>Build</Link>
+                    </Typography>
+                  </div>
+                </div>
+              </div>
+              <div className="kube-resource-list">
+                <Paper style={{ maxHeight: '200px', minWidth: '100%', overflow: 'auto' }}>
+                  <List
+                    component="nav"
+                  >
+                    <ListItem button onClick={this.podClick}>
+                      <ListItemText>Pods</ListItemText>
+                      {this.state.podsVisible ? <ExpandLess /> : <ExpandMore />}
+                    </ListItem>
+                    <Collapse in={this.state.podsVisible} timeout='auto' unmountOnExit>
+                      <List component="div" disablePadding>
+                        {
+                          this.state.pods ? 
+                          <div>
+                            {
+                              this.state.pods.map((pod) =>
+                                <ListItem button style={nestedStyle} key={pod.metadata.name}>
+                                  <ListItemText>{pod.metadata.name}</ListItemText>
+                                </ListItem>
+                              )
+                            }
+                          </div>
+                          : <CircularProgress/>
+                        }
+                      </List>
+                    </Collapse>
+                    <ListItem button onClick={this.resourceClick}>
+                      <ListItemText>Other Resources</ListItemText>
+                      {this.state.resourcesVisible ? <ExpandLess /> : <ExpandMore />}
+                    </ListItem>
+                    <Collapse in={this.state.resourcesVisible} timeout='auto' unmountOnExit>
+                      <List component="div" disablePadding>
+                        {
+                          this.state.resources ? 
+                          <div>
+                            {
+                              this.state.resources.map((resource) => 
+                                <ListItem style={nestedStyle} key={resource.kind}>
+                                  <ListItemText>{resource.kind}</ListItemText>
+                                </ListItem>
+                              )
+                            }
+                          </div> : <CircularProgress/>
+                        }
+                      </List>
+                    </Collapse>
+                  </List>
+                </Paper>
+              </div>
+            </div> : <CircularProgress />
+        }
+      </div>
     )
   }
 }
