@@ -8,7 +8,6 @@ import (
 
 	"github.com/google/go-github/github"
 	"gopkg.in/yaml.v2"
-	"k8s.io/helm/pkg/chartutil"
 )
 
 type GitCommands interface {
@@ -17,13 +16,12 @@ type GitCommands interface {
 }
 
 type Image struct {
-	service    string
 	Registry   string
 	Repository string
 	Tag        string
 }
 
-func parseImage(serviceName string, repo string, tag string) (*Image, error) {
+func parseImage(repo string, tag string) (*Image, error) {
 	arr := strings.Split(repo, "/")
 
 	var registry string
@@ -36,23 +34,10 @@ func parseImage(serviceName string, repo string, tag string) (*Image, error) {
 	}
 
 	return &Image{
-		service:    serviceName,
 		Registry:   registry,
 		Repository: repository,
 		Tag:        tag,
 	}, nil
-}
-
-func getKeys(vals chartutil.Values) []string {
-	var keys []string
-	for k := range vals {
-		keys = append(keys, k)
-	}
-	fmt.Println(keys)
-	if len(keys) == 0 {
-		return nil
-	}
-	return keys
 }
 
 func checkForImageKey(keys []string) bool {
@@ -64,56 +49,7 @@ func checkForImageKey(keys []string) bool {
 	return false
 }
 
-func getVal(keys []string, deepMap map[string]interface{}) interface{} {
-	if len(keys) == 1 {
-		return deepMap[keys[0]]
-	}
-
-	return getVal(keys[1:], deepMap[keys[0]].(map[string]interface{}))
-}
-
-func breadthSearch(graph map[string]interface{}, start string, end string) string {
-	// queue := make([]string, 0)
-	// queue = append(queue, start)
-
-	// for len(queue) != 0 {
-	// 	path := queue[0]
-	// 	queue = queue[1:]
-
-	// }
-	return ""
-}
-
-//func findImages() interface{} {
-// m := chartutil.Values{
-// 	"apples": []string{"delicious", "green", "red"},
-// 	"oranges": map[string]interface{}{
-// 		"foo": 123456,
-// 		"image": map[string]interface{}{
-// 			"repo": "bar",
-// 			"tag":  "hello, world",
-// 		},
-// 	},
-// 	// "image": map[string]interface{}{
-// 	// 	"foo": 123456,
-// 	// 	"bar": "hello, world",
-// 	// },
-// }
-// keys := getKeys(m)
-// imageKeys := make([]string, 0)
-// values := m
-// for i := range keys {
-// 	if keys[i] == "image" {
-// 		imageKeys = append(imageKeys, keys[i])
-// 	} else {
-// 		tabled, _ := values.Table(keys[i])
-// 		breadthSearch([]string{"image"}, tabled)
-// 	}
-// }
-//return breadthSearch([]string{"image"}, m)
-//}
-
-func findImages(v reflect.Value, imgMap *map[string]string, arr *[]map[string]string) {
+func findImages(v reflect.Value, arr *[]Image) {
 	fmt.Printf("Visiting %v\n", v)
 	// Indirect through pointers and interfaces
 	for v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface {
@@ -122,28 +58,56 @@ func findImages(v reflect.Value, imgMap *map[string]string, arr *[]map[string]st
 	switch v.Kind() {
 	case reflect.Array, reflect.Slice:
 		for i := 0; i < v.Len(); i++ {
-			findImages(v.Index(i), imgMap, arr)
+			findImages(v.Index(i), arr)
 		}
 	case reflect.Map:
 		for _, k := range v.MapKeys() {
-			_, ok := v.MapIndex(k).Interface().(map[string]interface{})
-			if ok {
-				//*path = *path + "." + k.Interface().(string)
-			}
-			//*path = *path + "." + k.Interface().(string)
 			if k.Interface().(string) == "image" {
 				i := v.MapIndex(k).Interface().(map[string]interface{})
-				*imgMap = map[string]string{
-					"repository": i["repo"].(string),
-					"tag":        i["tag"].(string),
+				img, err := parseImage(i["repository"].(string), i["tag"].(string))
+				if err != nil {
+					fmt.Println("image parse failure")
+					return
 				}
-				*arr = append(*arr, *imgMap)
+				*arr = append(*arr, Image{
+					Registry:   img.Registry,
+					Repository: img.Repository,
+					Tag:        img.Tag,
+				})
 			}
-			findImages(v.MapIndex(k), imgMap, arr)
+			findImages(v.MapIndex(k), arr)
 		}
 	default:
 		// handle other types
 	}
+}
+
+func update(v reflect.Value, images []Image, iterator *int) map[string]interface{} {
+	// Indirect through pointers and interfaces
+	for v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface {
+		v = v.Elem()
+	}
+	switch v.Kind() {
+	case reflect.Array, reflect.Slice:
+		for i := 0; i < v.Len(); i++ {
+			update(v.Index(i), images, iterator)
+		}
+	case reflect.Map:
+		for _, k := range v.MapKeys() {
+			if k.Interface().(string) == "image" {
+				v.MapIndex(k).Interface().(map[string]interface{})["repository"] = images[*iterator].Registry + "/" + images[*iterator].Repository
+				v.MapIndex(k).Interface().(map[string]interface{})["tag"] = images[*iterator].Tag
+				*iterator++
+				if *iterator == len(images) { // when all images are updated
+					return v.Interface().(map[string]interface{})
+				}
+			}
+			update(v.MapIndex(k), images, iterator)
+		}
+	default:
+		// handle other types
+	}
+	return nil
 }
 
 func LoadImage(serviceName string, client GitCommands) (*Image, error) {
@@ -159,30 +123,32 @@ func LoadImage(serviceName string, client GitCommands) (*Image, error) {
 	if err != nil {
 		return nil, err
 	}
-	getKeys(customResource.Spec.Values)
-	m := chartutil.Values{
+	m := map[string]interface{}{
 		"apples": "delicious",
 		"oranges": map[string]interface{}{
 			"foo": 123456,
-			"image1": map[string]interface{}{
-				"repo": "bar",
-				"tag":  "hello, world",
+			"not-image": map[string]interface{}{
+				"repository": "bar/foo",
+				"tag":        "hello, world",
 			},
 			"image": map[string]interface{}{
-				"repo": "bar",
-				"tag":  "hello, world",
+				"repository": "bar/foo",
+				"tag":        "hello, world",
 			},
 		},
 		"image": map[string]interface{}{
-			"repo": "this is a repo",
-			"tag":  "hello, world",
+			"repository": "bar/foo",
+			"tag":        "hello, world",
 		},
 	}
-	imgMap := map[string]string{}
-	images := make([]map[string]string, 0)
-	copy := m
-	findImages(reflect.ValueOf(copy), &imgMap, &images)
+	fmt.Println(m)
+	images := make([]Image, 0)
+	findImages(reflect.ValueOf(m), &images)
 	fmt.Println(images)
+	images[0].Tag = "this tag is updated img 0"
+	images[1].Tag = "this tag is updated img 1"
+	i := 0
+	fmt.Println(update(reflect.ValueOf(m), images, &i))
 	return nil, nil
 	//return parseImage(serviceName, customResource.Spec.Values.Image.Repository, customResource.Spec.Values.Image.Tag)
 }
