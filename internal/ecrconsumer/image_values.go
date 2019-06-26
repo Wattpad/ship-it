@@ -114,25 +114,7 @@ func LoadImage(serviceName string, client GitCommands) (*Image, error) {
 	if err != nil {
 		return nil, err
 	}
-	// m := map[string]interface{}{
-	// 	"apples": "delicious",
-	// 	"oranges": map[string]interface{}{
-	// 		"foo": 123456,
-	// 		"not-image": map[string]interface{}{
-	// 			"repository": "bar/foo",
-	// 			"tag":        "hello, world",
-	// 		},
-	// 		"image": map[string]interface{}{
-	// 			"repository": "bar/foo",
-	// 			"tag":        "hello, world",
-	// 		},
-	// 	},
-	// 	"image": map[string]interface{}{
-	// 		"repository": "bar/foo",
-	// 		"tag":        "hello, world",
-	// 	},
-	// }
-	// fmt.Println(m)
+
 	images := make([]Image, 0)
 	findImages(reflect.ValueOf(customResource.Spec.Values), &images)
 	fmt.Println(images)
@@ -141,39 +123,9 @@ func LoadImage(serviceName string, client GitCommands) (*Image, error) {
 	i := 0
 	fmt.Println(update(reflect.ValueOf(customResource.Spec.Values), images, &i))
 	return nil, nil
-	//return parseImage(serviceName, customResource.Spec.Values.Image.Repository, customResource.Spec.Values.Image.Tag)
 }
 
-func (i *Image) Update(client GitCommands) error {
-	//msg := fmt.Sprintf("Image Update --> Registry: %s, Repository: %s, Tag: %s", i.Registry, i.Repository, i.Tag)
-	//path := filepath.Join("k8s/custom-resources", i.service+".yaml")
-
-	// we assume this file path until a location in miranda for custom resources is decided upon
-	//resourceBytes, err := client.GetFile("master", filepath.Join("k8s/custom-resources", i.service+".yaml"))
-	//if err != nil {
-	//	return err
-	//}
-
-	//customResource := HelmRelease{}
-
-	// err = yaml.Unmarshal(resourceBytes, &customResource)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// Replace get Image helper func calls
-	//customResource.Spec.Values.Image.Repository = filepath.Join(i.Registry, i.Repository)
-	//customResource.Spec.Values.Image.Tag = i.Tag
-
-	// updatedBytes, err := yaml.Marshal(customResource)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// _, err = client.UpdateFile(msg, "master", path, updatedBytes)
-	// if err != nil {
-	// 	return err
-	// }
-
-	return nil
+func (r *HelmRelease) WithImages(imgs []Image) (*HelmRelease, error) {
+	// reassign values field of r and return r
+	return nil, nil
 }
