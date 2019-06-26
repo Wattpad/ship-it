@@ -40,15 +40,6 @@ func parseImage(repo string, tag string) (*Image, error) {
 	}, nil
 }
 
-func checkForImageKey(keys []string) bool {
-	for k := range keys {
-		if keys[k] == "image" {
-			return true
-		}
-	}
-	return false
-}
-
 func findImages(v reflect.Value, arr *[]Image) {
 	fmt.Printf("Visiting %v\n", v)
 	// Indirect through pointers and interfaces
@@ -146,7 +137,7 @@ func LoadImage(serviceName string, client GitCommands) (*Image, error) {
 	findImages(reflect.ValueOf(customResource.Spec.Values), &images)
 	fmt.Println(images)
 	images[0].Tag = "this tag is updated img 0"
-	//images[1].Tag = "this tag is updated img 1"
+	images[1].Tag = "this tag is updated img 1"
 	i := 0
 	fmt.Println(update(reflect.ValueOf(customResource.Spec.Values), images, &i))
 	return nil, nil
