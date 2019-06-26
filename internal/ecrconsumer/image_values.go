@@ -120,12 +120,14 @@ func LoadImage(serviceName string, client GitCommands) (*Image, error) {
 	fmt.Println(images)
 	images[0].Tag = "this tag is updated img 0"
 	images[1].Tag = "this tag is updated img 1"
-	i := 0
-	fmt.Println(update(reflect.ValueOf(customResource.Spec.Values), images, &i))
+
+	fmt.Println(customResource.WithImages(images))
 	return nil, nil
 }
 
-func (r *HelmRelease) WithImages(imgs []Image) (*HelmRelease, error) {
-	// reassign values field of r and return r
-	return nil, nil
+func (r HelmRelease) WithImages(imgs []Image) HelmRelease {
+	i := 0
+	newVals := update(reflect.ValueOf(r.Spec.Values), imgs, &i)
+	r.Spec.Values = newVals
+	return r
 }
