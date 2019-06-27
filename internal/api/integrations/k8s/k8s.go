@@ -9,23 +9,6 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
-	releaseList, err := k.helmreleases.HelmReleases(namespace).List(metav1.ListOptions{})
-	if err != nil {
-		return nil, err
-	}
-
-	var releases []models.Release
-	for _, r := range releaseList.Items {
-		releases = append(releases, models.Release{
-			Name:    r.GetName(),
-			Created: r.GetCreationTimestamp().Time,
-		})
-	}
-
-	return releases, nil
-}
-
 type K8sClient struct {
 	helmreleases v1alpha1.HelmreleasesV1alpha1Interface
 }
@@ -42,4 +25,21 @@ func New() (*K8sClient, error) {
 	}
 
 	return &K8sClient{client}, nil
+}
+
+func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
+	releaseList, err := k.helmreleases.HelmReleases(namespace).List(metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	var releases []models.Release
+	for _, r := range releaseList.Items {
+		releases = append(releases, models.Release{
+			Name:    r.GetName(),
+			Created: r.GetCreationTimestamp().Time,
+		})
+	}
+
+	return releases, nil
 }
