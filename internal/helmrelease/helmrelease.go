@@ -3,7 +3,7 @@ package helmrelease
 import (
 	"fmt"
 
-	"gopkg.in/yaml.v2"
+	"gopkg.in/json.v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	unstructured "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -57,7 +57,7 @@ func NewDecoder() runtime.Decoder {
 
 func (h HelmRelease) Encode() []byte {
 	data := make(map[string]interface{})
-	// create identical yaml to original with extra code gen fields
+	// create identical json to original with extra code gen fields
 	data["apiVersion"] = h.APIVersion
 	data["kind"] = h.Kind
 	data["metadata"] = h.ObjectMeta
@@ -69,10 +69,17 @@ func (h HelmRelease) Encode() []byte {
 
 	data["spec"] = spec
 	fmt.Println(data)
-	bytes, err := yaml.Marshal(data)
+	bytes, err := json.Marshal(h)
 	if err != nil {
 		fmt.Println(err)
 		return nil
 	}
+	testOut := make(map[string]interface{})
+	err = json.Unmarshal(bytes, &testOut)
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+	fmt.Println(testOut)
 	return bytes
 }
