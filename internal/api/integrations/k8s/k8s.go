@@ -3,33 +3,31 @@ package k8s
 import (
 	"ship-it/internal/api/models"
 
+	"ship-it/pkg/generated/clientset/versioned/typed/helmreleases.k8s.wattpad.com/v1alpha1"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
-	kv1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
 )
 
 func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
-	configMapList, err := k.core.ConfigMaps(namespace).List(metav1.ListOptions{})
+	releaseList, err := k.helmreleases.HelmReleases(namespace).List(metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
 
 	var releases []models.Release
-	for _, configMap := range configMapList.Items {
-		r := models.Release{
-			Name:    configMap.GetName(),
-			Created: configMap.GetCreationTimestamp().Time,
-		}
-
-		releases = append(releases, r)
+	for _, r := range releaseList.Items {
+		releases = append(releases, models.Release{
+			Name:    r.GetName(),
+			Created: r.GetCreationTimestamp().Time,
+		})
 	}
 
 	return releases, nil
 }
 
 type K8sClient struct {
-	core kv1.CoreV1Interface
+	helmreleases v1alpha1.HelmreleasesV1alpha1Interface
 }
 
 func New() (*K8sClient, error) {
@@ -38,10 +36,10 @@ func New() (*K8sClient, error) {
 		return nil, err
 	}
 
-	clientset, err := kubernetes.NewForConfig(config)
+	client, err := v1alpha1.NewForConfig(config)
 	if err != nil {
 		return nil, err
 	}
 
-	return &K8sClient{clientset.CoreV1()}, nil
+	return &K8sClient{client}, nil
 }
