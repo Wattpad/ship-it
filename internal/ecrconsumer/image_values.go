@@ -9,7 +9,6 @@ import (
 	"ship-it/internal/helmrelease"
 
 	"github.com/google/go-github/github"
-	"gopkg.in/yaml.v2"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
@@ -122,25 +121,6 @@ func LoadImage(serviceName string, client GitCommands) (*Image, error) {
 	gvk := schema.FromAPIVersionAndKind("helmreleases.k8s.wattpad.com/v1alpha1", "HelmRelease")
 	d.Decode(resourceBytes, &gvk, target)
 	fmt.Println(target.Spec.Values.Object)
-	fmt.Println("\n")
-
-	newBytes, err := yaml.Marshal(target)
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
-	if reflect.DeepEqual(newBytes, resourceBytes) {
-		fmt.Println("same bytes")
-		return nil, nil
-	}
-	newVals := make(map[string]interface{})
-	err = yaml.Unmarshal(newBytes, &newVals)
-	if err != nil {
-		return nil, err
-	}
-	fmt.Println("\n new vals below \n")
-	fmt.Println(newVals)
-	fmt.Println("\n \n")
 
 	image := Image{}
 	findImage(reflect.ValueOf(target.Spec.Values.Object), &image, serviceName)
