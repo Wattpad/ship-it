@@ -43,7 +43,6 @@ func parseImage(repo string, tag string) (*Image, error) {
 }
 
 func findImage(v reflect.Value, image *Image, serviceName string) {
-	fmt.Printf("Visiting %v\n", v)
 	// Indirect through pointers and interfaces
 	for v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface {
 		v = v.Elem()
@@ -56,7 +55,7 @@ func findImage(v reflect.Value, image *Image, serviceName string) {
 	case reflect.Map:
 		for _, k := range v.MapKeys() {
 			if k.Interface().(string) == "image" {
-				i := v.MapIndex(k).Interface().(map[interface{}]interface{})
+				i := v.MapIndex(k).Interface().(map[string]interface{})
 				img, err := parseImage(i["repository"].(string), i["tag"].(string))
 				if err != nil {
 					fmt.Println(err)
@@ -88,16 +87,17 @@ func update(v reflect.Value, image Image) map[string]interface{} {
 		for _, k := range v.MapKeys() {
 			if k.Interface().(string) == "image" {
 				// parse image and check for service name match only then can the field be updated and returned
-				repo := v.MapIndex(k).Interface().(map[interface{}]interface{})["repository"].(string)
-				tag := v.MapIndex(k).Interface().(map[interface{}]interface{})["tag"].(string)
+				repo := v.MapIndex(k).Interface().(map[string]interface{})["repository"].(string)
+				tag := v.MapIndex(k).Interface().(map[string]interface{})["tag"].(string)
 				foundImage, err := parseImage(repo, tag)
 				if err != nil {
 					fmt.Println(err)
 					return nil
 				}
 				if foundImage.Repository == image.Repository {
-					v.MapIndex(k).Interface().(map[interface{}]interface{})["repository"] = image.Registry + "/" + image.Repository
-					v.MapIndex(k).Interface().(map[interface{}]interface{})["tag"] = image.Tag
+					v.MapIndex(k).Interface().(map[string]interface{})["repository"] = image.Registry + "/" + image.Repository
+					v.MapIndex(k).Interface().(map[string]interface{})["tag"] = image.Tag
+
 					return v.Interface().(map[string]interface{})
 				}
 			}
@@ -116,20 +116,18 @@ func LoadImage(serviceName string, client GitCommands) (*Image, error) {
 		return nil, err
 	}
 
-	var customResource helmrelease.HelmRelease
-
-	image := Image{}
-	findImage(reflect.ValueOf(customResource.Spec.Values), &image, serviceName)
-
 	target := &helmrelease.HelmRelease{}
 	d := helmrelease.NewDecoder()
 	gvk := schema.FromAPIVersionAndKind("helmreleases.k8s.wattpad.com/v1alpha1", "HelmRelease")
 	d.Decode(resourceBytes, &gvk, target)
-	fmt.Println(target.Spec.Values.Object)
+	//fmt.Println(target.Spec.Values.Object)
+
+	image := Image{}
+	findImage(reflect.ValueOf(target.Spec.Values.Object), &image, serviceName)
 
 	image.Tag = "This is a new tag" // change a value and print
-	fmt.Println(WithImage(image, customResource))
-
+	changed := WithImage(image, *target).Spec.Values.Object
+	fmt.Println(changed)
 	// Try encoding back to bytes to prep git commit
 
 	return nil, nil
@@ -137,6 +135,7 @@ func LoadImage(serviceName string, client GitCommands) (*Image, error) {
 
 func WithImage(img Image, r helmrelease.HelmRelease) helmrelease.HelmRelease {
 	newVals := update(reflect.ValueOf(r.Spec.Values.Object), img)
+
 	r.Spec.Values.Object = newVals
 	return r
 }
