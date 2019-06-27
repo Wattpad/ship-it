@@ -118,29 +118,20 @@ func LoadImage(serviceName string, client GitCommands) (*Image, error) {
 
 	var customResource helmrelease.HelmRelease
 
-	// err = yaml.Unmarshal(resourceBytes, &customResource)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	//fmt.Println(customResource)
 	image := Image{}
 	findImage(reflect.ValueOf(customResource.Spec.Values), &image, serviceName)
-	//fmt.Println(image)
-	//images[0].Tag = "this tag is updated img 0"
-	//images[1].Tag = "this tag is updated img 1"
 
-	// get the image
-	// if there is more than 1 grab which ever one's repo name matches service name being queried.
-
-	// write an update function that gets all images again and places the changed one in the correct array index by comparing repo names if there is more than one image
-	image.Tag = "This is a new tag"
-	//fmt.Println(WithImage(image, customResource))
 	target := &helmrelease.HelmRelease{}
 	d := helmrelease.NewDecoder()
 	gvk := schema.FromAPIVersionAndKind("helmreleases.k8s.wattpad.com/v1alpha1", "HelmRelease")
 	d.Decode(resourceBytes, &gvk, target)
 	fmt.Println(target.Spec.Values.Object)
+
+	image.Tag = "This is a new tag" // change a value and print
+	fmt.Println(WithImage(image, customResource))
+
+	// Try encoding back to bytes to prep git commit
+
 	return nil, nil
 }
 
