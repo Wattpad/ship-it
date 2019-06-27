@@ -1,18 +1,18 @@
 package helmrelease
 
 import (
-	"fmt"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	unstructured "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 )
 
 // HelmReleaseSpec defines the desired state of HelmRelease
 type HelmReleaseSpec struct {
-	ReleaseName string                 `json:"releaseName"`
-	Chart       ChartSpec              `json:"chart"`
-	Values      map[string]interface{} `json:"values"`
+	ReleaseName string                    `json:"releaseName"`
+	Chart       ChartSpec                 `json:"chart"`
+	Values      unstructured.Unstructured `json:"values"`
 }
 
 // HelmReleaseSpec defines the desired Helm chart
@@ -43,10 +43,17 @@ type HelmReleaseList struct {
 	Items           []HelmRelease `json:"items"`
 }
 
-func NewDecoder(schema *runtime.Scheme) (*runtime.Decoder, error) {
-	factory := serializer.NewCodecFactory(schema)
+func (h *HelmRelease) DeepCopyObject() runtime.Object {
+	return h
+}
+
+func NewDecoder(obj runtime.Object, data []byte) (*runtime.Decoder, error) {
+	factory := serializer.NewCodecFactory(runtime.NewScheme())
 	// make universal deserializer
 	decoder := factory.UniversalDeserializer()
-	fmt.Println(decoder)
+	//fmt.Println(decoder)
+	gvk := schema.FromAPIVersionAndKind("helmreleases.k8s.wattpad.com/v1alpha1", "HelmRelease")
+	//fmt.Println()
+	decoder.Decode(data, &gvk, obj)
 	return nil, nil
 }

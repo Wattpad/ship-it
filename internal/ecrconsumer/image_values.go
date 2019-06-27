@@ -9,7 +9,6 @@ import (
 	"ship-it/internal/helmrelease"
 
 	"github.com/google/go-github/github"
-	"gopkg.in/yaml.v2"
 )
 
 type GitCommands interface {
@@ -66,11 +65,6 @@ func findImage(v reflect.Value, image *Image, serviceName string) {
 					*image = *img
 					return
 				}
-				// *arr = append(*arr, Image{
-				// 	Registry:   img.Registry,
-				// 	Repository: img.Repository,
-				// 	Tag:        img.Tag,
-				// })
 			}
 			findImage(v.MapIndex(k), image, serviceName)
 		}
@@ -123,14 +117,15 @@ func LoadImage(serviceName string, client GitCommands) (*Image, error) {
 
 	var customResource helmrelease.HelmRelease
 
-	err = yaml.Unmarshal(resourceBytes, &customResource)
-	if err != nil {
-		return nil, err
-	}
-	fmt.Println(customResource)
+	// err = yaml.Unmarshal(resourceBytes, &customResource)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	//fmt.Println(customResource)
 	image := Image{}
 	findImage(reflect.ValueOf(customResource.Spec.Values), &image, serviceName)
-	fmt.Println(image)
+	//fmt.Println(image)
 	//images[0].Tag = "this tag is updated img 0"
 	//images[1].Tag = "this tag is updated img 1"
 
@@ -139,13 +134,16 @@ func LoadImage(serviceName string, client GitCommands) (*Image, error) {
 
 	// write an update function that gets all images again and places the changed one in the correct array index by comparing repo names if there is more than one image
 	image.Tag = "This is a new tag"
-	fmt.Println(WithImage(image, customResource))
+	//fmt.Println(WithImage(image, customResource))
+	target := &helmrelease.HelmRelease{}
+	helmrelease.NewDecoder(target, resourceBytes)
+	fmt.Println(target.Spec.Values.Object)
 	return nil, nil
 }
 
 func WithImage(img Image, r helmrelease.HelmRelease) helmrelease.HelmRelease {
-	newVals := update(reflect.ValueOf(r.Spec.Values), img)
+	//newVals := update(reflect.ValueOf(r.Spec.Values), img)
 	// will have to cast map to runtime.Unstructured
-	r.Spec.Values = newVals
+	//r.Spec.Values = newVals
 	return r
 }
