@@ -87,9 +87,7 @@ func update(v reflect.Value, image Image) map[string]interface{} {
 		for _, k := range v.MapKeys() {
 			if k.Interface().(string) == "image" {
 				// parse image and check for service name match only then can the field be updated and returned
-				repo := v.MapIndex(k).Interface().(map[string]interface{})["repository"].(string)
-				tag := v.MapIndex(k).Interface().(map[string]interface{})["tag"].(string)
-				foundImage, err := parseImage(repo, tag)
+				foundImage, err := parseImage(v.MapIndex(k).Interface().(map[string]interface{})["repository"].(string), v.MapIndex(k).Interface().(map[string]interface{})["tag"].(string))
 				if err != nil {
 					fmt.Println(err)
 					return nil
