@@ -4,7 +4,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	unstructured "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 )
 
@@ -47,13 +46,8 @@ func (h *HelmRelease) DeepCopyObject() runtime.Object {
 	return h
 }
 
-func NewDecoder(obj runtime.Object, data []byte) (*runtime.Decoder, error) {
+func NewDecoder() runtime.Decoder {
 	factory := serializer.NewCodecFactory(runtime.NewScheme())
-	// make universal deserializer
-	decoder := factory.UniversalDeserializer()
-	//fmt.Println(decoder)
-	gvk := schema.FromAPIVersionAndKind("helmreleases.k8s.wattpad.com/v1alpha1", "HelmRelease")
-	//fmt.Println()
-	decoder.Decode(data, &gvk, obj)
-	return nil, nil
+
+	return factory.UniversalDeserializer()
 }

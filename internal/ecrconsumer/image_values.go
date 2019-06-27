@@ -9,6 +9,7 @@ import (
 	"ship-it/internal/helmrelease"
 
 	"github.com/google/go-github/github"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 type GitCommands interface {
@@ -136,14 +137,15 @@ func LoadImage(serviceName string, client GitCommands) (*Image, error) {
 	image.Tag = "This is a new tag"
 	//fmt.Println(WithImage(image, customResource))
 	target := &helmrelease.HelmRelease{}
-	helmrelease.NewDecoder(target, resourceBytes)
+	d := helmrelease.NewDecoder()
+	gvk := schema.FromAPIVersionAndKind("helmreleases.k8s.wattpad.com/v1alpha1", "HelmRelease")
+	d.Decode(resourceBytes, &gvk, target)
 	fmt.Println(target.Spec.Values.Object)
 	return nil, nil
 }
 
 func WithImage(img Image, r helmrelease.HelmRelease) helmrelease.HelmRelease {
-	//newVals := update(reflect.ValueOf(r.Spec.Values), img)
-	// will have to cast map to runtime.Unstructured
-	//r.Spec.Values = newVals
+	newVals := update(reflect.ValueOf(r.Spec.Values.Object), img)
+	r.Spec.Values.Object = newVals
 	return r
 }
