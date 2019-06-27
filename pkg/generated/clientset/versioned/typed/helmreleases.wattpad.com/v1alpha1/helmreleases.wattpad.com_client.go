@@ -21,7 +21,7 @@ package v1alpha1
 import (
 	"ship-it/pkg/generated/clientset/versioned/scheme"
 
-	v1alpha1 "ship-it/pkg/apis/helmreleases.wattpad.com/v1alpha1"
+	v1alpha1 "ship-it/pkg/apis/helmreleases.k8s.wattpad.com/v1alpha1"
 
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	rest "k8s.io/client-go/rest"

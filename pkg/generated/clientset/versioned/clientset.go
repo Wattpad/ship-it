@@ -22,7 +22,7 @@ import (
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"
-	helmreleasesv1alpha1 "ship-it/pkg/generated/clientset/versioned/typed/helmreleases.wattpad.com/v1alpha1"
+	helmreleasesv1alpha1 "ship-it/pkg/generated/clientset/versioned/typed/helmreleases.k8s.wattpad.com/v1alpha1"
 )
 
 type Interface interface {

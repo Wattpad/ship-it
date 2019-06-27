@@ -21,8 +21,8 @@ package fake
 import (
 	clientset "ship-it/pkg/generated/clientset/versioned"
 
-	helmreleasesv1alpha1 "ship-it/pkg/generated/clientset/versioned/typed/helmreleases.wattpad.com/v1alpha1"
-	fakehelmreleasesv1alpha1 "ship-it/pkg/generated/clientset/versioned/typed/helmreleases.wattpad.com/v1alpha1/fake"
+	helmreleasesv1alpha1 "ship-it/pkg/generated/clientset/versioned/typed/helmreleases.k8s.wattpad.com/v1alpha1"
+	fakehelmreleasesv1alpha1 "ship-it/pkg/generated/clientset/versioned/typed/helmreleases.k8s.wattpad.com/v1alpha1/fake"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"

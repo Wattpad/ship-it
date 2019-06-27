@@ -21,7 +21,7 @@ package fake
 import (
 	rest "k8s.io/client-go/rest"
 	testing "k8s.io/client-go/testing"
-	v1alpha1 "ship-it/pkg/generated/clientset/versioned/typed/helmreleases.wattpad.com/v1alpha1"
+	v1alpha1 "ship-it/pkg/generated/clientset/versioned/typed/helmreleases.k8s.wattpad.com/v1alpha1"
 )
 
 type FakeHelmreleasesV1alpha1 struct {
