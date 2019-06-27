@@ -1,7 +1,11 @@
 package helmrelease
 
 import (
+	"fmt"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/serializer"
 )
 
 // HelmReleaseSpec defines the desired state of HelmRelease
@@ -37,4 +41,12 @@ type HelmReleaseList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []HelmRelease `json:"items"`
+}
+
+func NewDecoder(schema *runtime.Scheme) (*runtime.Decoder, error) {
+	factory := serializer.NewCodecFactory(schema)
+	// make universal deserializer
+	decoder := factory.UniversalDeserializer()
+	fmt.Println(decoder)
+	return nil, nil
 }
