@@ -118,15 +118,21 @@ func LoadImage(serviceName string, client GitCommands) (*Image, error) {
 	d := helmrelease.NewDecoder()
 	gvk := schema.FromAPIVersionAndKind("helmreleases.k8s.wattpad.com/v1alpha1", "HelmRelease")
 	d.Decode(resourceBytes, &gvk, target)
-	fmt.Println(target.Spec.Values.Object)
+	fmt.Println(target)
+	fmt.Print("\n\n")
+
+	fmt.Println(reflect.DeepEqual(resourceBytes, target.Encode()))
 
 	image := Image{}
 	findImage(reflect.ValueOf(target.Spec.Values.Object), &image, serviceName)
 
 	image.Tag = "This is a new tag" // change a value and print
-	changed := WithImage(image, *target).Spec.Values.Object
-	fmt.Println(changed)
+	_ = WithImage(image, *target)
+	//fmt.Println(changed.Spec.Values.Object)
 	// Try encoding back to bytes to prep git commit
+
+	// changed.TypeMeta.APIVersion
+	// changed.TypeMeta.Kind
 
 	return nil, nil
 }

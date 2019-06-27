@@ -1,6 +1,9 @@
 package helmrelease
 
 import (
+	"fmt"
+
+	"gopkg.in/yaml.v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	unstructured "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -50,4 +53,26 @@ func NewDecoder() runtime.Decoder {
 	factory := serializer.NewCodecFactory(runtime.NewScheme())
 
 	return factory.UniversalDeserializer()
+}
+
+func (h HelmRelease) Encode() []byte {
+	data := make(map[string]interface{})
+	// create identical yaml to original with extra code gen fields
+	data["apiVersion"] = h.APIVersion
+	data["kind"] = h.Kind
+	data["metadata"] = h.ObjectMeta
+
+	spec := make(map[string]interface{})
+	spec["releaseName"] = h.Spec.ReleaseName
+	spec["chart"] = h.Spec.Chart
+	spec["values"] = h.Spec.Values.Object
+
+	data["spec"] = spec
+	fmt.Println(data)
+	bytes, err := yaml.Marshal(data)
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+	return bytes
 }
