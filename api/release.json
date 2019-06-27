@@ -1,0 +1,215 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$ref": "#/definitions/Release",
+  "definitions": {
+    "Release": {
+      "required": [
+        "name",
+        "created",
+        "lastDeployed",
+        "owner",
+        "autoDeploy",
+        "code",
+        "build",
+        "monitoring",
+        "artifacts",
+        "status"
+      ],
+      "properties": {
+        "artifacts": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/artifacts",
+          "description": "The build artifacts of the release"
+        },
+        "autoDeploy": {
+          "type": "boolean",
+          "description": "The state of the release's auto-deployment option"
+        },
+        "build": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/build",
+          "description": "The CI build page of current release"
+        },
+        "code": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/sourceCode",
+          "description": "The repository and branch ref of the release's source code"
+        },
+        "created": {
+          "type": "string",
+          "description": "The time when the release was created",
+          "format": "date-time"
+        },
+        "lastDeployed": {
+          "type": "string",
+          "description": "The time when the release was last deployed",
+          "format": "date-time"
+        },
+        "monitoring": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/monitoring",
+          "description": "The monitoring resources for the release"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the release"
+        },
+        "owner": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/owner",
+          "description": "Ownership and contact information"
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the release",
+          "examples": [
+            "deployed",
+            "failed",
+            "pending_rollback",
+            "pending_install",
+            "pending_upgrade"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "artifacts": {
+      "required": [
+        "docker",
+        "chart"
+      ],
+      "properties": {
+        "chart": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/helmArtifact"
+        },
+        "docker": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/dockerArtifact"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "build": {
+      "required": [
+        "travis"
+      ],
+      "properties": {
+        "travis": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "datadog": {
+      "required": [
+        "dashboard",
+        "monitors"
+      ],
+      "properties": {
+        "dashboard": {
+          "type": "string",
+          "format": "uri"
+        },
+        "monitors": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "dockerArtifact": {
+      "required": [
+        "image",
+        "tag"
+      ],
+      "properties": {
+        "image": {
+          "type": "string"
+        },
+        "tag": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "helmArtifact": {
+      "required": [
+        "path",
+        "version"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "format": "uri"
+        },
+        "version": {
+          "type": "string",
+          "examples": [
+            "1.2.3"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "monitoring": {
+      "required": [
+        "datadog",
+        "sumologic"
+      ],
+      "properties": {
+        "datadog": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/datadog"
+        },
+        "sumologic": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "owner": {
+      "required": [
+        "squad",
+        "slack"
+      ],
+      "properties": {
+        "slack": {
+          "type": "string"
+        },
+        "squad": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "sourceCode": {
+      "required": [
+        "github",
+        "ref"
+      ],
+      "properties": {
+        "github": {
+          "type": "string",
+          "format": "uri"
+        },
+        "ref": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    }
+  }
+}
