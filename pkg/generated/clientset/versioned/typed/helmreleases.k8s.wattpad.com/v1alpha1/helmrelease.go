@@ -19,9 +19,8 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"time"
-
 	scheme "ship-it/pkg/generated/clientset/versioned/scheme"
+	"time"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"

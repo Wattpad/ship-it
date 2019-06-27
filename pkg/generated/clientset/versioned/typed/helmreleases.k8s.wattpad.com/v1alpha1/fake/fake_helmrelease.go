@@ -34,9 +34,9 @@ type FakeHelmReleases struct {
 	ns   string
 }
 
-var helmreleasesResource = schema.GroupVersionResource{Group: "helmreleases.wattpad.com", Version: "v1alpha1", Resource: "helmreleases"}
+var helmreleasesResource = schema.GroupVersionResource{Group: "helmreleases.k8s.wattpad.com", Version: "v1alpha1", Resource: "helmreleases"}
 
-var helmreleasesKind = schema.GroupVersionKind{Group: "helmreleases.wattpad.com", Version: "v1alpha1", Kind: "HelmRelease"}
+var helmreleasesKind = schema.GroupVersionKind{Group: "helmreleases.k8s.wattpad.com", Version: "v1alpha1", Kind: "HelmRelease"}
 
 // Get takes name of the helmRelease, and returns the corresponding helmRelease object, and an error if there is any.
 func (c *FakeHelmReleases) Get(name string, options v1.GetOptions) (result *v1alpha1.HelmRelease, err error) {

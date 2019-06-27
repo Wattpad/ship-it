@@ -21,10 +21,8 @@ package v1alpha1
 import (
 	"ship-it/pkg/generated/clientset/versioned/scheme"
 
-	v1alpha1 "ship-it/pkg/apis/helmreleases.k8s.wattpad.com/v1alpha1"
-
-	"k8s.io/apimachinery/pkg/runtime/serializer"
 	rest "k8s.io/client-go/rest"
+	v1alpha1 "ship-it/pkg/apis/helmreleases.k8s.wattpad.com/v1alpha1"
 )
 
 type HelmreleasesV1alpha1Interface interface {
@@ -32,7 +30,7 @@ type HelmreleasesV1alpha1Interface interface {
 	HelmReleasesGetter
 }
 
-// HelmreleasesV1alpha1Client is used to interact with features provided by the helmreleases.wattpad.com group.
+// HelmreleasesV1alpha1Client is used to interact with features provided by the helmreleases.k8s.wattpad.com group.
 type HelmreleasesV1alpha1Client struct {
 	restClient rest.Interface
 }
@@ -73,7 +71,7 @@ func setConfigDefaults(config *rest.Config) error {
 	gv := v1alpha1.SchemeGroupVersion
 	config.GroupVersion = &gv
 	config.APIPath = "/apis"
-	config.NegotiatedSerializer = serializer.DirectCodecFactory{CodecFactory: scheme.Codecs}
+	config.NegotiatedSerializer = scheme.Codecs.WithoutConversion()
 
 	if config.UserAgent == "" {
 		config.UserAgent = rest.DefaultKubernetesUserAgent()
