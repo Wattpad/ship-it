@@ -42,7 +42,7 @@ func parseImage(repo string, tag string) (*Image, error) {
 	}, nil
 }
 
-func findImage(v reflect.Value, image *Image, serviceName string) {
+func FindImage(v reflect.Value, image *Image, serviceName string) {
 	// Indirect through pointers and interfaces
 	for v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface {
 		v = v.Elem()
@@ -50,7 +50,7 @@ func findImage(v reflect.Value, image *Image, serviceName string) {
 	switch v.Kind() {
 	case reflect.Array, reflect.Slice:
 		for i := 0; i < v.Len(); i++ {
-			findImage(v.Index(i), image, serviceName)
+			FindImage(v.Index(i), image, serviceName)
 		}
 	case reflect.Map:
 		for _, k := range v.MapKeys() {
@@ -66,7 +66,7 @@ func findImage(v reflect.Value, image *Image, serviceName string) {
 					return
 				}
 			}
-			findImage(v.MapIndex(k), image, serviceName)
+			FindImage(v.MapIndex(k), image, serviceName)
 		}
 	default:
 		// handle other types
@@ -131,7 +131,7 @@ func LoadImage(serviceName string, client GitCommands) (*Image, error) {
 	fmt.Println(reflect.DeepEqual(resourceBytes, outBytes))
 
 	image := Image{}
-	findImage(reflect.ValueOf(target.Spec.Values.Object), &image, serviceName)
+	FindImage(reflect.ValueOf(target.Spec.Values.Object), &image, serviceName)
 
 	image.Tag = "This is a new tag" // change a value and print
 	_ = WithImage(image, *target)
