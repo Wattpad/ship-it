@@ -10,7 +10,7 @@ import (
 )
 
 type K8sClient struct {
-	helmreleases v1alpha1.HelmreleasesV1alpha1Interface
+	helmreleases v1alpha1.HelmReleasesGetter
 }
 
 func New() (*K8sClient, error) {
@@ -33,7 +33,7 @@ func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
 		return nil, err
 	}
 
-	var releases []models.Release
+	releases := make([]models.Release, 0, len(releaseList.Items))
 	for _, r := range releaseList.Items {
 		releases = append(releases, models.Release{
 			Name:    r.GetName(),
