@@ -136,10 +136,6 @@ func TestUpdateImage(t *testing.T) {
 	}
 }
 
-func TestEncoder(t *testing.T) {
-	assert.Equal(t, 1, 1)
-}
-
 func TestParseImage(t *testing.T) {
 	assert.Equal(t, 1, 1)
 }

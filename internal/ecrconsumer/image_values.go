@@ -42,7 +42,7 @@ func parseImage(repo string, tag string) (*Image, error) {
 	}, nil
 }
 
-func FindImage(v reflect.Value, image *Image, serviceName string) {
+func FindImage(v reflect.Value, image *Image, serviceName string, path *string) {
 	// Indirect through pointers and interfaces
 	for v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface {
 		v = v.Elem()
@@ -50,10 +50,15 @@ func FindImage(v reflect.Value, image *Image, serviceName string) {
 	switch v.Kind() {
 	case reflect.Array, reflect.Slice:
 		for i := 0; i < v.Len(); i++ {
-			FindImage(v.Index(i), image, serviceName)
+			FindImage(v.Index(i), image, serviceName, path)
 		}
 	case reflect.Map:
 		for _, k := range v.MapKeys() {
+			_, ok := v.MapIndex(k).Interface().(string)
+			if !ok {
+				*path += k.Interface().(string)
+				//fmt.Println(*path)
+			}
 			if k.Interface().(string) == "image" {
 				i := v.MapIndex(k).Interface().(map[string]interface{})
 				img, err := parseImage(i["repository"].(string), i["tag"].(string))
@@ -66,11 +71,44 @@ func FindImage(v reflect.Value, image *Image, serviceName string) {
 					return
 				}
 			}
-			FindImage(v.MapIndex(k), image, serviceName)
+			FindImage(v.MapIndex(k), image, serviceName, path)
 		}
 	default:
 		// handle other types
 	}
+}
+
+func getImagePath(v reflect.Value, serviceName string) []string {
+	if v.Kind() != reflect.Map {
+		return []string{}
+	}
+
+	iter := v.MapRange()
+	for iter.Next() {
+		key := iter.Key().String()
+		if key == "image" {
+			img := v.MapIndex(iter.Key()).Interface().(map[string]interface{})
+			image, err := parseImage(img["repository"].(string), img["tag"].(string))
+			if err != nil {
+				fmt.Println("Invalid image")
+				return []string{}
+			}
+			if image.Repository == serviceName {
+				return []string{key}
+			}
+		}
+
+		val := reflect.ValueOf(iter.Value().Interface())
+		if val.Kind() == reflect.Map {
+			path := search(val, serviceName)
+			if len(path) == 0 {
+				continue
+			}
+			return append([]string{key}, path...)
+		}
+	}
+
+	return []string{}
 }
 
 func update(v reflect.Value, image Image, target *map[string]interface{}) {
@@ -135,7 +173,10 @@ func LoadImage(serviceName string, client GitCommands) (*Image, error) {
 	fmt.Println(reflect.DeepEqual(resourceBytes, outBytes))
 
 	image := Image{}
-	FindImage(reflect.ValueOf(target.Spec.Values.Object), &image, serviceName)
+	path := ""
+	FindImage(reflect.ValueOf(target.Spec.Values.Object), &image, serviceName, &path)
+
+	fmt.Println(getImagePath(reflect.ValueOf(target.Spec.Values.Object), "loki"))
 
 	image.Tag = "This is a new tag" // change a value and print
 	_ = WithImage(image, *target)

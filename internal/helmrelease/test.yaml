@@ -1,0 +1,55 @@
+apiVersion: helmreleases.k8s.wattpad.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: example-microservice
+  generatename: ""
+  namespace: ""
+  selflink: ""
+  uid: ""
+  resourceversion: ""
+  generation: 0
+  creationtimestamp: "0001-01-01T00:00:00Z"
+  deletiontimestamp: null
+  deletiongraceperiodseconds: null
+  labels: {}
+  annotations: {}
+  ownerreferences: []
+  initializers: null
+  finalizers: []
+  clustername: ""
+  managedfields: []
+spec:
+  chart:
+    repository: wattpad.s3.amazonaws.com/helm-charts
+    path: microservice
+    revision: HEAD
+  releaseName: example-release
+  values:
+    autoscaler:
+      maxPods: 50
+      minPods: 30
+      targetCPUUtilizationPercent: 60
+    containerPort: 80
+    cronjob:
+      closeoutAppLabel: loki-closeout
+      image:
+        repository: 723255503624.dkr.ecr.us-east-1.amazonaws.com/kube-tools
+        tag: deda27d
+      schedule: 0 0 * * *
+    image:
+      repository: 723255503624.dkr.ecr.us-east-1.amazonaws.com/loki
+      tag: cc064f8a3d3fa0fe938e95d961ad0278770fa5d2
+    microservice:
+      nameOverride: loki
+    nodePort: 31828
+    resources:
+      limits:
+        cpu: 500m
+        memory: 256Mi
+      requests:
+        cpu: 500m
+        memory: 128Mi
+    securityContext:
+      privileged: true
+    serviceAccountName: loki
+    servicePort: 80
