@@ -73,7 +73,7 @@ func FindImage(v reflect.Value, image *Image, serviceName string) {
 	}
 }
 
-func update(v reflect.Value, image Image) map[string]interface{} {
+func update(v reflect.Value, image Image, target *map[string]interface{}) {
 	// Indirect through pointers and interfaces
 	for v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface {
 		v = v.Elem()
@@ -81,7 +81,7 @@ func update(v reflect.Value, image Image) map[string]interface{} {
 	switch v.Kind() {
 	case reflect.Array, reflect.Slice:
 		for i := 0; i < v.Len(); i++ {
-			update(v.Index(i), image)
+			update(v.Index(i), image, target)
 		}
 	case reflect.Map:
 		for _, k := range v.MapKeys() {
@@ -90,20 +90,24 @@ func update(v reflect.Value, image Image) map[string]interface{} {
 				foundImage, err := parseImage(v.MapIndex(k).Interface().(map[string]interface{})["repository"].(string), v.MapIndex(k).Interface().(map[string]interface{})["tag"].(string))
 				if err != nil {
 					fmt.Println(err)
-					return nil
+					return
 				}
 				if foundImage.Repository == image.Repository {
 					v.MapIndex(k).Interface().(map[string]interface{})["repository"] = image.Registry + "/" + image.Repository
 					v.MapIndex(k).Interface().(map[string]interface{})["tag"] = image.Tag
 
-					return v.Interface().(map[string]interface{})
+					*target = v.Interface().(map[string]interface{})
+					return
 				}
 			}
-			update(v.MapIndex(k), image)
+			update(v.MapIndex(k), image, target)
 		}
 	default:
 		// handle other types
 	}
+}
+
+func iterativeUpdate(vals map[string]interface{}, img Image) map[string]interface{} {
 	return nil
 }
 
@@ -145,7 +149,8 @@ func LoadImage(serviceName string, client GitCommands) (*Image, error) {
 }
 
 func WithImage(img Image, r helmrelease.HelmRelease) helmrelease.HelmRelease {
-	newVals := update(reflect.ValueOf(r.Spec.Values.Object), img)
+	newVals := make(map[string]interface{})
+	update(reflect.ValueOf(r.Spec.Values.Object), img, &newVals)
 
 	r.Spec.Values.Object = newVals
 	return r

@@ -96,5 +96,54 @@ func TestFindImage(t *testing.T) {
 }
 
 func TestUpdateImage(t *testing.T) {
+	var tests = []struct {
+		newImage    Image
+		inputMap    map[string]interface{}
+		expectedMap map[string]interface{}
+	}{
+		{
+			Image{
+				Registry:   "foo",
+				Repository: "bar",
+				Tag:        "newTag",
+			},
+			map[string]interface{}{
+				"apples": "delicious",
+				"oranges": map[string]interface{}{
+					"taste": "delicious",
+				},
+				"image": map[string]interface{}{
+					"repository": "foo/bar",
+					"tag":        "baz",
+				},
+			},
+			map[string]interface{}{
+				"apples": "delicious",
+				"oranges": map[string]interface{}{
+					"taste": "delicious",
+				},
+				"image": map[string]interface{}{
+					"repository": "foo/bar",
+					"tag":        "newTag",
+				},
+			},
+		},
+	}
+	for i := range tests {
+		updatedMap := make(map[string]interface{})
+		update(reflect.ValueOf(tests[i].inputMap), tests[i].newImage, &updatedMap)
+		assert.Equal(t, tests[i].expectedMap, updatedMap)
+	}
+}
+
+func TestEncoder(t *testing.T) {
+	assert.Equal(t, 1, 1)
+}
+
+func TestParseImage(t *testing.T) {
+	assert.Equal(t, 1, 1)
+}
+
+func TestWithImage(t *testing.T) {
 	assert.Equal(t, 1, 1)
 }
