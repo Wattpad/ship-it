@@ -128,6 +128,8 @@ func LoadImage(serviceName string, client GitCommands) (*Image, error) {
 		return nil, err
 	}
 
+	fmt.Println(reflect.DeepEqual(resourceBytes, outBytes))
+
 	image := Image{}
 	findImage(reflect.ValueOf(target.Spec.Values.Object), &image, serviceName)
 
