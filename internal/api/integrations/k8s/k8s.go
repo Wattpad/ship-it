@@ -1,6 +1,7 @@
 package k8s
 
 import (
+	"context"
 	"time"
 
 	"ship-it/internal/api/models"
@@ -18,7 +19,7 @@ type K8sClient struct {
 	lister v1alpha1.HelmReleaseLister
 }
 
-func New() (*K8sClient, error) {
+func New(ctx context.Context) (*K8sClient, error) {
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		return nil, err
@@ -29,7 +30,15 @@ func New() (*K8sClient, error) {
 		return nil, err
 	}
 
+	exit := make(chan struct{})
+
+	go func() {
+		<-ctx.Done()
+		exit <- struct{}{}
+	}()
+
 	factory := informers.NewSharedInformerFactory(client, 30*time.Second)
+	factory.Start(exit)
 
 	return &K8sClient{
 		lister: factory.Helmreleases().V1alpha1().HelmReleases().Lister(),
