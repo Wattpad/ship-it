@@ -121,7 +121,12 @@ func LoadImage(serviceName string, client GitCommands) (*Image, error) {
 	fmt.Println(target)
 	fmt.Print("\n\n")
 
-	fmt.Println(reflect.DeepEqual(resourceBytes, target.Encode()))
+	outBytes := target.Encode()
+	_, err = client.UpdateFile("diff test", "master", "k8s/custom-resources/loki.yaml", outBytes)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
 
 	image := Image{}
 	findImage(reflect.ValueOf(target.Spec.Values.Object), &image, serviceName)

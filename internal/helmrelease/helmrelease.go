@@ -3,7 +3,7 @@ package helmrelease
 import (
 	"fmt"
 
-	"gopkg.in/json.v2"
+	"gopkg.in/yaml.v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	unstructured "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -68,18 +68,13 @@ func (h HelmRelease) Encode() []byte {
 	spec["values"] = h.Spec.Values.Object
 
 	data["spec"] = spec
+
+	out, err := yaml.Marshal(data)
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+
 	fmt.Println(data)
-	bytes, err := json.Marshal(h)
-	if err != nil {
-		fmt.Println(err)
-		return nil
-	}
-	testOut := make(map[string]interface{})
-	err = json.Unmarshal(bytes, &testOut)
-	if err != nil {
-		fmt.Println(err)
-		return nil
-	}
-	fmt.Println(testOut)
-	return bytes
+	return out
 }
