@@ -1,16 +1,21 @@
 package k8s
 
 import (
+	"time"
+
 	"ship-it/internal/api/models"
 
-	"ship-it/pkg/generated/clientset/versioned/typed/helmreleases.k8s.wattpad.com/v1alpha1"
+	clientset "ship-it/pkg/generated/clientset/versioned"
+	informers "ship-it/pkg/generated/informers/externalversions"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"ship-it/pkg/generated/listers/helmreleases.k8s.wattpad.com/v1alpha1"
+
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/rest"
 )
 
 type K8sClient struct {
-	helmreleases v1alpha1.HelmReleasesGetter
+	lister v1alpha1.HelmReleaseLister
 }
 
 func New() (*K8sClient, error) {
@@ -19,22 +24,26 @@ func New() (*K8sClient, error) {
 		return nil, err
 	}
 
-	client, err := v1alpha1.NewForConfig(config)
+	client, err := clientset.NewForConfig(config)
 	if err != nil {
 		return nil, err
 	}
 
-	return &K8sClient{client}, nil
+	factory := informers.NewSharedInformerFactory(client, 30*time.Second)
+
+	return &K8sClient{
+		lister: factory.Helmreleases().V1alpha1().HelmReleases().Lister(),
+	}, nil
 }
 
 func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
-	releaseList, err := k.helmreleases.HelmReleases(namespace).List(metav1.ListOptions{})
+	releaseList, err := k.lister.HelmReleases(namespace).List(labels.Everything())
 	if err != nil {
 		return nil, err
 	}
 
-	releases := make([]models.Release, 0, len(releaseList.Items))
-	for _, r := range releaseList.Items {
+	releases := make([]models.Release, 0, len(releaseList))
+	for _, r := range releaseList {
 		releases = append(releases, models.Release{
 			Name:    r.GetName(),
 			Created: r.GetCreationTimestamp().Time,
