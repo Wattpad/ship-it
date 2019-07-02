@@ -61,53 +61,14 @@ func (h HelmRelease) Encode() []byte {
 	data["apiVersion"] = h.APIVersion
 	data["kind"] = h.Kind
 
-	// make new metadata without unpopulated fields
+	metadata := make(map[string]interface{})
 
-	// metaFields := []string{
-	// 	"generatename",
-	// 	"namespace",
-	// 	"selflink",
-	// 	"uid",
-	// 	"resourceversion",
-	// 	"generation",
-	// 	"creationtimestamp",
-	// 	"deletiontimestamp",
-	// 	"deletiongraceperiodseconds",
-	// 	"labels",
-	// 	"annotations",
-	// 	"ownerreferences",
-	// 	"initializers",
-	// 	"finalizers",
-	// 	"clustername",
-	// 	"managedfields",
-	// }
+	// only take name as it is the only populated field
+	// this function may need to filter out unpopulated fields dynamically in the future
+	metadata["name"] = h.ObjectMeta.Name
 
-	// metadata := make(map[string]interface{})
-
-	// // make meta map
-	// metaBytes, err := h.ObjectMeta.Marshal()
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return nil
-	// }
-
-	// rawObjMeta := make(map[string]interface{})
-
-	// err = yaml.Unmarshal(metaBytes, rawObjMeta)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return nil
-	// }
-
-	// for i := range metaFields {
-	// 	if rawObjMeta[metaFields[i]] != "" {
-	// 		metadata[metaFields[i]] = rawObjMeta[metaFields[i]]
-	// 	}
-	// }
-
-	//fmt.Println(metadata)
-
-	data["metadata"] = h.ObjectMeta
+	data["metadata"] = metadata
+	fmt.Println(metadata)
 
 	spec := make(map[string]interface{})
 	spec["releaseName"] = h.Spec.ReleaseName

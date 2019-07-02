@@ -78,7 +78,6 @@ func getImagePath(v reflect.Value, serviceName string) []string {
 func table(vals map[string]interface{}, path []string) map[string]interface{} {
 	tabled := vals
 	for i := range path {
-		// check
 		_, ok := tabled[path[i]].(map[string]interface{})
 		if !ok {
 			fmt.Println("invalid path")
@@ -122,7 +121,7 @@ func LoadImage(serviceName string, client GitCommands) (*Image, error) {
 	}
 
 	pathArr := getImagePath(reflect.ValueOf(target.Spec.Values.Object), "loki")
-	image.Tag = "This is a new tag" // change a value and print
+	image.Tag = "This is a new tag"
 	fmt.Println(WithImage(image, *target, pathArr))
 
 	return nil, nil
