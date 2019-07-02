@@ -68,7 +68,7 @@ func NewDecoder() runtime.Decoder {
 	return factory.DecoderToVersion(d, v)
 }
 
-func (h HelmRelease) Encode() []byte {
+func (h HelmRelease) ToYaml() string {
 	data := make(map[string]interface{})
 	// create identical yaml to original with extra code gen fields
 	data["apiVersion"] = h.APIVersion
@@ -93,8 +93,8 @@ func (h HelmRelease) Encode() []byte {
 	out, err := yaml.Marshal(data)
 	if err != nil {
 		fmt.Println(err)
-		return nil
+		return ""
 	}
 
-	return out
+	return string(out)
 }

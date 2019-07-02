@@ -6,29 +6,31 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-func TestEncode(t *testing.T) {
+func TestToYaml(t *testing.T) {
 	expectedBytes, err := ioutil.ReadFile("test.yaml")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+
+	expectedStr := string(expectedBytes)
+
 	d := NewDecoder()
-	gvk := schema.FromAPIVersionAndKind("helmreleases.k8s.wattpad.com/v1alpha1", "HelmRelease")
+
 	target := &HelmRelease{}
-	d.Decode(expectedBytes, &gvk, target)
-	fmt.Println(target)
-	outBytes := target.Encode()
+	d.Decode(expectedBytes, nil, target)
+
+	outString := target.ToYaml()
 
 	var tests = []struct {
-		expected []byte
-		actual   []byte
+		expected string
+		actual   string
 	}{
 		{
-			expectedBytes,
-			outBytes,
+			expectedStr,
+			outString,
 		},
 	}
 
