@@ -2,22 +2,6 @@ apiVersion: helmreleases.k8s.wattpad.com/v1alpha1
 kind: HelmRelease
 metadata:
   name: example-microservice
-  generatename: ""
-  namespace: ""
-  selflink: ""
-  uid: ""
-  resourceversion: ""
-  generation: 0
-  creationtimestamp: "0001-01-01T00:00:00Z"
-  deletiontimestamp: null
-  deletiongraceperiodseconds: null
-  labels: {}
-  annotations: {}
-  ownerreferences: []
-  initializers: null
-  finalizers: []
-  clustername: ""
-  managedfields: []
 spec:
   chart:
     repository: wattpad.s3.amazonaws.com/helm-charts
