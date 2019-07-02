@@ -1,9 +1,11 @@
-package helmrelease
+package release
 
 import (
 	"fmt"
 	"io/ioutil"
 	"testing"
+
+	"ship-it/pkg/apis/helmreleases.k8s.wattpad.com/v1alpha1"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -19,7 +21,7 @@ func TestToYaml(t *testing.T) {
 
 	d := NewDecoder()
 
-	target := &HelmRelease{}
+	target := &helmrelease.HelmRelease{}
 	d.Decode(expectedBytes, nil, target)
 
 	outString := target.ToYaml()

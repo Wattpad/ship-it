@@ -5,7 +5,9 @@ import (
 	"reflect"
 	"strings"
 
-	"ship-it/internal/helmrelease"
+	"ship-it/internal/release"
+
+	"ship-it/pkg/apis/helmreleases.k8s.wattpad.com/v1alpha1"
 
 	"github.com/google/go-github/github"
 )
@@ -98,15 +100,15 @@ func update(vals map[string]interface{}, img Image, path []string) map[string]in
 	return vals
 }
 
-func LoadRelease(fileData []byte) (*helmrelease.HelmRelease, error) {
-	rls := &helmrelease.HelmRelease{}
-	d := helmrelease.NewDecoder()
+func LoadRelease(fileData []byte) (*v1alpha1.HelmRelease, error) {
+	rls := &v1alpha1.HelmRelease{}
+	d := release.NewDecoder()
 	d.Decode(fileData, nil, rls)
 
 	return rls, nil
 }
 
-func WithImage(img Image, r helmrelease.HelmRelease, path []string) helmrelease.HelmRelease {
+func WithImage(img Image, r v1alpha1.HelmRelease, path []string) v1alpha1.HelmRelease {
 	newVals := update(r.Spec.Values.Object, img, path)
 	r.Spec.Values.Object = newVals
 
