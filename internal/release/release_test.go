@@ -21,10 +21,10 @@ func TestToYaml(t *testing.T) {
 
 	d := NewDecoder()
 
-	target := &helmrelease.HelmRelease{}
+	target := &v1alpha1.HelmRelease{}
 	d.Decode(expectedBytes, nil, target)
 
-	outString := target.ToYaml()
+	outString := ToYaml(*target)
 
 	var tests = []struct {
 		expected string
