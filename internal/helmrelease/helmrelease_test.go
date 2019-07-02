@@ -1,9 +1,10 @@
 package helmrelease
 
 import (
+	"fmt"
 	"testing"
 	"io/ioutil"
-	"fmt"
+
 	"github.com/stretchr/testify/assert"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
@@ -18,10 +19,20 @@ func TestEncode(t *testing.T) {
 	gvk := schema.FromAPIVersionAndKind("helmreleases.k8s.wattpad.com/v1alpha1", "HelmRelease")
 	target := &HelmRelease{}
 	d.Decode(expectedBytes, &gvk, target)
-
+	fmt.Println(target)
 	outBytes := target.Encode()
-	// decode the expected bytes and re-encode check that there is still a match
-	assert.Equal(t, expectedBytes, outBytes)
+
+	var tests = []struct {
+		expected []byte
+		actual   []byte
+	}{
+		{
+			expectedBytes,
+			outBytes,
+		},
+	}
+
+	for i := range tests {
+		assert.Equal(t, tests[i].expected, tests[i].actual)
+	}
 }
-
-

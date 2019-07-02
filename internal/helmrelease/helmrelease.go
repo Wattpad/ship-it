@@ -63,7 +63,49 @@ func (h HelmRelease) Encode() []byte {
 
 	// make new metadata without unpopulated fields
 
-	//metaFields := []string{"generatename", "namespace", "selflink", "uid", "resourceversion", "generation"}
+	// metaFields := []string{
+	// 	"generatename",
+	// 	"namespace",
+	// 	"selflink",
+	// 	"uid",
+	// 	"resourceversion",
+	// 	"generation",
+	// 	"creationtimestamp",
+	// 	"deletiontimestamp",
+	// 	"deletiongraceperiodseconds",
+	// 	"labels",
+	// 	"annotations",
+	// 	"ownerreferences",
+	// 	"initializers",
+	// 	"finalizers",
+	// 	"clustername",
+	// 	"managedfields",
+	// }
+
+	// metadata := make(map[string]interface{})
+
+	// // make meta map
+	// metaBytes, err := h.ObjectMeta.Marshal()
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return nil
+	// }
+
+	// rawObjMeta := make(map[string]interface{})
+
+	// err = yaml.Unmarshal(metaBytes, rawObjMeta)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return nil
+	// }
+
+	// for i := range metaFields {
+	// 	if rawObjMeta[metaFields[i]] != "" {
+	// 		metadata[metaFields[i]] = rawObjMeta[metaFields[i]]
+	// 	}
+	// }
+
+	//fmt.Println(metadata)
 
 	data["metadata"] = h.ObjectMeta
 
