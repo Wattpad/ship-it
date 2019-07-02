@@ -19,7 +19,7 @@ type K8sClient struct {
 	lister v1alpha1.HelmReleaseLister
 }
 
-func New(ctx context.Context) (*K8sClient, error) {
+func New(ctx context.Context, resync time.Duration) (*K8sClient, error) {
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		return nil, err
@@ -37,7 +37,7 @@ func New(ctx context.Context) (*K8sClient, error) {
 		exit <- struct{}{}
 	}()
 
-	factory := informers.NewSharedInformerFactory(client, 30*time.Second)
+	factory := informers.NewSharedInformerFactory(client, resync)
 	factory.Start(exit)
 
 	return &K8sClient{
