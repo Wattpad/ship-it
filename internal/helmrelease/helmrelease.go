@@ -45,6 +45,7 @@ type HelmReleaseList struct {
 	Items           []HelmRelease `json:"items"`
 }
 
+// Should be removed once code gen is available
 func (h *HelmRelease) DeepCopyObject() runtime.Object {
 	return h
 }
