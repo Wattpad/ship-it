@@ -2,6 +2,7 @@ package ecrconsumer
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/Wattpad/sqsconsumer"
@@ -29,6 +30,7 @@ func New(logger log.Logger, hist metrics.Histogram, name string, svc sqsconsumer
 }
 
 func processMessage(ctx context.Context, msg string) error {
+	fmt.Println(msg)
 	return nil
 }
 
