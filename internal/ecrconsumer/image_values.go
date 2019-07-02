@@ -2,7 +2,6 @@ package ecrconsumer
 
 import (
 	"fmt"
-	"path/filepath"
 	"reflect"
 	"strings"
 
@@ -100,17 +99,12 @@ func update(vals map[string]interface{}, img Image, path []string) map[string]in
 	return vals
 }
 
-func LoadRelease(serviceName string, client GitCommands) (*helmrelease.HelmRelease, error) {
-	// we assume this file path until a location in miranda for custom resources is decided upon
-	resourceBytes, err := client.GetFile("master", filepath.Join("k8s/custom-resources", serviceName+".yaml"))
-	if err != nil {
-		return nil, err
-	}
+func LoadRelease(serviceName string, fileData []byte) (*helmrelease.HelmRelease, error) {
 
 	rls := &helmrelease.HelmRelease{}
 	d := helmrelease.NewDecoder()
 	gvk := schema.FromAPIVersionAndKind("helmreleases.k8s.wattpad.com/v1alpha1", "HelmRelease")
-	d.Decode(resourceBytes, &gvk, rls)
+	d.Decode(fileData, &gvk, rls)
 
 	return rls, nil
 }
