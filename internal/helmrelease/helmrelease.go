@@ -7,6 +7,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	unstructured "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 )
 
@@ -45,6 +46,14 @@ type HelmReleaseList struct {
 	Items           []HelmRelease `json:"items"`
 }
 
+type versioner struct {
+	gvk schema.GroupVersionKind
+}
+
+func (v versioner) KindForGroupVersionKinds(kinds []schema.GroupVersionKind) (target schema.GroupVersionKind, ok bool) {
+	return v.gvk, true
+}
+
 // Should be removed once code gen is available
 func (h *HelmRelease) DeepCopyObject() runtime.Object {
 	return h
@@ -52,8 +61,11 @@ func (h *HelmRelease) DeepCopyObject() runtime.Object {
 
 func NewDecoder() runtime.Decoder {
 	factory := serializer.NewCodecFactory(runtime.NewScheme())
-
-	return factory.UniversalDeserializer()
+	d := factory.UniversalDeserializer()
+	v := versioner{
+		gvk: schema.FromAPIVersionAndKind("helmreleases.k8s.wattpad.com/v1alpha1", "HelmRelease"),
+	}
+	return factory.DecoderToVersion(d, v)
 }
 
 func (h HelmRelease) Encode() []byte {

@@ -1,6 +1,7 @@
 package ecrconsumer
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -258,4 +259,53 @@ func TestParseImage(t *testing.T) {
 		img, _ := parseImage(tests[i].repo, tests[i].tag)
 		assert.Equal(t, tests[i].expected, img)
 	}
+}
+
+func TestLoadRelease(t *testing.T) {
+	crYaml := `
+apiVersion: helmreleases.k8s.wattpad.com/v1alpha1
+kind: HelmRelease
+metadata:
+  name: example-microservice
+spec:
+  chart:
+    repository: wattpad.s3.amazonaws.com/helm-charts
+    path: microservice
+    revision: HEAD
+  releaseName: example-release
+  values:
+    autoscaler:
+      maxPods: 50
+      minPods: 30
+      targetCPUUtilizationPercent: 60
+    containerPort: 80
+    cronjob:
+      closeoutAppLabel: loki-closeout
+      image:
+        repository: 723255503624.dkr.ecr.us-east-1.amazonaws.com/kube-tools
+        tag: deda27d
+      schedule: 0 0 * * *
+    image:
+      repository: 723255503624.dkr.ecr.us-east-1.amazonaws.com/loki
+      tag: cc064f8a3d3fa0fe938e95d961ad0278770fa5d2
+    microservice:
+      nameOverride: loki
+    nodePort: 31828
+    resources:
+      limits:
+        cpu: 500m
+        memory: 256Mi
+      requests:
+        cpu: 500m
+        memory: 128Mi
+    securityContext:
+      privileged: true
+    serviceAccountName: loki
+    servicePort: 80
+`
+	rls, err := LoadRelease([]byte(crYaml))
+
+	fmt.Println(rls)
+
+	assert.Nil(t, err)
 }

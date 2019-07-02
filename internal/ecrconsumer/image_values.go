@@ -8,7 +8,6 @@ import (
 	"ship-it/internal/helmrelease"
 
 	"github.com/google/go-github/github"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 type GitCommands interface {
@@ -99,12 +98,10 @@ func update(vals map[string]interface{}, img Image, path []string) map[string]in
 	return vals
 }
 
-func LoadRelease(serviceName string, fileData []byte) (*helmrelease.HelmRelease, error) {
-
+func LoadRelease(fileData []byte) (*helmrelease.HelmRelease, error) {
 	rls := &helmrelease.HelmRelease{}
 	d := helmrelease.NewDecoder()
-	gvk := schema.FromAPIVersionAndKind("helmreleases.k8s.wattpad.com/v1alpha1", "HelmRelease")
-	d.Decode(fileData, &gvk, rls)
+	d.Decode(fileData, nil, rls)
 
 	return rls, nil
 }
