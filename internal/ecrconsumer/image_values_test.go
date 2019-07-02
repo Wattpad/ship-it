@@ -99,9 +99,9 @@ func TestGetImagePath(t *testing.T) {
 			[]string{},
 		},
 	}
-	for i := range tests {
-		output := getImagePath(reflect.ValueOf(tests[i].inputMap), tests[i].serviceName)
-		assert.Equal(t, tests[i].expected, output)
+	for _, test := range tests {
+		output := getImagePath(reflect.ValueOf(test.inputMap), test.serviceName)
+		assert.Equal(t, test.expected, output)
 	}
 }
 
@@ -148,8 +148,8 @@ func TestTable(t *testing.T) {
 			},
 		},
 	}
-	for i := range tests {
-		assert.Equal(t, tests[i].expected, table(tests[i].inputMap, tests[i].path))
+	for _, test := range tests {
+		assert.Equal(t, test.expected, table(test.inputMap, test.path))
 	}
 }
 
@@ -230,8 +230,8 @@ func TestUpdateImage(t *testing.T) {
 			[]string{"oranges", "image"},
 		},
 	}
-	for i := range tests {
-		assert.Equal(t, tests[i].expectedMap, update(tests[i].inputMap, tests[i].newImage, tests[i].path))
+	for _, test := range tests {
+		assert.Equal(t, test.expectedMap, update(test.inputMap, test.newImage, test.path))
 	}
 }
 
@@ -255,9 +255,9 @@ func TestParseImage(t *testing.T) {
 			nil,
 		},
 	}
-	for i := range tests {
-		img, _ := parseImage(tests[i].repo, tests[i].tag)
-		assert.Equal(t, tests[i].expected, img)
+	for _, test := range tests {
+		img, _ := parseImage(test.repo, test.tag)
+		assert.Equal(t, test.expected, img)
 	}
 }
 
@@ -274,6 +274,7 @@ spec:
     revision: HEAD
   releaseName: example-release
   values:
+    kind: HelmRelease
     autoscaler:
       maxPods: 50
       minPods: 30

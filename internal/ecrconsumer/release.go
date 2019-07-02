@@ -1,15 +1,14 @@
-package release
+package ecrconsumer
 
 import (
-	"fmt"
-
-	"gopkg.in/yaml.v2"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"ship-it/pkg/apis/helmreleases.k8s.wattpad.com/v1alpha1"
 )
 
+// Simple Implementation of GroupVersioner
+// https://godoc.org/k8s.io/apimachinery/pkg/runtime#GroupVersioner
 type versioner struct {
 	gvk schema.GroupVersionKind
 }
@@ -27,7 +26,7 @@ func NewDecoder() runtime.Decoder {
 	return factory.DecoderToVersion(d, v)
 }
 
-func ToYaml(h v1alpha1.HelmRelease) string {
+func ToMap(h v1alpha1.HelmRelease) map[string]interface{} {
 	data := make(map[string]interface{})
 	// create identical yaml to original with extra code gen fields
 	data["apiVersion"] = h.APIVersion
@@ -40,7 +39,6 @@ func ToYaml(h v1alpha1.HelmRelease) string {
 	metadata["name"] = h.ObjectMeta.Name
 
 	data["metadata"] = metadata
-	fmt.Println(metadata)
 
 	spec := make(map[string]interface{})
 	spec["releaseName"] = h.Spec.ReleaseName
@@ -49,11 +47,5 @@ func ToYaml(h v1alpha1.HelmRelease) string {
 
 	data["spec"] = spec
 
-	out, err := yaml.Marshal(data)
-	if err != nil {
-		fmt.Println(err)
-		return ""
-	}
-
-	return string(out)
+	return data
 }

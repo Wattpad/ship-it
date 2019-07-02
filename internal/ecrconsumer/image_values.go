@@ -5,17 +5,10 @@ import (
 	"reflect"
 	"strings"
 
-	"ship-it/internal/release"
-
 	"ship-it/pkg/apis/helmreleases.k8s.wattpad.com/v1alpha1"
 
-	"github.com/google/go-github/github"
+	"k8s.io/apimachinery/pkg/runtime"
 )
-
-type GitCommands interface {
-	UpdateFile(msg string, branch string, path string, fileContent []byte) (*github.RepositoryContentResponse, error)
-	GetFile(branch string, path string) ([]byte, error)
-}
 
 type Image struct {
 	Registry   string
@@ -32,7 +25,7 @@ func parseImage(repo string, tag string) (*Image, error) {
 		repository = arr[1]
 		registry = arr[0]
 	} else {
-		return nil, fmt.Errorf("repository field is invalid! (lacking either the full registry name or repository name)")
+		return nil, fmt.Errorf("malformed repo: %s", repo)
 	}
 
 	return &Image{
@@ -51,10 +44,9 @@ func getImagePath(v reflect.Value, serviceName string) []string {
 	for iter.Next() {
 		key := iter.Key().String()
 		if key == "image" {
-			img := v.MapIndex(iter.Key()).Interface().(map[string]interface{})
+			img := iter.Value().Interface().(map[string]interface{})
 			image, err := parseImage(img["repository"].(string), img["tag"].(string))
 			if err != nil {
-				fmt.Println("Invalid image")
 				return []string{}
 			}
 			if image.Repository == serviceName {
@@ -77,14 +69,13 @@ func getImagePath(v reflect.Value, serviceName string) []string {
 
 func table(vals map[string]interface{}, path []string) map[string]interface{} {
 	tabled := vals
-	for i := range path {
-		_, ok := tabled[path[i]].(map[string]interface{})
+	for _, p := range path {
+		_, ok := tabled[p].(map[string]interface{})
 		if !ok {
-			fmt.Println("invalid path")
 			return nil
 		}
 
-		tabled = tabled[path[i]].(map[string]interface{})
+		tabled = tabled[p].(map[string]interface{})
 	}
 	return tabled
 }
@@ -102,8 +93,12 @@ func update(vals map[string]interface{}, img Image, path []string) map[string]in
 
 func LoadRelease(fileData []byte) (*v1alpha1.HelmRelease, error) {
 	rls := &v1alpha1.HelmRelease{}
-	d := release.NewDecoder()
-	d.Decode(fileData, nil, rls)
+	d := NewDecoder()
+
+	err := runtime.DecodeInto(d, fileData, rls)
+	if err != nil {
+		return nil, err
+	}
 
 	return rls, nil
 }
