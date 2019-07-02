@@ -60,6 +60,11 @@ func (h HelmRelease) Encode() []byte {
 	// create identical json to original with extra code gen fields
 	data["apiVersion"] = h.APIVersion
 	data["kind"] = h.Kind
+
+	// make new metadata without unpopulated fields
+
+	//metaFields := []string{"generatename", "namespace", "selflink", "uid", "resourceversion", "generation"}
+
 	data["metadata"] = h.ObjectMeta
 
 	spec := make(map[string]interface{})
@@ -75,6 +80,5 @@ func (h HelmRelease) Encode() []byte {
 		return nil
 	}
 
-	fmt.Println(data)
 	return out
 }

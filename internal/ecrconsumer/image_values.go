@@ -42,42 +42,6 @@ func parseImage(repo string, tag string) (*Image, error) {
 	}, nil
 }
 
-func FindImage(v reflect.Value, image *Image, serviceName string, path *string) {
-	// Indirect through pointers and interfaces
-	for v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface {
-		v = v.Elem()
-	}
-	switch v.Kind() {
-	case reflect.Array, reflect.Slice:
-		for i := 0; i < v.Len(); i++ {
-			FindImage(v.Index(i), image, serviceName, path)
-		}
-	case reflect.Map:
-		for _, k := range v.MapKeys() {
-			_, ok := v.MapIndex(k).Interface().(string)
-			if !ok {
-				*path += k.Interface().(string)
-				//fmt.Println(*path)
-			}
-			if k.Interface().(string) == "image" {
-				i := v.MapIndex(k).Interface().(map[string]interface{})
-				img, err := parseImage(i["repository"].(string), i["tag"].(string))
-				if err != nil {
-					fmt.Println(err)
-					return
-				}
-				if img.Repository == serviceName {
-					*image = *img
-					return
-				}
-			}
-			FindImage(v.MapIndex(k), image, serviceName, path)
-		}
-	default:
-		// handle other types
-	}
-}
-
 func getImagePath(v reflect.Value, serviceName string) []string {
 	if v.Kind() != reflect.Map {
 		return []string{}
@@ -126,7 +90,7 @@ func table(vals map[string]interface{}, path []string) map[string]interface{} {
 	return tabled
 }
 
-func iterativeUpdate(vals map[string]interface{}, img Image, path []string) map[string]interface{} {
+func update(vals map[string]interface{}, img Image, path []string) map[string]interface{} {
 	imgVals := table(vals, path)
 	if imgVals == nil {
 		return nil
@@ -151,31 +115,22 @@ func LoadImage(serviceName string, client GitCommands) (*Image, error) {
 	fmt.Println(target)
 	fmt.Print("\n\n")
 
-	outBytes := target.Encode()
-	_, err = client.UpdateFile("diff test", "master", "k8s/custom-resources/loki.yaml", outBytes)
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
+	image := Image{
+		Registry:   "foo",
+		Repository: "bar",
+		Tag:        "New Tag",
 	}
-
-	fmt.Println(reflect.DeepEqual(resourceBytes, outBytes))
-
-	image := Image{}
-	path := ""
-	FindImage(reflect.ValueOf(target.Spec.Values.Object), &image, serviceName, &path)
 
 	pathArr := getImagePath(reflect.ValueOf(target.Spec.Values.Object), "loki")
 	image.Tag = "This is a new tag" // change a value and print
-	fmt.Println(iterativeUpdate(target.Spec.Values.Object, image, pathArr))
-	//_ = WithImage(image, *target)
+	fmt.Println(WithImage(image, *target, pathArr))
 
 	return nil, nil
 }
 
-func WithImage(img Image, r helmrelease.HelmRelease) helmrelease.HelmRelease {
-	newVals := make(map[string]interface{})
-	//update(img, )
-
+func WithImage(img Image, r helmrelease.HelmRelease, path []string) helmrelease.HelmRelease {
+	newVals := update(r.Spec.Values.Object, img, path)
 	r.Spec.Values.Object = newVals
+
 	return r
 }
