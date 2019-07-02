@@ -2,6 +2,7 @@ language: go
 
 go:
   - 1.12.1
+  - tip
 
 env:
   - GO111MODULE=on
@@ -45,6 +46,13 @@ jobs:
       script:
         - TARGET=ship-it-api make push
         - TARGET=ship-it-ecrconsumer make push
+
+    - stage: Codecov
+      name: Test Coverage Report
+      script: 
+        - go test -race -coverprofile=coverage.txt -covermode=atomic ./...
+      after_success: 
+        - bash <(curl -s https://codecov.io/bash)
 
 branches:
   only:
