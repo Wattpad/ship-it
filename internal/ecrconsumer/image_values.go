@@ -100,31 +100,19 @@ func update(vals map[string]interface{}, img Image, path []string) map[string]in
 	return vals
 }
 
-func LoadImage(serviceName string, client GitCommands) (*Image, error) {
+func LoadRelease(serviceName string, client GitCommands) (*helmrelease.HelmRelease, error) {
 	// we assume this file path until a location in miranda for custom resources is decided upon
 	resourceBytes, err := client.GetFile("master", filepath.Join("k8s/custom-resources", serviceName+".yaml"))
 	if err != nil {
 		return nil, err
 	}
 
-	target := &helmrelease.HelmRelease{}
+	rls := &helmrelease.HelmRelease{}
 	d := helmrelease.NewDecoder()
 	gvk := schema.FromAPIVersionAndKind("helmreleases.k8s.wattpad.com/v1alpha1", "HelmRelease")
-	d.Decode(resourceBytes, &gvk, target)
-	fmt.Println(target)
-	fmt.Print("\n\n")
+	d.Decode(resourceBytes, &gvk, rls)
 
-	image := Image{
-		Registry:   "foo",
-		Repository: "bar",
-		Tag:        "New Tag",
-	}
-
-	pathArr := getImagePath(reflect.ValueOf(target.Spec.Values.Object), "loki")
-	image.Tag = "This is a new tag"
-	fmt.Println(WithImage(image, *target, pathArr))
-
-	return nil, nil
+	return rls, nil
 }
 
 func WithImage(img Image, r helmrelease.HelmRelease, path []string) helmrelease.HelmRelease {
