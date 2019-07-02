@@ -57,7 +57,7 @@ func NewDecoder() runtime.Decoder {
 
 func (h HelmRelease) Encode() []byte {
 	data := make(map[string]interface{})
-	// create identical json to original with extra code gen fields
+	// create identical yaml to original with extra code gen fields
 	data["apiVersion"] = h.APIVersion
 	data["kind"] = h.Kind
 
