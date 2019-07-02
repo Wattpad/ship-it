@@ -1,4 +1,4 @@
-.PHONY: build push run
+.PHONY: build push run jsonschema
 
 REGISTRY := 723255503624.dkr.ecr.us-east-1.amazonaws.com
 VERSION := $(shell git rev-parse HEAD)
@@ -32,3 +32,15 @@ run: build
 	    -e GITHUB_TOKEN=fake \
 	    -e GITHUB_ORG="wattpad" \
 	    $(shell docker images -q $(TARGET) | head -n 1)
+
+# empty target
+internal/models/*.go:
+
+# api docs should be rebuilt when model code changes
+api/*.json: internal/api/models/*.go
+	go run tools/jsonschema/main.go
+
+jsonschema: api/*.json
+
+k8s-code-gen:
+	./tools/k8s-code-gen/update-generated.sh
