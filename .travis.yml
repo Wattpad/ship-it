@@ -17,6 +17,8 @@ stages:
     if: type = pull_request
   - name: Push
     if: type = push AND branch = master
+  - name: Codecov
+    if: type = pull_request
 
 jobs:
   include:
@@ -49,10 +51,8 @@ jobs:
 
     - stage: Codecov
       name: Test Coverage Report
-      script: 
-        - go test -race -coverprofile=coverage.txt -covermode=atomic ./...
-      after_success: 
-        - bash <(curl -s https://codecov.io/bash)
+      script: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
+      after_success: bash <(curl -s https://codecov.io/bash)
 
 branches:
   only:
