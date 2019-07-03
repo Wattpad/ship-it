@@ -1,11 +1,12 @@
 package ecrconsumer
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
+	"fmt"
 
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v2"
 )
 
 func TestGetImagePath(t *testing.T) {
@@ -261,20 +262,19 @@ func TestParseImage(t *testing.T) {
 	}
 }
 
-func TestLoadRelease(t *testing.T) {
-	crYaml := `
-apiVersion: helmreleases.k8s.wattpad.com/v1alpha1
+func TestFullCycle(t *testing.T) {
+	crYaml := `apiVersion: helmreleases.k8s.wattpad.com/v1alpha1
 kind: HelmRelease
 metadata:
+  creationTimestamp: null
   name: example-microservice
 spec:
   chart:
-    repository: wattpad.s3.amazonaws.com/helm-charts
     path: microservice
+    repository: wattpad.s3.amazonaws.com/helm-charts
     revision: HEAD
   releaseName: example-release
   values:
-    kind: HelmRelease
     autoscaler:
       maxPods: 50
       minPods: 30
@@ -303,10 +303,14 @@ spec:
       privileged: true
     serviceAccountName: loki
     servicePort: 80
+status: {}
 `
 	rls, err := LoadRelease([]byte(crYaml))
-
-	fmt.Println(rls)
-
 	assert.Nil(t, err)
+	outBytes, err := yaml.Marshal(rls)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(string(outBytes))
+	assert.Equal(t, crYaml, string(outBytes))
 }
