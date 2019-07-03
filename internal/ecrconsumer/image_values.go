@@ -80,7 +80,6 @@ func table(vals map[string]interface{}, path []string) map[string]interface{} {
 	return tabled
 }
 
-// dont take path get it using the function instead
 func update(vals map[string]interface{}, img Image, path []string) map[string]interface{} {
 	imgVals := table(vals, path)
 	if imgVals == nil {
@@ -104,7 +103,6 @@ func LoadRelease(fileData []byte) (*v1alpha1.HelmRelease, error) {
 	return rls, nil
 }
 
-// dont take path get it using the function instead 
 func WithImage(img Image, r v1alpha1.HelmRelease, path []string) v1alpha1.HelmRelease {
 	newVals := update(r.Spec.Values, img, path)
 	r.Spec.Values = newVals
