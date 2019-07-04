@@ -6,7 +6,6 @@ import (
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/helm/pkg/chartutil"
 )
 
 // HelmReleaseSpec defines the desired state of HelmRelease
@@ -44,7 +43,7 @@ func (r HelmRelease) MarshalYAML() (interface{}, error) {
 
 // +k8s:deepcopy-gen:interfaces
 // HelmValues allows us to implement runtime.Object for map[string]interface type.
-type HelmValues chartutil.Values
+type HelmValues map[string]interface{}
 
 func (in *HelmValues) DeepCopyInto(out *HelmValues) {
 	if in == nil {
@@ -56,12 +55,12 @@ func (in *HelmValues) DeepCopyInto(out *HelmValues) {
 		return
 	}
 
-	var values chartutil.Values
+	var values HelmValues
 	if err := yaml.Unmarshal(b, &values); err != nil {
 		return
 	}
 
-	*out = HelmValues(values)
+	*out = values
 }
 
 // +genclient

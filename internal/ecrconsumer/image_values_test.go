@@ -4,6 +4,8 @@ import (
 	"reflect"
 	"testing"
 
+	//"ship-it/pkg/apis/helmreleases.k8s.wattpad.com/v1alpha1"
+
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
 )
@@ -304,7 +306,7 @@ func TestWithImage(t *testing.T) {
 	expectedImg := Image{
 		Registry:   "723255503624.dkr.ecr.us-east-1.amazonaws.com",
 		Repository: "loki",
-		Tag:        "cc064f8a3d3fa0fe938e95d961ad0278770fa5d2",
+		Tag:        "new-tag",
 	}
 
 	rls, err := LoadRelease([]byte(crYaml))
@@ -314,7 +316,7 @@ func TestWithImage(t *testing.T) {
 
 	outputRls := WithImage(expectedImg, *rls)
 
-	path := getImagePath(reflect.ValueOf(outputRls.Spec.Values), expectedImg.Repository)
+	path := getImagePath(reflect.ValueOf(outputRls.Spec.Values), "loki")
 	if path == nil {
 		t.Fatal("no mathcing image found")
 	}
@@ -328,6 +330,65 @@ func TestWithImage(t *testing.T) {
 
 	assert.Equal(t, expectedImg, *outputImage)
 }
+
+func TestStringMapCleanup(t *testing.T) {
+	inputMap := map[string]interface{}{
+		"foo": map[interface{}]interface{}{
+			"bar": "baz",
+		},
+	}
+	expectedMap := map[string]interface{}{
+		"foo": map[string]interface{}{
+			"bar": "baz",
+		},
+	}
+	assert.Equal(t, expectedMap, cleanUpStringMap(inputMap))
+}
+
+// TODO:
+//func TestDeepCopy(t *testing.T) {
+//	tests := []struct {
+//		original         map[string]interface{}
+//		transformer      func(v map[string]interface{}) map[string]interface{}
+//		expectedCopy     map[string]interface{}
+//		expectedOriginal map[string]interface{}
+//	}{
+//		// reassignment
+//		{
+//			original: nil,
+//			transformer: func(v map[string]interface{}) map[string]interface{} {
+//				return map[string]interface{}{}
+//			},
+//			expectedCopy:     map[string]interface{}{},
+//			expectedOriginal: nil,
+//		},
+//		// mutation
+//		{
+//			original: map[string]interface{}{},
+//			transformer: func(v map[string]interface{}) map[string]interface{} {
+//				v["foo"] = "bar"
+//				return v
+//			},
+//			expectedCopy:     map[string]interface{}{"foo": "bar"},
+//			expectedOriginal: map[string]interface{}{},
+//		},
+//		{
+//			original: map[string]interface{}{"foo": map[string]interface{}{"bar": "baz"}},
+//			transformer: func(v map[string]interface{}) map[string]interface{} {
+//				v["foo"] = map[string]interface{}{"bar": "oof"}
+//				return v
+//			},
+//			expectedCopy:     map[string]interface{}{"foo": map[string]interface{}{"bar": "oof"}},
+//			expectedOriginal: map[string]interface{}{"foo": map[string]interface{}{"bar": "baz"}},
+//		},
+//	}
+//	for i, tc := range tests {
+//		output := make(map[string]interface{})
+//		tc.original.DeepCopyInto(output)
+//		assert.Exactly(t, tc.expectedCopy, tc.transformer(output), "copy was not mutated. test case: %d", i)
+//		assert.Exactly(t, tc.expectedOriginal, tc.original, "original was mutated. test case: %d", i)
+//	}
+//}
 
 func TestFullCycle(t *testing.T) {
 	rls, err := LoadRelease([]byte(crYaml))

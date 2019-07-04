@@ -107,7 +107,50 @@ func LoadRelease(fileData []byte) (*v1alpha1.HelmRelease, error) {
 	return rls, nil
 }
 
+func cleanUpInterfaceArray(in []interface{}) []interface{} {
+	result := make([]interface{}, len(in))
+	for i, v := range in {
+		result[i] = cleanUpMapValue(v)
+	}
+	return result
+}
+
+func cleanUpStringMap(in map[string]interface{}) map[string]interface{} {
+	result := make(map[string]interface{})
+	for k, v := range in {
+		result[fmt.Sprintf("%v", k)] = cleanUpMapValue(v)
+	}
+	return result
+}
+
+func cleanUpInterfaceMap(in map[interface{}]interface{}) map[string]interface{} {
+	result := make(map[string]interface{})
+	for k, v := range in {
+		result[fmt.Sprintf("%v", k)] = cleanUpMapValue(v)
+	}
+	return result
+}
+
+func cleanUpMapValue(v interface{}) interface{} {
+	switch v := v.(type) {
+	case []interface{}:
+		return cleanUpInterfaceArray(v)
+	case map[interface{}]interface{}:
+		return cleanUpInterfaceMap(v)
+	case string:
+		return v
+	default:
+		return v
+	}
+}
+
 func WithImage(img Image, r v1alpha1.HelmRelease) v1alpha1.HelmRelease {
-	update(r.Spec.Values, img)
-	return r
+	copy := r.DeepCopy()
+
+	cleanMap := cleanUpStringMap(copy.Spec.Values)
+	copy.Spec.Values = v1alpha1.HelmValues(cleanMap)
+
+	update(copy.Spec.Values, img)
+
+	return *copy
 }
