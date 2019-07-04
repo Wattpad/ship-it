@@ -1,13 +1,55 @@
 package ecrconsumer
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
 )
+
+const crYaml = `apiVersion: helmreleases.k8s.wattpad.com/v1alpha1
+kind: HelmRelease
+metadata:
+  creationTimestamp: null
+  name: example-microservice
+spec:
+  chart:
+    path: microservice
+    repository: wattpad.s3.amazonaws.com/helm-charts
+    revision: HEAD
+  releaseName: example-release
+  values:
+    autoscaler:
+      maxPods: 50
+      minPods: 30
+      targetCPUUtilizationPercent: 60
+    containerPort: 80
+    cronjob:
+      closeoutAppLabel: loki-closeout
+      image:
+        repository: 723255503624.dkr.ecr.us-east-1.amazonaws.com/kube-tools
+        tag: deda27d
+      schedule: 0 0 * * *
+    image:
+      repository: 723255503624.dkr.ecr.us-east-1.amazonaws.com/loki
+      tag: cc064f8a3d3fa0fe938e95d961ad0278770fa5d2
+    microservice:
+      nameOverride: loki
+    nodePort: 31828
+    resources:
+      limits:
+        cpu: 500m
+        memory: 256Mi
+      requests:
+        cpu: 500m
+        memory: 128Mi
+    securityContext:
+      privileged: true
+    serviceAccountName: loki
+    servicePort: 80
+status: {}
+`
 
 func TestGetImagePath(t *testing.T) {
 	var tests = []struct {
@@ -159,7 +201,6 @@ func TestUpdateImage(t *testing.T) {
 		newImage    Image
 		inputMap    map[string]interface{}
 		expectedMap map[string]interface{}
-		path        []string
 	}{
 		{
 			Image{
@@ -187,7 +228,6 @@ func TestUpdateImage(t *testing.T) {
 					"tag":        "newTag",
 				},
 			},
-			[]string{"image"},
 		}, {
 			Image{
 				Registry:   "foo",
@@ -214,7 +254,6 @@ func TestUpdateImage(t *testing.T) {
 					},
 				},
 			},
-			[]string{"oranges", "image"},
 		}, {
 			Image{
 				Registry:   "foo",
@@ -228,11 +267,10 @@ func TestUpdateImage(t *testing.T) {
 				},
 			},
 			nil,
-			[]string{"oranges", "image"},
 		},
 	}
 	for _, test := range tests {
-		assert.Equal(t, test.expectedMap, update(test.inputMap, test.newImage, test.path))
+		assert.Equal(t, test.expectedMap, update(test.inputMap, test.newImage))
 	}
 }
 
@@ -262,55 +300,42 @@ func TestParseImage(t *testing.T) {
 	}
 }
 
+func TestWithImage(t *testing.T) {
+	expectedImg := Image{
+		Registry: "723255503624.dkr.ecr.us-east-1.amazonaws.com",
+		Repository: "loki",
+		Tag: "cc064f8a3d3fa0fe938e95d961ad0278770fa5d2",
+	}
+
+	rls, err := LoadRelease([]byte(crYaml))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	outputRls := WithImage(expectedImg, *rls)
+
+	path := getImagePath(reflect.ValueOf(outputRls.Spec.Values), expectedImg.Repository)
+	if path == nil {
+		t.Fatal("no mathcing image found")
+	}
+
+	imgVals := table(outputRls.Spec.Values, path)
+
+	outputImage, err := parseImage(imgVals["repository"].(string), imgVals["tag"].(string))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, expectedImg, *outputImage)
+}
+
 func TestFullCycle(t *testing.T) {
-	crYaml := `apiVersion: helmreleases.k8s.wattpad.com/v1alpha1
-kind: HelmRelease
-metadata:
-  creationTimestamp: null
-  name: example-microservice
-spec:
-  chart:
-    path: microservice
-    repository: wattpad.s3.amazonaws.com/helm-charts
-    revision: HEAD
-  releaseName: example-release
-  values:
-    autoscaler:
-      maxPods: 50
-      minPods: 30
-      targetCPUUtilizationPercent: 60
-    containerPort: 80
-    cronjob:
-      closeoutAppLabel: loki-closeout
-      image:
-        repository: 723255503624.dkr.ecr.us-east-1.amazonaws.com/kube-tools
-        tag: deda27d
-      schedule: 0 0 * * *
-    image:
-      repository: 723255503624.dkr.ecr.us-east-1.amazonaws.com/loki
-      tag: cc064f8a3d3fa0fe938e95d961ad0278770fa5d2
-    microservice:
-      nameOverride: loki
-    nodePort: 31828
-    resources:
-      limits:
-        cpu: 500m
-        memory: 256Mi
-      requests:
-        cpu: 500m
-        memory: 128Mi
-    securityContext:
-      privileged: true
-    serviceAccountName: loki
-    servicePort: 80
-status: {}
-`
 	rls, err := LoadRelease([]byte(crYaml))
 	assert.Nil(t, err)
 	outBytes, err := yaml.Marshal(rls)
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println(string(outBytes))
+
 	assert.Equal(t, crYaml, string(outBytes))
 }

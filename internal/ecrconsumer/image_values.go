@@ -80,7 +80,11 @@ func table(vals map[string]interface{}, path []string) map[string]interface{} {
 	return tabled
 }
 
-func update(vals map[string]interface{}, img Image, path []string) map[string]interface{} {
+func update(vals map[string]interface{}, img Image) map[string]interface{} {
+	path := getImagePath(reflect.ValueOf(vals), img.Repository)
+	if len(path) == 0 {
+		return nil
+	}
 	imgVals := table(vals, path)
 	if imgVals == nil {
 		return nil
@@ -103,8 +107,11 @@ func LoadRelease(fileData []byte) (*v1alpha1.HelmRelease, error) {
 	return rls, nil
 }
 
-func WithImage(img Image, r v1alpha1.HelmRelease, path []string) v1alpha1.HelmRelease {
-	newVals := update(r.Spec.Values, img, path)
+func WithImage(img Image, r v1alpha1.HelmRelease) v1alpha1.HelmRelease {
+	//newVals := &v1alpha1.HelmValues{}
+	//r.Spec.Values.DeepCopyInto(newVals)
+	//update(*newVals, img)
+	newVals := update(r.Spec.Values, img)
 	r.Spec.Values = newVals
 
 	return r
