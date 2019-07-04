@@ -302,9 +302,9 @@ func TestParseImage(t *testing.T) {
 
 func TestWithImage(t *testing.T) {
 	expectedImg := Image{
-		Registry: "723255503624.dkr.ecr.us-east-1.amazonaws.com",
+		Registry: 	"723255503624.dkr.ecr.us-east-1.amazonaws.com",
 		Repository: "loki",
-		Tag: "cc064f8a3d3fa0fe938e95d961ad0278770fa5d2",
+		Tag: 		"cc064f8a3d3fa0fe938e95d961ad0278770fa5d2",
 	}
 
 	rls, err := LoadRelease([]byte(crYaml))
