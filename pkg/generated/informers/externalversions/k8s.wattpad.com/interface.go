@@ -21,7 +21,7 @@ package helmreleases
 import (
 	internalinterfaces "ship-it/pkg/generated/informers/externalversions/internalinterfaces"
 
-	v1alpha1 "ship-it/pkg/generated/informers/externalversions/helmreleases.k8s.wattpad.com/v1alpha1"
+	v1alpha1 "ship-it/pkg/generated/informers/externalversions/k8s.wattpad.com/v1alpha1"
 )
 
 // Interface provides access to each of this group's versions.

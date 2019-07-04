@@ -23,7 +23,7 @@ import (
 
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	cache "k8s.io/client-go/tools/cache"
-	v1alpha1 "ship-it/pkg/apis/helmreleases.k8s.wattpad.com/v1alpha1"
+	v1alpha1 "ship-it/pkg/apis/k8s.wattpad.com/v1alpha1"
 )
 
 // GenericInformer is type of SharedIndexInformer which will locate and delegate to other

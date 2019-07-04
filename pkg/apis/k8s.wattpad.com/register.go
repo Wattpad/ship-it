@@ -11,9 +11,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package helmreleasesk8swattpadcom
+package k8swattpadcom
 
 // GroupName is the group name used in this package
 const (
-	GroupName = "helmreleases.k8s.wattpad.com"
+	GroupName = "k8s.wattpad.com"
 )

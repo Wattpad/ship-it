@@ -22,7 +22,7 @@ import (
 	"ship-it/pkg/generated/clientset/versioned/scheme"
 
 	rest "k8s.io/client-go/rest"
-	v1alpha1 "ship-it/pkg/apis/helmreleases.k8s.wattpad.com/v1alpha1"
+	v1alpha1 "ship-it/pkg/apis/k8s.wattpad.com/v1alpha1"
 )
 
 type HelmreleasesV1alpha1Interface interface {

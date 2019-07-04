@@ -26,7 +26,7 @@ import (
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	rest "k8s.io/client-go/rest"
-	v1alpha1 "ship-it/pkg/apis/helmreleases.k8s.wattpad.com/v1alpha1"
+	v1alpha1 "ship-it/pkg/apis/k8s.wattpad.com/v1alpha1"
 )
 
 // HelmReleasesGetter has a method to return a HelmReleaseInterface.

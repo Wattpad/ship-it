@@ -27,8 +27,8 @@ import (
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"
 	cache "k8s.io/client-go/tools/cache"
-	helmreleasesk8swattpadcomv1alpha1 "ship-it/pkg/apis/helmreleases.k8s.wattpad.com/v1alpha1"
-	v1alpha1 "ship-it/pkg/generated/listers/helmreleases.k8s.wattpad.com/v1alpha1"
+	k8swattpadcomv1alpha1 "ship-it/pkg/apis/k8s.wattpad.com/v1alpha1"
+	v1alpha1 "ship-it/pkg/generated/listers/k8s.wattpad.com/v1alpha1"
 )
 
 // HelmReleaseInformer provides access to a shared informer and lister for
@@ -70,7 +70,7 @@ func NewFilteredHelmReleaseInformer(client versioned.Interface, namespace string
 				return client.HelmreleasesV1alpha1().HelmReleases(namespace).Watch(options)
 			},
 		},
-		&helmreleasesk8swattpadcomv1alpha1.HelmRelease{},
+		&k8swattpadcomv1alpha1.HelmRelease{},
 		resyncPeriod,
 		indexers,
 	)
@@ -81,7 +81,7 @@ func (f *helmReleaseInformer) defaultInformer(client versioned.Interface, resync
 }
 
 func (f *helmReleaseInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&helmreleasesk8swattpadcomv1alpha1.HelmRelease{}, f.defaultInformer)
+	return f.factory.InformerFor(&k8swattpadcomv1alpha1.HelmRelease{}, f.defaultInformer)
 }
 
 func (f *helmReleaseInformer) Lister() v1alpha1.HelmReleaseLister {
