@@ -25,7 +25,7 @@ chmod +x vendor/k8s.io/code-generator/generate-groups.sh
 ./vendor/k8s.io/code-generator/generate-groups.sh \
     "deepcopy,client,lister,informer" \
     ship-it/pkg/generated ship-it/pkg/apis \
-    "helmreleases.k8s.wattpad.com:v1alpha1" \
+    "k8s.wattpad.com:v1alpha1" \
     --go-header-file tools/k8s-code-gen/boilerplate.go.txt
 
 export GO111MODULE="on"
