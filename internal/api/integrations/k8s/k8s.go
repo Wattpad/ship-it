@@ -9,7 +9,7 @@ import (
 	clientset "ship-it/pkg/generated/clientset/versioned"
 	informers "ship-it/pkg/generated/informers/externalversions"
 
-	"ship-it/pkg/generated/listers/helmreleases.k8s.wattpad.com/v1alpha1"
+	"ship-it/pkg/generated/listers/k8s.wattpad.com/v1alpha1"
 
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/rest"
@@ -30,18 +30,15 @@ func New(ctx context.Context, resync time.Duration) (*K8sClient, error) {
 		return nil, err
 	}
 
-	exit := make(chan struct{})
-
-	go func() {
-		<-ctx.Done()
-		exit <- struct{}{}
-	}()
-
 	factory := informers.NewSharedInformerFactory(client, resync)
-	factory.Start(exit)
+
+	helmReleaseLister := factory.Helmreleases().V1alpha1().HelmReleases().Lister()
+
+	// factory must be started after all informers/listers have been created
+	factory.Start(ctx.Done())
 
 	return &K8sClient{
-		lister: factory.Helmreleases().V1alpha1().HelmReleases().Lister(),
+		lister: helmReleaseLister,
 	}, nil
 }
 
