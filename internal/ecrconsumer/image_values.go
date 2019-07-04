@@ -108,11 +108,6 @@ func LoadRelease(fileData []byte) (*v1alpha1.HelmRelease, error) {
 }
 
 func WithImage(img Image, r v1alpha1.HelmRelease) v1alpha1.HelmRelease {
-	//newVals := &v1alpha1.HelmValues{}
-	//r.Spec.Values.DeepCopyInto(newVals)
-	//update(*newVals, img)
-	newVals := update(r.Spec.Values, img)
-	r.Spec.Values = newVals
-
+	update(r.Spec.Values, img)
 	return r
 }
