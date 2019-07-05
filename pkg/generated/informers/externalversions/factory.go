@@ -29,7 +29,7 @@ import (
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	cache "k8s.io/client-go/tools/cache"
-	helmreleasesk8swattpadcom "ship-it/pkg/generated/informers/externalversions/helmreleases.k8s.wattpad.com"
+	k8swattpadcom "ship-it/pkg/generated/informers/externalversions/k8s.wattpad.com"
 )
 
 // SharedInformerOption defines the functional option type for SharedInformerFactory.
@@ -172,9 +172,9 @@ type SharedInformerFactory interface {
 	ForResource(resource schema.GroupVersionResource) (GenericInformer, error)
 	WaitForCacheSync(stopCh <-chan struct{}) map[reflect.Type]bool
 
-	Helmreleases() helmreleasesk8swattpadcom.Interface
+	Helmreleases() k8swattpadcom.Interface
 }
 
-func (f *sharedInformerFactory) Helmreleases() helmreleasesk8swattpadcom.Interface {
-	return helmreleasesk8swattpadcom.New(f, f.namespace, f.tweakListOptions)
+func (f *sharedInformerFactory) Helmreleases() k8swattpadcom.Interface {
+	return k8swattpadcom.New(f, f.namespace, f.tweakListOptions)
 }

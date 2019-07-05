@@ -1,47 +1,60 @@
 package k8s
 
 import (
+	"context"
+	"time"
+
 	"ship-it/internal/api/models"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
-	kv1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	clientset "ship-it/pkg/generated/clientset/versioned"
+	informers "ship-it/pkg/generated/informers/externalversions"
+
+	"ship-it/pkg/generated/listers/k8s.wattpad.com/v1alpha1"
+
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/rest"
 )
 
-func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
-	configMapList, err := k.core.ConfigMaps(namespace).List(metav1.ListOptions{})
-	if err != nil {
-		return nil, err
-	}
-
-	var releases []models.Release
-	for _, configMap := range configMapList.Items {
-		r := models.Release{
-			Name:    configMap.GetName(),
-			Created: configMap.GetCreationTimestamp().Time,
-		}
-
-		releases = append(releases, r)
-	}
-
-	return releases, nil
-}
-
 type K8sClient struct {
-	core kv1.CoreV1Interface
+	lister v1alpha1.HelmReleaseLister
 }
 
-func New() (*K8sClient, error) {
+func New(ctx context.Context, resync time.Duration) (*K8sClient, error) {
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		return nil, err
 	}
 
-	clientset, err := kubernetes.NewForConfig(config)
+	client, err := clientset.NewForConfig(config)
 	if err != nil {
 		return nil, err
 	}
 
-	return &K8sClient{clientset.CoreV1()}, nil
+	factory := informers.NewSharedInformerFactory(client, resync)
+
+	helmReleaseLister := factory.Helmreleases().V1alpha1().HelmReleases().Lister()
+
+	// factory must be started after all informers/listers have been created
+	factory.Start(ctx.Done())
+
+	return &K8sClient{
+		lister: helmReleaseLister,
+	}, nil
+}
+
+func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
+	releaseList, err := k.lister.HelmReleases(namespace).List(labels.Everything())
+	if err != nil {
+		return nil, err
+	}
+
+	releases := make([]models.Release, 0, len(releaseList))
+	for _, r := range releaseList {
+		releases = append(releases, models.Release{
+			Name:    r.GetName(),
+			Created: r.GetCreationTimestamp().Time,
+		})
+	}
+
+	return releases, nil
 }
