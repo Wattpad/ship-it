@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	//"ship-it/pkg/apis/k8s.wattpad.com/v1alpha1"
+	"ship-it/pkg/apis/k8s.wattpad.com/v1alpha1"
 
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
@@ -345,50 +345,49 @@ func TestStringMapCleanup(t *testing.T) {
 	assert.Equal(t, expectedMap, cleanUpStringMap(inputMap))
 }
 
-// TODO:
-//func TestDeepCopy(t *testing.T) {
-//	tests := []struct {
-//		original         map[string]interface{}
-//		transformer      func(v map[string]interface{}) map[string]interface{}
-//		expectedCopy     map[string]interface{}
-//		expectedOriginal map[string]interface{}
-//	}{
-//		// reassignment
-//		{
-//			original: nil,
-//			transformer: func(v map[string]interface{}) map[string]interface{} {
-//				return map[string]interface{}{}
-//			},
-//			expectedCopy:     map[string]interface{}{},
-//			expectedOriginal: nil,
-//		},
-//		// mutation
-//		{
-//			original: map[string]interface{}{},
-//			transformer: func(v map[string]interface{}) map[string]interface{} {
-//				v["foo"] = "bar"
-//				return v
-//			},
-//			expectedCopy:     map[string]interface{}{"foo": "bar"},
-//			expectedOriginal: map[string]interface{}{},
-//		},
-//		{
-//			original: map[string]interface{}{"foo": map[string]interface{}{"bar": "baz"}},
-//			transformer: func(v map[string]interface{}) map[string]interface{} {
-//				v["foo"] = map[string]interface{}{"bar": "oof"}
-//				return v
-//			},
-//			expectedCopy:     map[string]interface{}{"foo": map[string]interface{}{"bar": "oof"}},
-//			expectedOriginal: map[string]interface{}{"foo": map[string]interface{}{"bar": "baz"}},
-//		},
-//	}
-//	for i, tc := range tests {
-//		output := make(map[string]interface{})
-//		tc.original.DeepCopyInto(output)
-//		assert.Exactly(t, tc.expectedCopy, tc.transformer(output), "copy was not mutated. test case: %d", i)
-//		assert.Exactly(t, tc.expectedOriginal, tc.original, "original was mutated. test case: %d", i)
-//	}
-//}
+func TestDeepCopy(t *testing.T) {
+	tests := []struct {
+		original         v1alpha1.HelmValues
+		transformer      func(v v1alpha1.HelmValues) v1alpha1.HelmValues
+		expectedCopy     v1alpha1.HelmValues
+		expectedOriginal v1alpha1.HelmValues
+	}{
+		// reassignment
+		{
+			original: nil,
+			transformer: func(v v1alpha1.HelmValues) v1alpha1.HelmValues {
+				return v1alpha1.HelmValues{}
+			},
+			expectedCopy:     v1alpha1.HelmValues{},
+			expectedOriginal: nil,
+		},
+		// mutation
+		{
+			original: v1alpha1.HelmValues{},
+			transformer: func(v v1alpha1.HelmValues) v1alpha1.HelmValues {
+				v["foo"] = "bar"
+				return v
+			},
+			expectedCopy:     v1alpha1.HelmValues{"foo": "bar"},
+			expectedOriginal: v1alpha1.HelmValues{},
+		},
+		{
+			original: v1alpha1.HelmValues{"foo": v1alpha1.HelmValues{"bar": "baz"}},
+			transformer: func(v v1alpha1.HelmValues) v1alpha1.HelmValues {
+				v["foo"] = v1alpha1.HelmValues{"bar": "oof"}
+				return v
+			},
+			expectedCopy:     v1alpha1.HelmValues{"foo": v1alpha1.HelmValues{"bar": "oof"}},
+			expectedOriginal: v1alpha1.HelmValues{"foo": v1alpha1.HelmValues{"bar": "baz"}},
+		},
+	}
+	for i, tc := range tests {
+		output := v1alpha1.HelmValues(make(map[string]interface{}))
+		tc.original.DeepCopyInto(&output)
+		assert.Exactly(t, tc.expectedCopy, tc.transformer(output), "copy was not mutated. test case: %d", i)
+		assert.Exactly(t, tc.expectedOriginal, tc.original, "original was mutated. test case: %d", i)
+	}
+}
 
 func TestFullCycle(t *testing.T) {
 	rls, err := LoadRelease([]byte(crYaml))
