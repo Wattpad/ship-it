@@ -9,8 +9,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-const crYaml =
-`apiVersion: helmreleases.k8s.wattpad.com/v1alpha1
+const crYaml = `apiVersion: helmreleases.k8s.wattpad.com/v1alpha1
 kind: HelmRelease
 metadata:
   creationTimestamp: null
