@@ -8,18 +8,20 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-func New(k K8sInterface) (*Service, error) {
-	return &Service{k}, nil
+func New(l ReleaseLister) *Service {
+	return &Service{
+		lister: l,
+	}
 }
 
-type K8sInterface interface {
+type ReleaseLister interface {
 	ListAll(namespace string) ([]models.Release, error)
 }
 
 type Service struct {
-	kube K8sInterface
+	lister ReleaseLister
 }
 
 func (s *Service) ListReleases(ctx context.Context) ([]models.Release, error) {
-	return s.kube.ListAll(v1.NamespaceAll)
+	return s.lister.ListAll(v1.NamespaceAll)
 }

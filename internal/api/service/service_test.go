@@ -34,7 +34,7 @@ func TestListReleasesPopulatesFromConfigMap(t *testing.T) {
 	currentTime := time.Now()
 
 	mock := newMockK8sClient(name, currentTime)
-	svc := Service{mock}
+	svc := New(mock)
 
 	releases, err := svc.ListReleases(context.Background())
 
