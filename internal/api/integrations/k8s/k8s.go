@@ -2,6 +2,7 @@ package k8s
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"ship-it/internal/api/models"
@@ -50,9 +51,30 @@ func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
 
 	releases := make([]models.Release, 0, len(releaseList))
 	for _, r := range releaseList {
+		annotations := r.GetAnnotations()
+		autoDeploy, err := strconv.ParseBool(annotations["helmreleases.k8s.wattpad.com/autodeploy"])
+		if err != nil {
+			return nil, err
+		}
 		releases = append(releases, models.Release{
 			Name:    r.GetName(),
 			Created: r.GetCreationTimestamp().Time,
+			AutoDeploy: autoDeploy,
+			Owner: models.Owner{
+				Squad: annotations["helmreleases.k8s.wattpad.com/squad"],
+				Slack: annotations["helmreleases.k8s.wattpad.com/slack"],
+			},
+			Monitoring: models.Monitoring{
+				Datadog: models.Datadog{
+					Dashboard: annotations["helmreleases.k8s.wattpad.com/datadog"],
+					Monitors: "",
+				},
+				Sumologic: annotations["helmreleases.k8s.wattpad.com/sumologic"],
+			},
+			Code: models.SourceCode{
+				Github: annotations["helmreleases.k8s.wattpad.com/code"],
+				Ref: "",
+			},
 		})
 	}
 
