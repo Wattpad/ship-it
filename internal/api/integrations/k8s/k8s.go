@@ -57,8 +57,8 @@ func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
 			return nil, err
 		}
 		releases = append(releases, models.Release{
-			Name:    r.GetName(),
-			Created: r.GetCreationTimestamp().Time,
+			Name:       r.GetName(),
+			Created:    r.GetCreationTimestamp().Time,
 			AutoDeploy: autoDeploy,
 			Owner: models.Owner{
 				Squad: annotations["helmreleases.k8s.wattpad.com/squad"],
@@ -67,13 +67,13 @@ func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
 			Monitoring: models.Monitoring{
 				Datadog: models.Datadog{
 					Dashboard: annotations["helmreleases.k8s.wattpad.com/datadog"],
-					Monitors: "",
+					Monitors:  "",
 				},
 				Sumologic: annotations["helmreleases.k8s.wattpad.com/sumologic"],
 			},
 			Code: models.SourceCode{
 				Github: annotations["helmreleases.k8s.wattpad.com/code"],
-				Ref: "",
+				Ref:    "",
 			},
 		})
 	}
