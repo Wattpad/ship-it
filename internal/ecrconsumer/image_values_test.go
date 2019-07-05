@@ -1,7 +1,6 @@
 package ecrconsumer
 
 import (
-	"reflect"
 	"testing"
 
 	"ship-it/pkg/apis/k8s.wattpad.com/v1alpha1"
@@ -145,7 +144,7 @@ func TestGetImagePath(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		output := getImagePath(reflect.ValueOf(test.inputMap), test.serviceName)
+		output := getImagePath(test.inputMap, test.serviceName)
 		assert.Equal(t, test.expected, output)
 	}
 }
@@ -316,7 +315,7 @@ func TestWithImage(t *testing.T) {
 
 	outputRls := WithImage(expectedImg, *rls)
 
-	path := getImagePath(reflect.ValueOf(outputRls.Spec.Values), "loki")
+	path := getImagePath(outputRls.Spec.Values, "loki")
 	if path == nil {
 		t.Fatal("no mathcing image found")
 	}

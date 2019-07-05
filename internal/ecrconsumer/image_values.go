@@ -2,7 +2,6 @@ package ecrconsumer
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
 
 	"ship-it/pkg/apis/k8s.wattpad.com/v1alpha1"
@@ -35,28 +34,22 @@ func parseImage(repo string, tag string) (*Image, error) {
 	}, nil
 }
 
-func getImagePath(v reflect.Value, serviceName string) []string {
-	if v.Kind() != reflect.Map {
-		return []string{}
-	}
-
-	iter := v.MapRange()
-	for iter.Next() {
-		key := iter.Key().String()
+func getImagePath(obj map[string]interface{}, serviceName string) []string {
+	for key, val := range obj {
 		if key == "image" {
-			img := iter.Value().Interface().(map[string]interface{})
-			image, err := parseImage(img["repository"].(string), img["tag"].(string))
-			if err != nil {
-				return []string{}
-			}
-			if image.Repository == serviceName {
-				return []string{key}
+			if img, ok := val.(map[string]interface{}); ok {
+				image, err := parseImage(img["repository"].(string), img["tag"].(string))
+				if err != nil {
+					return []string{}
+				}
+				if image.Repository == serviceName {
+					return []string{key}
+				}
 			}
 		}
 
-		val := reflect.ValueOf(iter.Value().Interface())
-		if val.Kind() == reflect.Map {
-			path := getImagePath(val, serviceName)
+		if nested, ok := val.(map[string]interface{}); ok {
+			path := getImagePath(nested, serviceName)
 			if len(path) == 0 {
 				continue
 			}
@@ -81,14 +74,16 @@ func table(vals map[string]interface{}, path []string) map[string]interface{} {
 }
 
 func update(vals map[string]interface{}, img Image) map[string]interface{} {
-	path := getImagePath(reflect.ValueOf(vals), img.Repository)
+	path := getImagePath(vals, img.Repository)
 	if len(path) == 0 {
 		return nil
 	}
+
 	imgVals := table(vals, path)
 	if imgVals == nil {
 		return nil
 	}
+
 	imgVals["repository"] = img.Registry + "/" + img.Repository
 	imgVals["tag"] = img.Tag
 
