@@ -43,6 +43,10 @@ func New(ctx context.Context, resync time.Duration) (*K8sClient, error) {
 	}, nil
 }
 
+func getKey(k string) string {
+	return "helmreleases." + k8swattpadcom.GroupName + "/" + k
+}
+
 func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
 	releaseList, err := k.lister.HelmReleases(namespace).List(labels.Everything())
 	if err != nil {
@@ -52,7 +56,7 @@ func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
 	releases := make([]models.Release, 0, len(releaseList))
 	for _, r := range releaseList {
 		annotations := r.GetAnnotations()
-		autoDeploy, err := strconv.ParseBool(annotations["helmreleases.k8s.wattpad.com/autodeploy"])
+		autoDeploy, err := strconv.ParseBool(annotations[getKey("autodeploy")])
 		if err != nil {
 			return nil, err
 		}
@@ -61,28 +65,22 @@ func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
 			Created:    r.GetCreationTimestamp().Time,
 			AutoDeploy: autoDeploy,
 			Owner: models.Owner{
-				Squad: annotations["helmreleases.k8s.wattpad.com/squad"],
-				Slack: annotations["helmreleases.k8s.wattpad.com/slack"],
+				Squad: annotations[getKey("squad")],
+				Slack: annotations[getKey("slack")],
 			},
 			Monitoring: models.Monitoring{
 				Datadog: models.Datadog{
-					Dashboard: annotations["helmreleases.k8s.wattpad.com/datadog"],
-					Monitors:  "",
+					Dashboard: annotations[getKey("datadog")],
 				},
-				Sumologic: annotations["helmreleases.k8s.wattpad.com/sumologic"],
+				Sumologic: annotations[getKey("sumologic")],
 			},
 			Code: models.SourceCode{
-				Github: annotations["helmreleases.k8s.wattpad.com/code"],
-				Ref:    "",
+				Github: annotations[getKey("code")],
 			},
 			Artifacts: models.Artifacts{
 				Chart: models.HelmArtifact{
 					Path:    r.Spec.Chart.Path,
 					Version: r.Spec.Chart.Revision,
-				},
-				Docker: models.DockerArtifact{
-					Image: "",
-					Tag:   "",
 				},
 			},
 		})
