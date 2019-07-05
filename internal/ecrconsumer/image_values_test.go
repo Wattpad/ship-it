@@ -272,14 +272,14 @@ func TestWithImage(t *testing.T) {
 	}
 
 	rls := v1alpha1.HelmRelease{
-		metav1.TypeMeta{
+		TypeMeta: metav1.TypeMeta{
 			Kind:       "HelmRelease",
 			APIVersion: "apiVersion: helmreleases.k8s.wattpad.com/v1alpha1",
 		},
-		metav1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name: "example-microservice",
 		},
-		v1alpha1.HelmReleaseSpec{
+		Spec: v1alpha1.HelmReleaseSpec{
 			ReleaseName: "example-release",
 			Chart: v1alpha1.ChartSpec{
 				Repository: "wattpad.s3.amazonaws.com/helm-charts",
@@ -293,7 +293,7 @@ func TestWithImage(t *testing.T) {
 				},
 			},
 		},
-		v1alpha1.HelmReleaseStatus{},
+		Status: v1alpha1.HelmReleaseStatus{},
 	}
 
 	outputRls := WithImage(expectedImg, rls)
