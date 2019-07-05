@@ -293,7 +293,6 @@ func TestWithImage(t *testing.T) {
 				},
 			},
 		},
-		Status: v1alpha1.HelmReleaseStatus{},
 	}
 
 	outputRls := WithImage(expectedImg, rls)
