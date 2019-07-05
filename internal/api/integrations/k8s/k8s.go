@@ -75,6 +75,16 @@ func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
 				Github: annotations["helmreleases.k8s.wattpad.com/code"],
 				Ref:    "",
 			},
+			Artifacts: models.Artifacts{
+				Chart: models.HelmArtifact{
+					Path:    r.Spec.Chart.Path,
+					Version: r.Spec.Chart.Revision,
+				},
+				Docker: models.DockerArtifact{
+					Image: "",
+					Tag:   "",
+				},
+			},
 		})
 	}
 

@@ -13,7 +13,7 @@ type Release struct {
 	Code         SourceCode `json:"code" jsonschema:"description=The repository and branch ref of the release's source code"`
 	Build        build      `json:"build" jsonschema:"description=The CI build page of current release,required=true"`
 	Monitoring   Monitoring `json:"monitoring" jsonschema:"description=The monitoring resources for the release"`
-	Artifacts    artifacts  `json:"artifacts" jsonschema:"description=The build artifacts of the release"`
+	Artifacts    Artifacts  `json:"artifacts" jsonschema:"description=The build artifacts of the release"`
 	Status       string     `json:"status" jsonschema:"description=The status of the release,example=deployed,example=failed,example=pending_rollback,example=pending_install,example=pending_upgrade"`
 }
 
@@ -41,12 +41,12 @@ type Datadog struct {
 	Monitors  string `json:"monitors" jsonschema:"format=uri"`
 }
 
-type artifacts struct {
-	Docker dockerArtifact `json:"docker"`
+type Artifacts struct {
+	Docker DockerArtifact `json:"docker"`
 	Chart  HelmArtifact   `json:"chart"`
 }
 
-type dockerArtifact struct {
+type DockerArtifact struct {
 	Image string `json:"image"`
 	Tag   string `json:"tag"`
 }
