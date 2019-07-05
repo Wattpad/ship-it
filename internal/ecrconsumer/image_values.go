@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"strings"
 
-	"ship-it/pkg/apis/helmreleases.k8s.wattpad.com/v1alpha1"
+	"ship-it/pkg/apis/k8s.wattpad.com/v1alpha1"
 
 	"k8s.io/apimachinery/pkg/runtime"
 )

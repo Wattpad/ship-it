@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	//"ship-it/pkg/apis/helmreleases.k8s.wattpad.com/v1alpha1"
+	//"ship-it/pkg/apis/k8s.wattpad.com/v1alpha1"
 
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"

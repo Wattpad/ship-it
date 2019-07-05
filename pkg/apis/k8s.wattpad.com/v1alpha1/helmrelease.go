@@ -49,42 +49,6 @@ type HelmReleaseStatus struct {
 	// TODO
 }
 
-func (r HelmRelease) MarshalYAML() (interface{}, error) {
-	rawJSON, err := json.Marshal(r)
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to marshal HelmRelease into JSON")
-	}
-
-	var jsonObj interface{}
-	if err := json.Unmarshal(rawJSON, &jsonObj); err != nil {
-		return nil, errors.Wrap(err, "unable to unmarshal HelmRelease from JSON")
-	}
-
-	return jsonObj, err
-}
-
-// +k8s:deepcopy-gen:interfaces
-// HelmValues allows us to implement runtime.Object for map[string]interface type.
-type HelmValues map[string]interface{}
-
-func (in *HelmValues) DeepCopyInto(out *HelmValues) {
-	if in == nil {
-		return
-	}
-
-	b, err := yaml.Marshal(in)
-	if err != nil {
-		return
-	}
-
-	var values HelmValues
-	if err := yaml.Unmarshal(b, &values); err != nil {
-		return
-	}
-
-	*out = values
-}
-
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -112,7 +76,6 @@ func (r HelmRelease) MarshalYAML() (interface{}, error) {
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
 // HelmReleaseList contains a list of HelmRelease
 type HelmReleaseList struct {
 	metav1.TypeMeta `json:",inline"`
