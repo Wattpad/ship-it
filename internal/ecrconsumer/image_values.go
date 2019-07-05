@@ -5,8 +5,6 @@ import (
 	"strings"
 
 	"ship-it/pkg/apis/k8s.wattpad.com/v1alpha1"
-
-	"k8s.io/apimachinery/pkg/runtime"
 )
 
 type Image struct {
@@ -89,18 +87,6 @@ func update(vals map[string]interface{}, img Image) {
 	}
 	imgVals["repository"] = img.Untagged()
 	imgVals["tag"] = img.Tag
-}
-
-func LoadRelease(fileData []byte) (*v1alpha1.HelmRelease, error) {
-	rls := &v1alpha1.HelmRelease{}
-	d := v1alpha1.Decoder
-
-	err := runtime.DecodeInto(d, fileData, rls)
-	if err != nil {
-		return nil, err
-	}
-
-	return rls, nil
 }
 
 func cleanUpInterfaceArray(in []interface{}) []interface{} {

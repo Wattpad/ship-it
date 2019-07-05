@@ -51,7 +51,7 @@ spec:
 status: {}
 `
 
-func LoadRelease(fileData []byte) (*HelmRelease, error) {
+func loadRelease(fileData []byte) (*HelmRelease, error) {
 	rls := &HelmRelease{}
 	d := Decoder
 
@@ -108,7 +108,7 @@ func TestDeepCopy(t *testing.T) {
 }
 
 func TestSerializeRoundTrip(t *testing.T) {
-	rls, err := LoadRelease([]byte(crYaml))
+	rls, err := loadRelease([]byte(crYaml))
 	assert.NoError(t, err)
 
 	outBytes, err := yaml.Marshal(rls)
