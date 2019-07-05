@@ -32,7 +32,7 @@ func parseImage(repo string, tag string) (*Image, error) {
 	}, nil
 }
 
-func (i Image) Untagged() string {
+func (i Image) URI() string {
 	return i.Registry + "/" + i.Repository
 }
 
@@ -85,7 +85,7 @@ func update(vals map[string]interface{}, img Image) {
 	if imgVals == nil {
 		return
 	}
-	imgVals["repository"] = img.Untagged()
+	imgVals["repository"] = img.URI()
 	imgVals["tag"] = img.Tag
 }
 
