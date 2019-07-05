@@ -35,6 +35,10 @@ func parseImage(repo string, tag string) (*Image, error) {
 	}, nil
 }
 
+func (i Image) Untagged() string {
+	return i.Registry + "/" + i.Repository
+}
+
 func getImagePath(v reflect.Value, serviceName string) []string {
 	if v.Kind() != reflect.Map {
 		return []string{}
@@ -70,29 +74,27 @@ func getImagePath(v reflect.Value, serviceName string) []string {
 func table(vals map[string]interface{}, path []string) map[string]interface{} {
 	tabled := vals
 	for _, p := range path {
-		_, ok := tabled[p].(map[string]interface{})
+		currentMap, ok := tabled[p].(map[string]interface{})
 		if !ok {
 			return nil
 		}
 
-		tabled = tabled[p].(map[string]interface{})
+		tabled = currentMap
 	}
 	return tabled
 }
 
-func update(vals map[string]interface{}, img Image) map[string]interface{} {
+func update(vals map[string]interface{}, img Image) {
 	path := getImagePath(reflect.ValueOf(vals), img.Repository)
 	if len(path) == 0 {
-		return nil
+		return
 	}
 	imgVals := table(vals, path)
 	if imgVals == nil {
-		return nil
+		return
 	}
-	imgVals["repository"] = img.Registry + "/" + img.Repository
+	imgVals["repository"] = img.Untagged()
 	imgVals["tag"] = img.Tag
-
-	return vals
 }
 
 func LoadRelease(fileData []byte) (*v1alpha1.HelmRelease, error) {
@@ -116,7 +118,7 @@ func cleanUpInterfaceArray(in []interface{}) []interface{} {
 }
 
 func cleanUpStringMap(in map[string]interface{}) map[string]interface{} {
-	result := make(map[string]interface{})
+	result := make(map[string]interface{}, len(in))
 	for k, v := range in {
 		result[fmt.Sprintf("%v", k)] = cleanUpMapValue(v)
 	}
@@ -124,7 +126,7 @@ func cleanUpStringMap(in map[string]interface{}) map[string]interface{} {
 }
 
 func cleanUpInterfaceMap(in map[interface{}]interface{}) map[string]interface{} {
-	result := make(map[string]interface{})
+	result := make(map[string]interface{}, len(in))
 	for k, v := range in {
 		result[fmt.Sprintf("%v", k)] = cleanUpMapValue(v)
 	}
@@ -137,8 +139,6 @@ func cleanUpMapValue(v interface{}) interface{} {
 		return cleanUpInterfaceArray(v)
 	case map[interface{}]interface{}:
 		return cleanUpInterfaceMap(v)
-	case string:
-		return v
 	default:
 		return v
 	}

@@ -10,7 +10,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-const crYaml = `apiVersion: helmreleases.k8s.wattpad.com/v1alpha1
+const crYaml =
+`apiVersion: helmreleases.k8s.wattpad.com/v1alpha1
 kind: HelmRelease
 metadata:
   creationTimestamp: null
@@ -268,11 +269,17 @@ func TestUpdateImage(t *testing.T) {
 					"taste": "delicious",
 				},
 			},
-			nil,
+			map[string]interface{}{
+				"apples": "delicious",
+				"oranges": map[string]interface{}{
+					"taste": "delicious",
+				},
+			},
 		},
 	}
 	for _, test := range tests {
-		assert.Equal(t, test.expectedMap, update(test.inputMap, test.newImage))
+		update(test.inputMap, test.newImage)
+		assert.Equal(t, test.expectedMap, test.inputMap)
 	}
 }
 
@@ -310,23 +317,19 @@ func TestWithImage(t *testing.T) {
 	}
 
 	rls, err := LoadRelease([]byte(crYaml))
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.NoError(t, err)
 
 	outputRls := WithImage(expectedImg, *rls)
 
 	path := getImagePath(reflect.ValueOf(outputRls.Spec.Values), "loki")
 	if path == nil {
-		t.Fatal("no mathcing image found")
+		t.Fatal("no matching image found")
 	}
 
 	imgVals := table(outputRls.Spec.Values, path)
 
 	outputImage, err := parseImage(imgVals["repository"].(string), imgVals["tag"].(string))
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.NoError(t, err)
 
 	assert.Equal(t, expectedImg, *outputImage)
 }
@@ -389,13 +392,12 @@ func TestDeepCopy(t *testing.T) {
 	}
 }
 
-func TestFullCycle(t *testing.T) {
+func TestSerializeRoundTrip(t *testing.T) {
 	rls, err := LoadRelease([]byte(crYaml))
-	assert.Nil(t, err)
+	assert.NoError(t, err)
+
 	outBytes, err := yaml.Marshal(rls)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.NoError(t, err)
 
 	assert.Equal(t, crYaml, string(outBytes))
 }
