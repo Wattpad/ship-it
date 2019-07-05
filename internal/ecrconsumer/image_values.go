@@ -2,7 +2,6 @@ package ecrconsumer
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
 
 	"ship-it/pkg/apis/k8s.wattpad.com/v1alpha1"
@@ -79,7 +78,7 @@ func table(vals map[string]interface{}, path []string) map[string]interface{} {
 }
 
 func update(vals map[string]interface{}, img Image) {
-	path := getImagePath(reflect.ValueOf(vals), img.Repository)
+	path := getImagePath(vals, img.Repository)
 	if len(path) == 0 {
 		return
 	}
