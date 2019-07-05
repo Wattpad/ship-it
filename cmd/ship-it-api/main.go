@@ -49,12 +49,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	svc, err := service.New(k8s)
-	if err != nil {
-		logger.Log("error", err)
-		os.Exit(1)
-	}
-
+	svc := service.New(k8s)
 	srv := http.Server{
 		Addr:    ":" + cfg.ServicePort,
 		Handler: api.New(svc, dd.NewTiming("api.time", 1.0)),
