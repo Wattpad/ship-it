@@ -39,28 +39,22 @@ func (i Image) Untagged() string {
 	return i.Registry + "/" + i.Repository
 }
 
-func getImagePath(v reflect.Value, serviceName string) []string {
-	if v.Kind() != reflect.Map {
-		return []string{}
-	}
-
-	iter := v.MapRange()
-	for iter.Next() {
-		key := iter.Key().String()
+func getImagePath(obj map[string]interface{}, serviceName string) []string {
+	for key, val := range obj {
 		if key == "image" {
-			img := iter.Value().Interface().(map[string]interface{})
-			image, err := parseImage(img["repository"].(string), img["tag"].(string))
-			if err != nil {
-				return []string{}
-			}
-			if image.Repository == serviceName {
-				return []string{key}
+			if img, ok := val.(map[string]interface{}); ok {
+				image, err := parseImage(img["repository"].(string), img["tag"].(string))
+				if err != nil {
+					return []string{}
+				}
+				if image.Repository == serviceName {
+					return []string{key}
+				}
 			}
 		}
 
-		val := reflect.ValueOf(iter.Value().Interface())
-		if val.Kind() == reflect.Map {
-			path := getImagePath(val, serviceName)
+		if nested, ok := val.(map[string]interface{}); ok {
+			path := getImagePath(nested, serviceName)
 			if len(path) == 0 {
 				continue
 			}
@@ -89,6 +83,7 @@ func update(vals map[string]interface{}, img Image) {
 	if len(path) == 0 {
 		return
 	}
+
 	imgVals := table(vals, path)
 	if imgVals == nil {
 		return
