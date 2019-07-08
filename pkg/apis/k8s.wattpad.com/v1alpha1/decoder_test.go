@@ -5,7 +5,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
-	"k8s.io/apimachinery/pkg/runtime"
 )
 
 const crYaml = `apiVersion: helmreleases.k8s.wattpad.com/v1alpha1
@@ -50,18 +49,6 @@ spec:
     servicePort: 80
 status: {}
 `
-
-func loadRelease(fileData []byte) (*HelmRelease, error) {
-	rls := &HelmRelease{}
-	d := Decoder
-
-	err := runtime.DecodeInto(d, fileData, rls)
-	if err != nil {
-		return nil, err
-	}
-
-	return rls, nil
-}
 
 func TestDeepCopy(t *testing.T) {
 	tests := []struct {
@@ -108,7 +95,7 @@ func TestDeepCopy(t *testing.T) {
 }
 
 func TestSerializeRoundTrip(t *testing.T) {
-	rls, err := loadRelease([]byte(crYaml))
+	rls, err := LoadRelease([]byte(crYaml))
 	assert.NoError(t, err)
 
 	outBytes, err := yaml.Marshal(rls)

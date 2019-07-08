@@ -3,26 +3,23 @@ package ecrconsumer
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strings"
 	"time"
+
+	"ship-it/pkg/apis/k8s.wattpad.com/v1alpha1"
 
 	"github.com/Wattpad/sqsconsumer"
 	"github.com/Wattpad/sqsconsumer/middleware"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics"
 	"github.com/google/go-github/github"
+	"gopkg.in/yaml.v2"
 )
 
 type GitCommands interface {
 	GetFile(branch string, path string) ([]byte, error)
 	UpdateFile(msg string, branch string, path string, fileContent []byte) (*github.RepositoryContentResponse, error)
-}
-
-// Will delete after VELO-1453 is merged as that PR already has this type included
-type Image struct {
-	Registry   string
-	Repository string
-	Tag        string
 }
 
 type SQSMessage struct {
@@ -86,14 +83,30 @@ func processMessage(client GitCommands) sqsconsumer.MessageHandlerFunc {
 		}
 
 		tag := parseSHA(sqsMessage.Detail.ResponseElements.Image.ImageID.ImageDigest)
-		_ = makeImage(sqsMessage.Detail.ResponseElements.Image.RepositoryName, tag)
+		newImage := makeImage(sqsMessage.Detail.ResponseElements.Image.RepositoryName, tag)
 
+		resourceBytes, err := client.GetFile("master", "/custom-resources")
+		if err != nil {
+			return err
+		}
+
+		rls, err := v1alpha1.LoadRelease(resourceBytes)
+		if err != nil {
+			return err
+		}
+
+		updatedRls := WithImage(newImage, *rls)
+
+		updatedBytes, err := yaml.Marshal(updatedRls)
+		if err != nil {
+			return nil
+		}
+
+		_, err = client.UpdateFile(fmt.Sprintf("Image Tag updated to: %s", newImage.Tag), "master", "/custom-resources", updatedBytes)
+		if err != nil {
+			return err
+		}
 		return nil
-		// Get CR Bytes
-		// Unmarshal
-		// Attach updated Image
-		// Marshal
-		// Commit new Bytes to GitHub
 	}
 }
 

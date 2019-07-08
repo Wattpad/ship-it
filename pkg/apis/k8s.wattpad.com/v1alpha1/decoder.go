@@ -13,3 +13,15 @@ func newDecoder() runtime.Decoder {
 
 	return factory.DecoderToVersion(d, SchemeGroupVersion)
 }
+
+func LoadRelease(fileData []byte) (*HelmRelease, error) {
+	rls := &HelmRelease{}
+	d := Decoder
+
+	err := runtime.DecodeInto(d, fileData, rls)
+	if err != nil {
+		return nil, err
+	}
+
+	return rls, nil
+}
