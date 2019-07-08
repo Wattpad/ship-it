@@ -6,10 +6,15 @@ import (
 
 	"github.com/Wattpad/sqsconsumer"
 	"github.com/Wattpad/sqsconsumer/middleware"
-
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics"
+	"github.com/google/go-github/github"
 )
+
+type GitCommands interface {
+	GetFile(branch string, path string) ([]byte, error)
+	UpdateFile(msg string, branch string, path string, fileContent []byte) (*github.RepositoryContentResponse, error)
+}
 
 // New returns a SQS consumer which processes ECR PushImage events by updating
 // the associated service's chart values in a remote Git repository.
