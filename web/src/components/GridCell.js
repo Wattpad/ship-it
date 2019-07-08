@@ -75,7 +75,7 @@ class SingleGridCell extends React.Component {
               <Typography variant="h5" component="h2">
                 {this.props.SingleGridCellData.name}
               </Typography>
-              <StatusChip status={this.props.SingleGridCellData.deployment.status} />
+              <StatusChip status={this.props.SingleGridCellData.status} />
               <div>
                 <IconButton>
                   <img src={TimePassed} alt={imgAlt} />
