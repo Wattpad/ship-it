@@ -302,12 +302,31 @@ func TestWithImage(t *testing.T) {
 		t.Fatal("no matching image found")
 	}
 
-	imgVals := table(outputRls.Spec.Values, path)
+	outputImg := outputRls.Spec.Values["image"].(map[string]interface{})
+	assert.Equal(t, expectedImg.Tag, outputImg["tag"].(string))
 
-	outputImage, err := parseImage(imgVals["repository"].(string), imgVals["tag"].(string))
-	assert.NoError(t, err)
+	// Test No Matching Image Case
+	rls = v1alpha1.HelmRelease{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "HelmRelease",
+			APIVersion: "apiVersion: helmreleases.k8s.wattpad.com/v1alpha1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "example-microservice",
+		},
+		Spec: v1alpha1.HelmReleaseSpec{
+			ReleaseName: "example-release",
+			Chart: v1alpha1.ChartSpec{
+				Repository: "wattpad.s3.amazonaws.com/helm-charts",
+				Path:       "microservice",
+				Revision:   "HEAD",
+			},
+			Values: map[string]interface{}{},
+		},
+	}
 
-	assert.Equal(t, expectedImg, *outputImage)
+	outputRls = WithImage(expectedImg, rls)
+	assert.Exactly(t, rls, outputRls)
 }
 
 func TestStringMapCleanup(t *testing.T) {
