@@ -265,12 +265,6 @@ func TestParseImage(t *testing.T) {
 }
 
 func TestWithImage(t *testing.T) {
-	expectedImg := Image{
-		Registry:   "bar",
-		Repository: "foo",
-		Tag:        "new-tag",
-	}
-
 	rls := v1alpha1.HelmRelease{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "HelmRelease",
@@ -295,38 +289,28 @@ func TestWithImage(t *testing.T) {
 		},
 	}
 
-	outputRls := WithImage(expectedImg, rls)
+	t.Run("Matching Image Case", func(t *testing.T) {
+		expectedImg := Image{
+			Registry:   "bar",
+			Repository: "foo",
+			Tag:        "new-tag",
+		}
+		outputRls := WithImage(expectedImg, rls)
 
-	path := getImagePath(outputRls.Spec.Values, "foo")
-	if path == nil {
-		t.Fatal("no matching image found")
-	}
-
-	outputImg := outputRls.Spec.Values["image"].(map[string]interface{})
-	assert.Equal(t, expectedImg.Tag, outputImg["tag"].(string))
+		outputImg := outputRls.Spec.Values["image"].(map[string]interface{})
+		assert.Equal(t, expectedImg.Tag, outputImg["tag"].(string))
+	})
 
 	// Test No Matching Image Case
-	rls = v1alpha1.HelmRelease{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "HelmRelease",
-			APIVersion: "apiVersion: helmreleases.k8s.wattpad.com/v1alpha1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "example-microservice",
-		},
-		Spec: v1alpha1.HelmReleaseSpec{
-			ReleaseName: "example-release",
-			Chart: v1alpha1.ChartSpec{
-				Repository: "wattpad.s3.amazonaws.com/helm-charts",
-				Path:       "microservice",
-				Revision:   "HEAD",
-			},
-			Values: map[string]interface{}{},
-		},
-	}
-
-	outputRls = WithImage(expectedImg, rls)
-	assert.Exactly(t, rls, outputRls)
+	t.Run("No Matching Image Case", func(t *testing.T) {
+		expectedImg := Image{
+			Registry:   "bar",
+			Repository: "oof",
+			Tag:        "new-tag",
+		}
+		outputRls := WithImage(expectedImg, rls)
+		assert.Exactly(t, rls, outputRls)
+	})
 }
 
 func TestStringMapCleanup(t *testing.T) {
