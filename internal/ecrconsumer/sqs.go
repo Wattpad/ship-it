@@ -18,7 +18,7 @@ type GitCommands interface {
 
 // New returns a SQS consumer which processes ECR PushImage events by updating
 // the associated service's chart values in a remote Git repository.
-func New(logger log.Logger, hist metrics.Histogram, name string, svc sqsconsumer.SQSAPI) (*sqsconsumer.Consumer, error) {
+func New(logger log.Logger, hist metrics.Histogram, name string, svc sqsconsumer.SQSAPI, client GitCommands) (*sqsconsumer.Consumer, error) {
 	service, err := sqsconsumer.NewSQSService(name, svc)
 	if err != nil {
 		return nil, err
@@ -36,6 +36,7 @@ func New(logger log.Logger, hist metrics.Histogram, name string, svc sqsconsumer
 func processMessage(ctx context.Context, msg string) error {
 	return nil
 }
+
 
 func dataDogTimeTracker(hist metrics.Histogram) middleware.MessageHandlerDecorator {
 	return func(fn sqsconsumer.MessageHandlerFunc) sqsconsumer.MessageHandlerFunc {
