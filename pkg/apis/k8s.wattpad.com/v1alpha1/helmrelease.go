@@ -76,7 +76,6 @@ func (r HelmRelease) MarshalYAML() (interface{}, error) {
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
 // HelmReleaseList contains a list of HelmRelease
 type HelmReleaseList struct {
 	metav1.TypeMeta `json:",inline"`
