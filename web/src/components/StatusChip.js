@@ -3,7 +3,6 @@ import Chip from '@material-ui/core/Chip'
 import DoneIcon from '@material-ui/icons/Done'
 import PendingIcon from '@material-ui/icons/Cached'
 import FailIcon from '@material-ui/icons/Clear'
-import RegisteredIcon from '@material-ui/icons/Backup'
 import NotInstalledIcon from '@material-ui/icons/Info'
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles'
 
@@ -101,7 +100,7 @@ class StatusChip extends React.Component {
         return (
           <MuiThemeProvider theme={tagTheme}>
             <Chip
-              icon={<RegisteredIcon />}
+              icon={<PendingIcon />}
               label="Upgrading"
               color="primary"
               variant="outlined"
