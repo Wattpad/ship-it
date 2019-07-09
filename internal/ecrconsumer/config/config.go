@@ -15,6 +15,7 @@ type Config struct {
 	QueueName     string `split_words:"true" required:"true"`
 	GithubToken   string `split_words:"true" required:"true"`
 	GithubOrg     string `split_words:"true" required:"true"`
+	ResourcePath  string `split_words:"true" required:"true"`
 }
 
 // DataDogAddress returns the local address of the datadog agent.

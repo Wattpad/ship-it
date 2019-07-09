@@ -46,7 +46,7 @@ type SQSMessage struct {
 
 // New returns a SQS consumer which processes ECR PushImage events by updating
 // the associated service's chart values in a remote Git repository.
-func New(logger log.Logger, hist metrics.Histogram, name string, svc sqsconsumer.SQSAPI, client GitCommands) (*sqsconsumer.Consumer, error) {
+func New(logger log.Logger, hist metrics.Histogram, name string, svc sqsconsumer.SQSAPI, client GitCommands, resourcePath string) (*sqsconsumer.Consumer, error) {
 	service, err := sqsconsumer.NewSQSService(name, svc)
 	if err != nil {
 		return nil, err
@@ -54,7 +54,7 @@ func New(logger log.Logger, hist metrics.Histogram, name string, svc sqsconsumer
 
 	track := dataDogTimeTracker(hist)
 	wrappedLogger := loggerMiddleware(logger)
-	handler := middleware.ApplyDecoratorsToHandler(processMessage(client), track, wrappedLogger)
+	handler := middleware.ApplyDecoratorsToHandler(processMessage(client, resourcePath), track, wrappedLogger)
 	consumer := sqsconsumer.NewConsumer(service, handler)
 
 	return consumer, nil
@@ -85,9 +85,8 @@ func makeImage(repoName string, tag string) Image {
 	}
 }
 
-func processMessage(client GitCommands) sqsconsumer.MessageHandlerFunc {
+func processMessage(client GitCommands, resourcePath string) sqsconsumer.MessageHandlerFunc {
 	return func(ctx context.Context, msg string) error {
-		// Handle Git Commits Here
 		sqsMessage, err := parseMsg(msg)
 		if err != nil {
 			return err
@@ -96,7 +95,7 @@ func processMessage(client GitCommands) sqsconsumer.MessageHandlerFunc {
 		tag := parseSHA(sqsMessage.Detail.Response.Image.ID.Digest)
 		newImage := makeImage(sqsMessage.Detail.Response.Image.RepositoryName, tag)
 
-		resourceBytes, err := client.GetFile("master", "/custom-resources")
+		resourceBytes, err := client.GetFile("master", resourcePath)
 		if err != nil {
 			return err
 		}
@@ -113,7 +112,7 @@ func processMessage(client GitCommands) sqsconsumer.MessageHandlerFunc {
 			return nil
 		}
 
-		_, err = client.UpdateFile(fmt.Sprintf("Image Tag updated to: %s", newImage.Tag), "master", "/custom-resources", updatedBytes)
+		_, err = client.UpdateFile(fmt.Sprintf("Image Tag updated to: %s", newImage.Tag), "master", resourcePath, updatedBytes)
 		if err != nil {
 			return err
 		}
