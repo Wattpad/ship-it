@@ -48,7 +48,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	gitClient := ecrconsumer.NewGitHub(cfg.GithubToken, context.Background(), "wattpad", "miranda")
+	gitClient := ecrconsumer.NewGitHub(cfg.GithubToken, context.Background(), cfg.GithubOrg, "miranda")
 
 	consumer, err := ecrconsumer.New(logger, dd.NewTiming("worker.time", 1.0).With("worker", "ecrconsumer", "queue", cfg.QueueName), cfg.QueueName, sqs.New(s), gitClient)
 	if err != nil {
