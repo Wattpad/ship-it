@@ -3,6 +3,8 @@ import Chip from '@material-ui/core/Chip'
 import DoneIcon from '@material-ui/icons/Done'
 import RollBackIcon from '@material-ui/icons/Cached'
 import FailIcon from '@material-ui/icons/Clear'
+import RegisteredIcon from '@material-ui/icons/Backup'
+import NotInstalledIcon from '@material-ui/icons/Info'
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles'
 
 const tagTheme = createMuiTheme({
@@ -71,8 +73,30 @@ class StatusChip extends React.Component {
             />
           </MuiThemeProvider>
         )
+      case 'registered':
+        return (
+          <MuiThemeProvider theme={tagTheme}>
+            <Chip
+              icon={<RegisteredIcon />}
+              label="Registered"
+              color="default"
+              variant="outlined"
+              clickable
+            />
+          </MuiThemeProvider>
+        )
       default:
-        return null
+        return (
+          <MuiThemeProvider theme={tagTheme}>
+            <Chip
+              icon={<NotInstalledIcon />}
+              label="Not Installed"
+              color="default"
+              variant="outlined"
+              clickable
+            />
+          </MuiThemeProvider>
+        )
     }
   }
 
