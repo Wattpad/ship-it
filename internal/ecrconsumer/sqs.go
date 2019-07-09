@@ -22,18 +22,26 @@ type GitCommands interface {
 	UpdateFile(msg string, branch string, path string, fileContent []byte) (*github.RepositoryContentResponse, error)
 }
 
+type ImageID struct {
+	Digest string `json:"imageDigest"`
+}
+
+type ImageData struct {
+	RepositoryName string `json:"repositoryName"`
+	ID ImageID `json:"imageId"`
+}
+
+type ResponseElements struct {
+	Image ImageData `json:"image"`
+}
+
+type Detail struct {
+	EventTime time.Time `json:"eventTime"`
+	Response ResponseElements `json:"responseElements"`
+}
+
 type SQSMessage struct {
-	Detail struct {
-		EventTime        time.Time `json:"eventTime"`
-		ResponseElements struct {
-			Image struct {
-				RepositoryName string `json:"repositoryName"`
-				ImageID        struct {
-					ImageDigest string `json:"imageDigest"`
-				}
-			} `json:"image"`
-		} `json:"responseElements"`
-	} `json:"detail"`
+	Detail Detail `json:"detail"`
 }
 
 // New returns a SQS consumer which processes ECR PushImage events by updating
@@ -54,7 +62,10 @@ func New(logger log.Logger, hist metrics.Histogram, name string, svc sqsconsumer
 
 func parseSHA(digest string) string {
 	arr := strings.Split(digest, ":")
-	return arr[1]
+	if len(arr) == 2 {
+		return arr[1]
+	}
+	return ""
 }
 
 func parseMsg(msg string) (*SQSMessage, error) {
@@ -82,8 +93,8 @@ func processMessage(client GitCommands) sqsconsumer.MessageHandlerFunc {
 			return err
 		}
 
-		tag := parseSHA(sqsMessage.Detail.ResponseElements.Image.ImageID.ImageDigest)
-		newImage := makeImage(sqsMessage.Detail.ResponseElements.Image.RepositoryName, tag)
+		tag := parseSHA(sqsMessage.Detail.Response.Image.ID.Digest)
+		newImage := makeImage(sqsMessage.Detail.Response.Image.RepositoryName, tag)
 
 		resourceBytes, err := client.GetFile("master", "/custom-resources")
 		if err != nil {

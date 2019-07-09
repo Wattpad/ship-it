@@ -30,7 +30,7 @@ run: build
 	    -e AWS_SECURITY_TOKEN=${AWS_SECURITY_TOKEN} \
 	    -e AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN} \
 	    -e GITHUB_TOKEN=fake \
-	    -e GITHUB_ORG="wattpad" \
+	    -e GITHUB_ORG="Wattpad" \
 	    $(shell docker images -q $(TARGET) | head -n 1)
 
 # empty target
