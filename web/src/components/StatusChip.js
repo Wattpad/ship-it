@@ -73,24 +73,12 @@ class StatusChip extends React.Component {
             />
           </MuiThemeProvider>
         )
-      case 'registered':
+      default:
         return (
           <MuiThemeProvider theme={tagTheme}>
             <Chip
               icon={<RegisteredIcon />}
               label="Registered"
-              color="default"
-              variant="outlined"
-              clickable
-            />
-          </MuiThemeProvider>
-        )
-      default:
-        return (
-          <MuiThemeProvider theme={tagTheme}>
-            <Chip
-              icon={<NotInstalledIcon />}
-              label="Not Installed"
               color="default"
               variant="outlined"
               clickable
