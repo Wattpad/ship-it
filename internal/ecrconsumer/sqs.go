@@ -27,8 +27,8 @@ type ImageID struct {
 }
 
 type ImageData struct {
-	RepositoryName string `json:"repositoryName"`
-	ID ImageID `json:"imageId"`
+	RepositoryName string  `json:"repositoryName"`
+	ID             ImageID `json:"imageId"`
 }
 
 type ResponseElements struct {
@@ -36,8 +36,8 @@ type ResponseElements struct {
 }
 
 type Detail struct {
-	EventTime time.Time `json:"eventTime"`
-	Response ResponseElements `json:"responseElements"`
+	EventTime time.Time        `json:"eventTime"`
+	Response  ResponseElements `json:"responseElements"`
 }
 
 type SQSMessage struct {
