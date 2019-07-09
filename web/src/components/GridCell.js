@@ -88,7 +88,7 @@ class SingleGridCell extends React.Component {
                   <img src={SlackIcon} width="32" height="32" alt={imgAlt} />
                 </IconButton>
                 {
-                  this.state.slackInfo ? <SlackInfoDialog open={this.state.slackInfo} owner={this.props.SingleGridCellData.owner.team} slack={this.props.SingleGridCellData.owner.slack} handleClose={this.slackClosed}/> : null
+                  this.state.slackInfo ? <SlackInfoDialog open={this.state.slackInfo} owner={this.props.SingleGridCellData.owner.squad} slack={this.props.SingleGridCellData.owner.slack} handleClose={this.slackClosed}/> : null
                 }
                 <IconButton onClick={this.dockerClicked}>
                   <img src={DockerIcon} width="32" height="32" alt={imgAlt} />
