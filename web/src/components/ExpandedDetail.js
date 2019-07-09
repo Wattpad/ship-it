@@ -86,7 +86,7 @@ class ExpandedDetail extends React.Component {
                     <img src={HelmIcon} width="32" height="32" alt={imgAlt} />
                   </div>
                   <div>
-                    <Typography variant="h5">{this.props.data.artifacts.chart.version}</Typography>
+                    <Typography variant="h6">{this.props.data.artifacts.chart.version}</Typography>
                   </div>
                 </div>
 
