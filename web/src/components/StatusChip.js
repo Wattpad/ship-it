@@ -41,7 +41,7 @@ class StatusChip extends React.Component {
         return (
           <MuiThemeProvider theme={tagTheme}>
             <Chip
-              icon={<FailIcon />}
+              icon={<NotInstalledIcon />}
               label="Deleted"
               color="secondary"
               variant="outlined"
@@ -89,7 +89,7 @@ class StatusChip extends React.Component {
         return (
           <MuiThemeProvider theme={tagTheme}>
             <Chip
-              icon={<PendingIcon />}
+              icon={<RegisteredIcon />}
               label="Upgrading"
               color="primary"
               variant="outlined"
@@ -113,7 +113,7 @@ class StatusChip extends React.Component {
         return (
           <MuiThemeProvider theme={tagTheme}>
             <Chip
-              icon={<PendingIcon />}
+              icon={<RegisteredIcon />}
               label="Deploying"
               color="default"
               variant="outlined"
