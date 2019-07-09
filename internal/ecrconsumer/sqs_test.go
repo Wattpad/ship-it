@@ -53,3 +53,11 @@ func TestParseMessage(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Exactly(t, expectedMessage, *inputMessage)
 }
+
+func TestMakeImage(t *testing.T) {
+	assert.Exactly(t, Image{
+		Registry: "723255503624.dkr.ecr.us-east-1.amazonaws.com",
+		Repository: "ship-it",
+		Tag: "shipped",
+	}, makeImage("ship-it", "shipped"))
+}
