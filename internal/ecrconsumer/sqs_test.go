@@ -56,8 +56,8 @@ func TestParseMessage(t *testing.T) {
 
 func TestMakeImage(t *testing.T) {
 	assert.Exactly(t, Image{
-		Registry: "723255503624.dkr.ecr.us-east-1.amazonaws.com",
+		Registry:   "723255503624.dkr.ecr.us-east-1.amazonaws.com",
 		Repository: "ship-it",
-		Tag: "shipped",
+		Tag:        "shipped",
 	}, makeImage("ship-it", "shipped"))
 }
