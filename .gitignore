@@ -7,7 +7,7 @@
 
 # Compiled binaries
 main
-ship-it
+^ship-it
 
 # Test binary, build with `go test -c`
 *.test

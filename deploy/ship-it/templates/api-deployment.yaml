@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ship-it.fullname" . }}-api
+  labels:
+    {{ include "ship-it.labels" . | nindent 4 | trim }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ include "ship-it.name" . }}-api
+      instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        {{ include "ship-it.labels" . | nindent 8 | trim }}
+    spec:
+      containers:
+        - name: {{ include "ship-it.name" . }}-api
+          image: "{{ .Values.api.image.repository }}:{{ .Values.api.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
