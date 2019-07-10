@@ -1,0 +1,12 @@
+apiVersion: skaffold/v1beta10
+kind: Config
+build:
+  artifacts:
+  - image: ship-it-api
+    docker:
+      dockerfile: cmd/ship-it-api/Dockerfile
+deploy:
+  helm:
+    releases:
+    - name: ship-it
+      chartPath: deploy/ship-it
