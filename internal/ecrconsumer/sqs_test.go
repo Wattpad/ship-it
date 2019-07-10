@@ -8,8 +8,8 @@ import (
 )
 
 func TestParseSHA(t *testing.T) {
-	assert.Equal(t, parseSHA("sha256:the-tag"), "the-tag")
-	assert.Equal(t, parseSHA("malformed"), "")
+	assert.Equal(t, "the-tag", parseSHA("sha256:the-tag"))
+	assert.Equal(t, "", parseSHA("malformed"))
 }
 
 func TestParseMessage(t *testing.T) {
