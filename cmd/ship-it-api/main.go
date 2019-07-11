@@ -10,8 +10,8 @@ import (
 
 	"ship-it/internal/api"
 	"ship-it/internal/api/config"
-	"ship-it/internal/api/integrations/k8s"
 	"ship-it/internal/api/integrations/github"
+	"ship-it/internal/api/integrations/k8s"
 	"ship-it/internal/api/service"
 
 	"github.com/go-kit/kit/log"
