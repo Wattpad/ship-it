@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"ship-it/internal/api/models"
+	"ship-it/internal/api/integrations/github"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -34,7 +35,8 @@ func TestListReleasesPopulatesFromConfigMap(t *testing.T) {
 	currentTime := time.Now()
 
 	mock := newMockK8sClient(name, currentTime)
-	svc := New(mock)
+	mockGit := github.New(context.Background(), "Wattpad", "fake")
+	svc := New(mock, mockGit)
 
 	releases, err := svc.ListReleases(context.Background())
 
