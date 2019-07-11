@@ -36,7 +36,7 @@ func TestListReleasesPopulatesFromConfigMap(t *testing.T) {
 
 	mock := newMockK8sClient(name, currentTime)
 	mockGit := github.New(context.Background(), "Wattpad", "fake")
-	svc := New(mock, mockGit)
+	svc := New(mock, mockGit, "miranda", "master")
 
 	releases, err := svc.ListReleases(context.Background())
 
