@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"ship-it/internal/ecrconsumer/config"
+
 	"ship-it/pkg/apis/k8s.wattpad.com/v1alpha1"
 
 	"github.com/Wattpad/sqsconsumer"
