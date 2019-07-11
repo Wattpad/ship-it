@@ -31,7 +31,7 @@ func newMockK8sClient(name string, time time.Time) *mockK8sClient {
 }
 
 type mockGitClient struct {
-	Org string
+	Org    string
 	Checks github.ChecksService
 }
 
