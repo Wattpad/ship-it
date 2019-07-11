@@ -11,10 +11,10 @@ import (
 
 func New(l ReleaseLister, git GitCommands, repo string, ref string) *Service {
 	return &Service{
-		lister: l,
-		client: git,
+		lister:     l,
+		client:     git,
 		repository: repo,
-		ref: ref,
+		ref:        ref,
 	}
 }
 
@@ -27,10 +27,10 @@ type GitCommands interface {
 }
 
 type Service struct {
-	lister ReleaseLister
-	client GitCommands
+	lister     ReleaseLister
+	client     GitCommands
 	repository string
-	ref string
+	ref        string
 }
 
 func (s *Service) ListReleases(ctx context.Context) ([]models.Release, error) {
