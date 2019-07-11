@@ -33,6 +33,8 @@ func (s *Service) ListReleases(ctx context.Context) ([]models.Release, error) {
 		r := &releases[i]
 
 		r.Status = s.getReleaseStatus(r).String()
+		//r.Build.Travis = getTravisURL()
+
 	}
 
 	return releases, err
@@ -43,3 +45,5 @@ func (s *Service) getReleaseStatus(_ *models.Release) release.Status_Code {
 	// There's only one possible release status for now.
 	return release.Status_PENDING_INSTALL
 }
+
+func (s *Service) getTravisURL() {}
