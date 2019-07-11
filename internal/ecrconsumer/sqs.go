@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"time"
 
+	"ship-it/internal/ecrconsumer/config"
 	"ship-it/pkg/apis/k8s.wattpad.com/v1alpha1"
 
 	"github.com/Wattpad/sqsconsumer"
@@ -32,15 +33,15 @@ type SQSMessage struct {
 
 // New returns a SQS consumer which processes ECR PushImage events by updating
 // the associated service's chart values in a remote Git repository.
-func New(logger log.Logger, hist metrics.Histogram, name string, svc sqsconsumer.SQSAPI, client GitCommands, resourcePath string) (*sqsconsumer.Consumer, error) {
-	service, err := sqsconsumer.NewSQSService(name, svc)
+func New(logger log.Logger, hist metrics.Histogram, svc sqsconsumer.SQSAPI, client GitCommands, conf config.SQSConfig) (*sqsconsumer.Consumer, error) {
+	service, err := sqsconsumer.NewSQSService(conf.QueueName, svc)
 	if err != nil {
 		return nil, err
 	}
 
 	track := dataDogTimeTracker(hist)
 	wrappedLogger := loggerMiddleware(logger)
-	handler := middleware.ApplyDecoratorsToHandler(processMessage(client, resourcePath), track, wrappedLogger)
+	handler := middleware.ApplyDecoratorsToHandler(processMessage(client, conf.ResourcePath, conf.ReleaseBranch), track, wrappedLogger)
 	consumer := sqsconsumer.NewConsumer(service, handler)
 
 	return consumer, nil
@@ -71,7 +72,7 @@ func validateTag(tag string) bool {
 	return matched
 }
 
-func processMessage(client GitCommands, resourcePath string) sqsconsumer.MessageHandlerFunc {
+func processMessage(client GitCommands, resourcePath string, branch string) sqsconsumer.MessageHandlerFunc {
 	return func(ctx context.Context, msg string) error {
 		sqsMessage, err := parseMsg(msg)
 		if err != nil {
@@ -84,7 +85,7 @@ func processMessage(client GitCommands, resourcePath string) sqsconsumer.Message
 
 		newImage := makeImage(sqsMessage.RepositoryName, sqsMessage.Tag)
 
-		resourceBytes, err := client.GetFile("master", resourcePath)
+		resourceBytes, err := client.GetFile(branch, resourcePath)
 		if err != nil {
 			return err
 		}
@@ -101,7 +102,7 @@ func processMessage(client GitCommands, resourcePath string) sqsconsumer.Message
 			return nil
 		}
 
-		_, err = client.UpdateFile(fmt.Sprintf("Image Tag updated to: %s", newImage.Tag), "master", filepath.Join(resourcePath, newImage.Repository)+".yaml", updatedBytes)
+		_, err = client.UpdateFile(fmt.Sprintf("Image Tag updated to: %s", newImage.Tag), branch, filepath.Join(resourcePath, newImage.Repository)+".yaml", updatedBytes)
 		if err != nil {
 			return err
 		}

@@ -121,7 +121,7 @@ status: {}
 	mockGit := new(MockedObject)
 	mockGit.On("GetFile", "master", "custom-resources").Return([]byte(inputYaml), error(nil))
 	mockGit.On("UpdateFile", "Image Tag updated to: 78bc9ccf64eb838c6a0e0492ded722274925e2bd", "master", "custom-resources/bar.yaml", []byte(expectedYaml)).Return(&github.RepositoryContentResponse{}, error(nil))
-	handler := processMessage(mockGit, "custom-resources")
+	handler := processMessage(mockGit, "custom-resources", "master")
 	err := handler(context.Background(), inputJSON)
 	assert.NoError(t, err)
 }

@@ -12,10 +12,15 @@ type Config struct {
 	AWSRegion     string `envconfig:"AWS_REGION" required:"true"`
 	DogstatsdHost string `split_words:"true" required:"true"`
 	DogstatsdPort string `split_words:"true" default:"8125"`
-	QueueName     string `split_words:"true" required:"true"`
 	GithubToken   string `split_words:"true" required:"true"`
 	GithubOrg     string `split_words:"true" required:"true"`
-	ResourcePath  string `split_words:"true" required:"true"`
+	SQS 		  SQSConfig
+}
+
+type SQSConfig struct{
+	QueueName     string `envconfig:"QUEUE_NAME" required:"true"`
+	ResourcePath  string `envconfig:"RESOURCE_PATH" required:"true"`
+	ReleaseBranch string `envconfig:"RELEASE_BRANCH" required:"true"`
 }
 
 // DataDogAddress returns the local address of the datadog agent.

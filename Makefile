@@ -32,6 +32,7 @@ run: build
 	    -e GITHUB_TOKEN="fake" \
 	    -e GITHUB_ORG="Wattpad" \
 	    -e RESOURCE_PATH="custom-resources" \
+	    -e RELEASE_BRANCH="master" \
 	    $(shell docker images -q $(TARGET) | head -n 1)
 
 # empty target
