@@ -3,7 +3,7 @@ package ecrconsumer
 import (
 	"context"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v26/github"
 	"golang.org/x/oauth2"
 )
 

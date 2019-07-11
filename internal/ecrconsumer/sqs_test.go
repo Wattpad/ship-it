@@ -1,52 +1,37 @@
 package ecrconsumer
 
 import (
+	"context"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/google/go-github/v26/github"
 )
 
-func TestParseSHA(t *testing.T) {
-	assert.Equal(t, "the-tag", parseSHA("sha256:the-tag"))
-	assert.Equal(t, "", parseSHA("malformed"))
+type MockedObject struct {
+	mock.Mock
 }
 
 func TestParseMessage(t *testing.T) {
 	inputJSON := `
 {
-	"detail": {
-		"eventTime": "2019-06-28T17:42:49Z",
-		"responseElements": {
-			"image": {
-				"repositoryName": "writer-dashboard",
-				"imageManifest": "{\n   \"schemaVersion\": 2,\n   \"mediaType\": \"application/vnd.docker.distribution.manifest.v2+json\",\n   \"config\": {\n      \"mediaType\": \"application/vnd.docker.container.image.v1+json\",\n      \"size\": 2316,\n      \"digest\": \"sha256:5a1b9e65745aadb59af6669eafb6057f238f118621771bc4000698741847ee72\"\n   },\n   \"layers\": [\n      {\n         \"mediaType\": \"application/vnd.docker.image.rootfs.diff.tar.gzip\",\n         \"size\": 45339350,\n         \"digest\": \"sha256:6f2f362378c5a6fd915d96d11dda1e0223ccf213bf121ace56ae0f6616ea1dc8\"\n      },\n      {\n         \"mediaType\": \"application/vnd.docker.image.rootfs.diff.tar.gzip\",\n         \"size\": 3672402,\n         \"digest\": \"sha256:82a2520544ca213d45bd63751ea90f529e1993b98cddfbd63e806091c1ba625c\"\n      },\n      {\n         \"mediaType\": \"application/vnd.docker.image.rootfs.diff.tar.gzip\",\n         \"size\": 4436039,\n         \"digest\": \"sha256:7f97b11819ed7e1453daf98f2125d921dbd38e517e0092d0a665e2569d28658e\"\n      }\n   ]\n}",
-				"registryId": "723255503624",
-				"imageId": {
-					"imageDigest": "sha256:d8ac457c16d1e20172d771e5244c75bdcfb93e33e49fa85eb7e25d75ca7c74c1",
-					"imageTag": "latest"
-				}
-			}
-		}
-	}
+	"eventTime": "2019-07-11T14:19:59Z", 
+	"repositoryName": "monolith-php", 
+	"tag": "78bc9ccf64eb838c6a0e0492ded722274925e2bd",
+	"registryId": "723255503624"
 }
 `
 
-	deployTime, err := time.Parse(time.RFC3339, "2019-06-28T17:42:49Z")
+	deployTime, err := time.Parse(time.RFC3339, "2019-07-11T14:19:59Z")
 	assert.NoError(t, err)
 
 	expectedMessage := SQSMessage{
-		Detail: Detail{
-			EventTime: deployTime,
-			Response: ResponseElements{
-				Image: ImageData{
-					RepositoryName: "writer-dashboard",
-					ID: ImageID{
-						Digest: "sha256:d8ac457c16d1e20172d771e5244c75bdcfb93e33e49fa85eb7e25d75ca7c74c1",
-					},
-				},
-			},
-		},
+		EventTime: deployTime,
+		RepositoryName: "monolith-php",
+		Tag: "78bc9ccf64eb838c6a0e0492ded722274925e2bd",
+		RegistryId: "723255503624",
 	}
 
 	inputMessage, err := parseMsg(inputJSON)
@@ -60,4 +45,83 @@ func TestMakeImage(t *testing.T) {
 		Repository: "ship-it",
 		Tag:        "shipped",
 	}, makeImage("ship-it", "shipped"))
+}
+
+func (m *MockedObject) GetFile(branch string, path string) ([]byte, error) {
+	args := m.Called(branch, path)
+	return args.Get(0).([]byte), args.Error(1)
+}
+
+func (m *MockedObject) UpdateFile(msg string, branch string, path string, fileContent []byte) (*github.RepositoryContentResponse, error) {
+	args := m.Called(msg, branch, path, fileContent)
+	return args.Get(0).(*github.RepositoryContentResponse), args.Error(1)
+}
+
+func TestValidateTag(t *testing.T) {
+	tests := []struct{
+		inputString string
+		expected bool
+	}{
+		{"78bc9ccf64eb838c6a0e0492ded722274925e2bd", true},
+		{"latest", false},
+		{"78bc9ccf64eb838c6a0e0492ded722274925E2ND", false},
+	}
+	for _, test := range tests {
+		assert.Equal(t, test.expected, validateTag(test.inputString))
+	}
+}
+
+func TestProcessMessage(t *testing.T) {
+
+	const inputYaml = `apiVersion: helmreleases.k8s.wattpad.com/v1alpha1
+kind: HelmRelease
+metadata:
+  creationTimestamp: null
+  name: example-microservice
+spec:
+  chart:
+    path: microservice
+    repository: wattpad.s3.amazonaws.com/helm-charts
+    revision: HEAD
+  releaseName: example-release
+  values:
+    image:
+      repository: 723255503624.dkr.ecr.us-east-1.amazonaws.com/bar
+      tag: baz
+status: {}
+`
+
+	const expectedYaml = `apiVersion: helmreleases.k8s.wattpad.com/v1alpha1
+kind: HelmRelease
+metadata:
+  creationTimestamp: null
+  name: example-microservice
+spec:
+  chart:
+    path: microservice
+    repository: wattpad.s3.amazonaws.com/helm-charts
+    revision: HEAD
+  releaseName: example-release
+  values:
+    image:
+      repository: 723255503624.dkr.ecr.us-east-1.amazonaws.com/bar
+      tag: 78bc9ccf64eb838c6a0e0492ded722274925e2bd
+status: {}
+`
+
+	const inputJSON = `
+{
+	"eventTime": "2019-07-11T14:19:59Z", 
+	"repositoryName": "bar", 
+	"tag": "78bc9ccf64eb838c6a0e0492ded722274925e2bd",
+	"registryId": "723255503624"
+}
+`
+
+	mockGit := new(MockedObject)
+	mockGit.On("GetFile", "master", "custom-resources").Return([]byte(inputYaml), error(nil))
+	mockGit.On("UpdateFile", "Image Tag updated to: 78bc9ccf64eb838c6a0e0492ded722274925e2bd", "master", "custom-resources/bar.yaml", []byte(expectedYaml)).Return(&github.RepositoryContentResponse{}, error(nil))
+	handler := processMessage(mockGit, "custom-resources")
+	err := handler(context.Background(), inputJSON)
+	assert.NoError(t, err)
 }
