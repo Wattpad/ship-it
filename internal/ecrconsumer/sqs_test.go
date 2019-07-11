@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-github/v26/github"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"github.com/google/go-github/v26/github"
 )
 
 type MockedObject struct {
@@ -28,10 +28,10 @@ func TestParseMessage(t *testing.T) {
 	assert.NoError(t, err)
 
 	expectedMessage := SQSMessage{
-		EventTime: deployTime,
+		EventTime:      deployTime,
 		RepositoryName: "monolith-php",
-		Tag: "78bc9ccf64eb838c6a0e0492ded722274925e2bd",
-		RegistryId: "723255503624",
+		Tag:            "78bc9ccf64eb838c6a0e0492ded722274925e2bd",
+		RegistryId:     "723255503624",
 	}
 
 	inputMessage, err := parseMsg(inputJSON)
@@ -58,9 +58,9 @@ func (m *MockedObject) UpdateFile(msg string, branch string, path string, fileCo
 }
 
 func TestValidateTag(t *testing.T) {
-	tests := []struct{
+	tests := []struct {
 		inputString string
-		expected bool
+		expected    bool
 	}{
 		{"78bc9ccf64eb838c6a0e0492ded722274925e2bd", true},
 		{"latest", false},

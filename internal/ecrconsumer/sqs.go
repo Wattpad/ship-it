@@ -24,10 +24,10 @@ type GitCommands interface {
 }
 
 type SQSMessage struct {
-	EventTime time.Time
+	EventTime      time.Time
 	RepositoryName string
-	Tag string
-	RegistryId string
+	Tag            string
+	RegistryId     string
 }
 
 // New returns a SQS consumer which processes ECR PushImage events by updating
@@ -101,7 +101,7 @@ func processMessage(client GitCommands, resourcePath string) sqsconsumer.Message
 			return nil
 		}
 
-		_, err = client.UpdateFile(fmt.Sprintf("Image Tag updated to: %s", newImage.Tag), "master", filepath.Join(resourcePath, newImage.Repository) + ".yaml", updatedBytes)
+		_, err = client.UpdateFile(fmt.Sprintf("Image Tag updated to: %s", newImage.Tag), "master", filepath.Join(resourcePath, newImage.Repository)+".yaml", updatedBytes)
 		if err != nil {
 			return err
 		}
