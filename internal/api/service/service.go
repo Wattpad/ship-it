@@ -5,16 +5,16 @@ import (
 
 	"ship-it/internal/api/models"
 
+	"github.com/go-kit/kit/log"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/helm/pkg/proto/hapi/release"
 )
 
-func New(l ReleaseLister, git GitCommands, repo string, ref string) *Service {
+func New(l ReleaseLister, travis TravisChecker, logger log.Logger) *Service {
 	return &Service{
-		lister:     l,
-		client:     git,
-		repository: repo,
-		ref:        ref,
+		lister: l,
+		travis: travis,
+		logger: logger,
 	}
 }
 
@@ -22,15 +22,14 @@ type ReleaseLister interface {
 	ListAll(namespace string) ([]models.Release, error)
 }
 
-type GitCommands interface {
+type TravisChecker interface {
 	GetTravisCIBuildURLForRef(ctx context.Context, repo string, ref string) (string, error)
 }
 
 type Service struct {
-	lister     ReleaseLister
-	client     GitCommands
-	repository string
-	ref        string
+	lister ReleaseLister
+	travis TravisChecker
+	logger log.Logger
 }
 
 func (s *Service) ListReleases(ctx context.Context) ([]models.Release, error) {
@@ -43,7 +42,7 @@ func (s *Service) ListReleases(ctx context.Context) ([]models.Release, error) {
 		r := &releases[i]
 
 		r.Status = s.getReleaseStatus(r).String()
-		r.Build.Travis = s.getTravisURL(ctx)
+		r.Build.Travis = s.getTravisURL(ctx, *r)
 
 	}
 
@@ -56,9 +55,10 @@ func (s *Service) getReleaseStatus(_ *models.Release) release.Status_Code {
 	return release.Status_PENDING_INSTALL
 }
 
-func (s *Service) getTravisURL(ctx context.Context) string {
-	url, err := s.client.GetTravisCIBuildURLForRef(ctx, s.repository, s.ref)
+func (s *Service) getTravisURL(ctx context.Context, r models.Release) string {
+	url, err := s.travis.GetTravisCIBuildURLForRef(ctx, r.Code.Github, r.Code.Ref)
 	if err != nil {
+		s.logger.Log("Failed to fetch build URL")
 		return ""
 	}
 	return url

@@ -51,7 +51,7 @@ func main() {
 	}
 
 	gitClient := github.New(ctx, cfg.GithubOrg, cfg.GithubToken)
-	svc := service.New(k8s, gitClient, "miranda", "master")
+	svc := service.New(k8s, gitClient, logger)
 	srv := http.Server{
 		Addr:    ":" + cfg.ServicePort,
 		Handler: api.New(svc, dd.NewTiming("api.time", 1.0)),

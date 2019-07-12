@@ -2,12 +2,14 @@ package service
 
 import (
 	"context"
+	"os"
 	"testing"
 	"time"
 
 	"ship-it/internal/api/integrations/github"
 	"ship-it/internal/api/models"
 
+	"github.com/go-kit/kit/log"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -51,7 +53,7 @@ func TestListReleasesPopulatesFromCustomResource(t *testing.T) {
 
 	mockK8s := newMockK8sClient(name, currentTime)
 	mockGit := newMockGitClient("wattpad")
-	svc := New(mockK8s, mockGit, "miranda", "master")
+	svc := New(mockK8s, mockGit, log.NewJSONLogger(log.NewSyncWriter(os.Stdout)))
 
 	releases, err := svc.ListReleases(context.Background())
 
@@ -62,5 +64,15 @@ func TestListReleasesPopulatesFromCustomResource(t *testing.T) {
 }
 
 func TestTravisFieldIsPopulated(t *testing.T) {
+	mockK8s := newMockK8sClient("word-counts", time.Now())
+	mockGit := newMockGitClient("wattpad")
+	svc := New(mockK8s, mockGit, log.NewJSONLogger(log.NewSyncWriter(os.Stdout)))
 
+	ctx := context.Background()
+	releases, err := svc.ListReleases(ctx)
+
+	assert.Nil(t, err)
+	assert.Len(t, releases, 1)
+
+	assert.Equal(t, releases[0].Build.Travis, "www.travisci.com")
 }
