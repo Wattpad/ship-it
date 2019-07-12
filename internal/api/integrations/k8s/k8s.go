@@ -110,6 +110,9 @@ func findVCSRepo(url string) string {
 
 func GetImageForRepo(repo string, vals map[string]interface{}) internal.Image {
 	arr := internal.GetImagePath(vals, repo)
+	if len(arr) == 0 {
+		return internal.Image{}
+	}
 	imgVals := internal.Table(vals, arr)
 	img, err := internal.ParseImage(imgVals["repository"].(string), imgVals["tag"].(string))
 	if err != nil {

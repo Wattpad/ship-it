@@ -3,6 +3,8 @@ package k8s
 import (
 	"testing"
 
+	"ship-it/internal"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -20,7 +22,47 @@ func TestAnnotationFor(t *testing.T) {
 }
 
 func TestGetImageForRepo(t *testing.T) {
+	tests := []struct {
+		inputMap map[string]interface{}
+		repo     string
+		expected internal.Image
+	}{
+		{
+			map[string]interface{}{
+				"apples": "delicious",
+				"oranges": map[string]interface{}{
+					"taste": "delicious",
+				},
+				"image": map[string]interface{}{
+					"repository": "foo/bar",
+					"tag":        "baz",
+				},
+			},
+			"bar",
+			internal.Image{
+				Registry:   "foo",
+				Repository: "bar",
+				Tag:        "baz",
+			},
+		}, {
+			map[string]interface{}{
+				"apples": "delicious",
+				"oranges": map[string]interface{}{
+					"taste": "delicious",
+				},
+				"image": map[string]interface{}{
+					"repository": "foo/oof",
+					"tag":        "baz",
+				},
+			},
+			"bar",
+			internal.Image{},
+		},
+	}
 
+	for _, test := range tests {
+		assert.Equal(t, test.expected, GetImageForRepo(test.repo, test.inputMap))
+	}
 }
 
 func TestFindRepo(t *testing.T) {
