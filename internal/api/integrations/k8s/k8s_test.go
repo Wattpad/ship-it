@@ -1,9 +1,12 @@
 package k8s
 
 import (
+	"os"
 	"testing"
 
 	"ship-it/internal"
+
+	"github.com/go-kit/kit/log"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -61,7 +64,7 @@ func TestGetImageForRepo(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		assert.Equal(t, test.expected, GetImageForRepo(test.repo, test.inputMap))
+		assert.Equal(t, test.expected, GetImageForRepo(test.repo, test.inputMap, log.NewJSONLogger(log.NewSyncWriter(os.Stdout))))
 	}
 }
 

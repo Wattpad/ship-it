@@ -15,15 +15,18 @@ import (
 	"ship-it/pkg/apis/k8s.wattpad.com/v1alpha1"
 	listerv1alpha1 "ship-it/pkg/generated/listers/k8s.wattpad.com/v1alpha1"
 
+	"github.com/go-kit/kit/log"
+
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/rest"
 )
 
 type K8sClient struct {
 	lister listerv1alpha1.HelmReleaseLister
+	logger log.Logger
 }
 
-func New(ctx context.Context, resync time.Duration) (*K8sClient, error) {
+func New(ctx context.Context, resync time.Duration, logger log.Logger) (*K8sClient, error) {
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		return nil, err
@@ -43,6 +46,7 @@ func New(ctx context.Context, resync time.Duration) (*K8sClient, error) {
 
 	return &K8sClient{
 		lister: helmReleaseLister,
+		logger: logger,
 	}, nil
 }
 
@@ -65,7 +69,7 @@ func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
 		}
 		codeURL := annotations[annotationFor("code")]
 		serviceName := r.GetName()
-		image := GetImageForRepo(serviceName, r.Spec.Values)
+		image := GetImageForRepo(serviceName, r.Spec.Values, k.logger)
 		releases = append(releases, models.Release{
 			Name:       serviceName,
 			Created:    r.GetCreationTimestamp().Time,
@@ -108,14 +112,16 @@ func findVCSRepo(url string) string {
 	return ""
 }
 
-func GetImageForRepo(repo string, vals map[string]interface{}) internal.Image {
+func GetImageForRepo(repo string, vals map[string]interface{}, logger log.Logger) internal.Image {
 	arr := internal.GetImagePath(vals, repo)
 	if len(arr) == 0 {
+		logger.Log("No Image Found for repository")
 		return internal.Image{}
 	}
 	imgVals := internal.Table(vals, arr)
 	img, err := internal.ParseImage(imgVals["repository"].(string), imgVals["tag"].(string))
 	if err != nil {
+		logger.Log("Unable to parse valid image")
 		return internal.Image{}
 	}
 	return *img

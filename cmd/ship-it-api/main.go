@@ -44,7 +44,7 @@ func main() {
 	dd := dogstatsd.New("wattpad.ship-it.", logger)
 	go dd.SendLoop(time.Tick(time.Second), "udp", cfg.DataDogAddress())
 
-	k8s, err := k8s.New(ctx, cfg.HelmReleasesResync())
+	k8s, err := k8s.New(ctx, cfg.HelmReleasesResync(), logger)
 	if err != nil {
 		logger.Log("error", err)
 		os.Exit(1)
