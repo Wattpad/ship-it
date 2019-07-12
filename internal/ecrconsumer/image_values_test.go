@@ -3,6 +3,8 @@ package ecrconsumer
 import (
 	"testing"
 
+	"ship-it/internal"
+
 	"ship-it/pkg/apis/k8s.wattpad.com/v1alpha1"
 
 	"github.com/stretchr/testify/assert"
@@ -156,12 +158,12 @@ func TestTable(t *testing.T) {
 
 func TestUpdateImage(t *testing.T) {
 	var tests = []struct {
-		newImage    Image
+		newImage    internal.Image
 		inputMap    map[string]interface{}
 		expectedMap map[string]interface{}
 	}{
 		{
-			Image{
+			internal.Image{
 				Registry:   "foo",
 				Repository: "bar",
 				Tag:        "newTag",
@@ -187,7 +189,7 @@ func TestUpdateImage(t *testing.T) {
 				},
 			},
 		}, {
-			Image{
+			internal.Image{
 				Registry:   "foo",
 				Repository: "bar",
 				Tag:        "newTag",
@@ -213,7 +215,7 @@ func TestUpdateImage(t *testing.T) {
 				},
 			},
 		}, {
-			Image{
+			internal.Image{
 				Registry:   "foo",
 				Repository: "bar",
 				Tag:        "newTag",
@@ -235,32 +237,6 @@ func TestUpdateImage(t *testing.T) {
 	for _, test := range tests {
 		update(test.inputMap, test.newImage)
 		assert.Equal(t, test.expectedMap, test.inputMap)
-	}
-}
-
-func TestParseImage(t *testing.T) {
-	var tests = []struct {
-		repo     string
-		tag      string
-		expected *Image
-	}{
-		{
-			"foo/bar",
-			"baz",
-			&Image{
-				Registry:   "foo",
-				Repository: "bar",
-				Tag:        "baz",
-			},
-		}, {
-			"foo-bar",
-			"baz",
-			nil,
-		},
-	}
-	for _, test := range tests {
-		img, _ := parseImage(test.repo, test.tag)
-		assert.Equal(t, test.expected, img)
 	}
 }
 
@@ -290,7 +266,7 @@ func TestWithImage(t *testing.T) {
 	}
 
 	t.Run("Matching Image Case", func(t *testing.T) {
-		expectedImg := Image{
+		expectedImg := internal.Image{
 			Registry:   "bar",
 			Repository: "foo",
 			Tag:        "new-tag",
@@ -303,7 +279,7 @@ func TestWithImage(t *testing.T) {
 
 	// Test No Matching Image Case
 	t.Run("No Matching Image Case", func(t *testing.T) {
-		expectedImg := Image{
+		expectedImg := internal.Image{
 			Registry:   "bar",
 			Repository: "oof",
 			Tag:        "new-tag",
