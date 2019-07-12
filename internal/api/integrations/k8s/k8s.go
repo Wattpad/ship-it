@@ -2,6 +2,8 @@ package k8s
 
 import (
 	"context"
+	"fmt"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -16,6 +18,8 @@ import (
 	listerv1alpha1 "ship-it/pkg/generated/listers/k8s.wattpad.com/v1alpha1"
 
 	"github.com/go-kit/kit/log"
+
+	"github.com/pkg/errors"
 
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/rest"
@@ -63,15 +67,29 @@ func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
 	releases := make([]models.Release, 0, len(releaseList))
 	for _, r := range releaseList {
 		annotations := r.GetAnnotations()
-		autoDeploy, err := strconv.ParseBool(annotations[annotationFor("autodeploy")])
 
-		k.logger.Log(err)
+		autoDeployStr := annotations[annotationFor("autodeploy")]
+		autoDeploy, err := strconv.ParseBool(autoDeployStr)
+		if err != nil {
+			errors.Wrapf(err, `Unable to parse "%s" as boolean`, autoDeployStr)
+			k.logger.Log("error", err)
+		}
 
 		codeURL := annotations[annotationFor("code")]
-		serviceName := r.GetName()
-		image := GetImageForRepo(serviceName, r.Spec.Values, k.logger)
+		gitRepo, err := findVCSRepo(codeURL)
+		if err != nil {
+			k.logger.Log("error", err)
+		}
+
+		releaseName := r.GetName()
+
+		image, err := GetImageForRepo(releaseName, r.Spec.Values)
+		if err != nil {
+			k.logger.Log("error", err)
+		}
+
 		releases = append(releases, models.Release{
-			Name:       serviceName,
+			Name:       releaseName,
 			Created:    r.GetCreationTimestamp().Time,
 			AutoDeploy: autoDeploy,
 			Owner: models.Owner{
@@ -85,7 +103,7 @@ func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
 				Sumologic: annotations[annotationFor("sumologic")],
 			},
 			Code: models.SourceCode{
-				Github: findVCSRepo(codeURL),
+				Github: *gitRepo,
 				Ref:    image.Tag,
 			},
 			Artifacts: models.Artifacts{
@@ -104,25 +122,27 @@ func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
 	return releases, nil
 }
 
-func findVCSRepo(url string) string {
-	arr := strings.Split(url, "/")
-	if len(arr) > 4 {
-		return arr[4]
+func findVCSRepo(addr string) (*string, error) {
+	address, err := url.Parse(addr)
+	if err != nil {
+		return nil, err
 	}
-	return ""
+	arr := strings.Split(address.Path, "/")
+	if len(arr) > 2 {
+		return &arr[2], nil
+	}
+	return nil, fmt.Errorf("")
 }
 
-func GetImageForRepo(repo string, vals map[string]interface{}, logger log.Logger) internal.Image {
+func GetImageForRepo(repo string, vals map[string]interface{}) (*internal.Image, error) {
 	arr := internal.GetImagePath(vals, repo)
 	if len(arr) == 0 {
-		logger.Log("No Image Found for repository")
-		return internal.Image{}
+		return nil, fmt.Errorf("Image not found")
 	}
 	imgVals := internal.Table(vals, arr)
 	img, err := internal.ParseImage(imgVals["repository"].(string), imgVals["tag"].(string))
 	if err != nil {
-		logger.Log("Unable to parse valid image")
-		return internal.Image{}
+		return nil, fmt.Errorf("invalid image: %v", err)
 	}
-	return *img
+	return img, nil
 }

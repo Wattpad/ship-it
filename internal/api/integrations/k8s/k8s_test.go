@@ -1,12 +1,9 @@
 package k8s
 
 import (
-	"os"
 	"testing"
 
 	"ship-it/internal"
-
-	"github.com/go-kit/kit/log"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -28,7 +25,7 @@ func TestGetImageForRepo(t *testing.T) {
 	tests := []struct {
 		inputMap map[string]interface{}
 		repo     string
-		expected internal.Image
+		expected *internal.Image
 	}{
 		{
 			map[string]interface{}{
@@ -42,7 +39,7 @@ func TestGetImageForRepo(t *testing.T) {
 				},
 			},
 			"bar",
-			internal.Image{
+			&internal.Image{
 				Registry:   "foo",
 				Repository: "bar",
 				Tag:        "baz",
@@ -59,12 +56,13 @@ func TestGetImageForRepo(t *testing.T) {
 				},
 			},
 			"bar",
-			internal.Image{},
+			nil,
 		},
 	}
 
 	for _, test := range tests {
-		assert.Equal(t, test.expected, GetImageForRepo(test.repo, test.inputMap, log.NewJSONLogger(log.NewSyncWriter(os.Stdout))))
+		actualImg, _ := GetImageForRepo(test.repo, test.inputMap)
+		assert.Equal(t, test.expected, actualImg)
 	}
 }
 
@@ -79,6 +77,11 @@ func TestFindRepo(t *testing.T) {
 		{"https://github.com/Wattpad", ""},
 	}
 	for _, test := range tests {
-		assert.Equal(t, test.expected, findVCSRepo(test.input))
+		repo, err := findVCSRepo(test.input)
+		if err == nil {
+			assert.Equal(t, test.expected, *repo)
+		} else {
+			assert.Error(t, err)
+		}
 	}
 }

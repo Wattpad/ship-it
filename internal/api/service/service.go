@@ -42,7 +42,7 @@ func (s *Service) ListReleases(ctx context.Context) ([]models.Release, error) {
 		r := &releases[i]
 
 		r.Status = s.getReleaseStatus(r).String()
-		r.Build.Travis = s.getTravisURL(ctx, *r)
+		r.Build.Travis = s.getTravisURL(ctx, r)
 
 	}
 
@@ -55,10 +55,10 @@ func (s *Service) getReleaseStatus(_ *models.Release) release.Status_Code {
 	return release.Status_PENDING_INSTALL
 }
 
-func (s *Service) getTravisURL(ctx context.Context, r models.Release) string {
+func (s *Service) getTravisURL(ctx context.Context, r *models.Release) string {
 	url, err := s.travis.GetTravisCIBuildURLForRef(ctx, r.Code.Github, r.Code.Ref)
 	if err != nil {
-		s.logger.Log("Failed to fetch build URL")
+		s.logger.Log("error", err)
 		return ""
 	}
 	return url

@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"os"
 	"testing"
 	"time"
 
@@ -53,7 +52,7 @@ func TestListReleasesPopulatesFromCustomResource(t *testing.T) {
 
 	mockK8s := newMockK8sClient(name, currentTime)
 	mockGit := newMockGitClient("wattpad")
-	svc := New(mockK8s, mockGit, log.NewJSONLogger(log.NewSyncWriter(os.Stdout)))
+	svc := New(mockK8s, mockGit, log.NewNopLogger())
 
 	releases, err := svc.ListReleases(context.Background())
 
@@ -66,7 +65,7 @@ func TestListReleasesPopulatesFromCustomResource(t *testing.T) {
 func TestTravisFieldIsPopulated(t *testing.T) {
 	mockK8s := newMockK8sClient("word-counts", time.Now())
 	mockGit := newMockGitClient("wattpad")
-	svc := New(mockK8s, mockGit, log.NewJSONLogger(log.NewSyncWriter(os.Stdout)))
+	svc := New(mockK8s, mockGit, log.NewNopLogger())
 
 	ctx := context.Background()
 	releases, err := svc.ListReleases(ctx)
