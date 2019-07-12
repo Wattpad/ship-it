@@ -3,7 +3,7 @@ package github
 import (
 	"context"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v26/github"
 	"github.com/pkg/errors"
 	"k8s.io/helm/pkg/chartutil"
 )
