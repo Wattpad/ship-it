@@ -15,7 +15,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics/dogstatsd"
-	gogithub "github.com/google/go-github/github"
+	gogithub "github.com/google/go-github/v26/github"
 	"golang.org/x/oauth2"
 	"k8s.io/helm/pkg/helm"
 )
