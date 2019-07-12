@@ -64,9 +64,9 @@ func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
 	for _, r := range releaseList {
 		annotations := r.GetAnnotations()
 		autoDeploy, err := strconv.ParseBool(annotations[annotationFor("autodeploy")])
-		if err != nil {
-			return nil, err
-		}
+
+		k.logger.Log(err)
+
 		codeURL := annotations[annotationFor("code")]
 		serviceName := r.GetName()
 		image := GetImageForRepo(serviceName, r.Spec.Values, k.logger)
