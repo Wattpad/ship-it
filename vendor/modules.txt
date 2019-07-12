@@ -16,19 +16,18 @@ github.com/Wattpad/sqsconsumer/middleware/movingaverage
 # github.com/alecthomas/jsonschema v0.0.0-20190530235721-fd8d96416671
 github.com/alecthomas/jsonschema
 # github.com/aws/aws-sdk-go v1.19.47
-github.com/aws/aws-sdk-go/aws
 github.com/aws/aws-sdk-go/aws/session
 github.com/aws/aws-sdk-go/service/sqs
+github.com/aws/aws-sdk-go/aws
 github.com/aws/aws-sdk-go/aws/awserr
-github.com/aws/aws-sdk-go/aws/credentials
-github.com/aws/aws-sdk-go/aws/endpoints
-github.com/aws/aws-sdk-go/internal/sdkio
 github.com/aws/aws-sdk-go/aws/client
 github.com/aws/aws-sdk-go/aws/corehandlers
+github.com/aws/aws-sdk-go/aws/credentials
 github.com/aws/aws-sdk-go/aws/credentials/processcreds
 github.com/aws/aws-sdk-go/aws/credentials/stscreds
 github.com/aws/aws-sdk-go/aws/csm
 github.com/aws/aws-sdk-go/aws/defaults
+github.com/aws/aws-sdk-go/aws/endpoints
 github.com/aws/aws-sdk-go/aws/request
 github.com/aws/aws-sdk-go/internal/ini
 github.com/aws/aws-sdk-go/internal/shareddefaults
@@ -37,6 +36,7 @@ github.com/aws/aws-sdk-go/aws/client/metadata
 github.com/aws/aws-sdk-go/aws/signer/v4
 github.com/aws/aws-sdk-go/private/protocol
 github.com/aws/aws-sdk-go/private/protocol/query
+github.com/aws/aws-sdk-go/internal/sdkio
 github.com/aws/aws-sdk-go/internal/sdkrand
 github.com/aws/aws-sdk-go/service/sts
 github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds
@@ -81,8 +81,8 @@ github.com/gogo/protobuf/proto
 github.com/gogo/protobuf/sortkeys
 # github.com/golang/protobuf v1.2.0
 github.com/golang/protobuf/proto
-github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes/timestamp
+github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/duration
 # github.com/google/go-cmp v0.3.0
@@ -91,8 +91,6 @@ github.com/google/go-cmp/cmp/internal/diff
 github.com/google/go-cmp/cmp/internal/flags
 github.com/google/go-cmp/cmp/internal/function
 github.com/google/go-cmp/cmp/internal/value
-# github.com/google/go-github v17.0.0+incompatible
-github.com/google/go-github/github
 # github.com/google/go-github/v26 v26.0.4
 github.com/google/go-github/v26/github
 # github.com/google/go-querystring v1.0.0
@@ -140,13 +138,13 @@ golang.org/x/crypto/ssh/terminal
 golang.org/x/crypto/scrypt
 golang.org/x/crypto/pbkdf2
 # golang.org/x/net v0.0.0-20190620200207-3b0461eec859
-golang.org/x/net/http2
 golang.org/x/net/context
+golang.org/x/net/http2
 golang.org/x/net/context/ctxhttp
+golang.org/x/net/trace
 golang.org/x/net/http/httpguts
 golang.org/x/net/http2/hpack
 golang.org/x/net/idna
-golang.org/x/net/trace
 golang.org/x/net/internal/timeseries
 # golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 golang.org/x/oauth2
@@ -393,18 +391,18 @@ k8s.io/gengo/types
 k8s.io/gengo/parser
 k8s.io/gengo/examples/set-gen/sets
 # k8s.io/helm v2.14.1+incompatible
+k8s.io/helm/pkg/helm
 k8s.io/helm/pkg/proto/hapi/release
 k8s.io/helm/pkg/proto/hapi/chart
 k8s.io/helm/pkg/chartutil
-k8s.io/helm/pkg/helm
 k8s.io/helm/pkg/proto/hapi/services
-k8s.io/helm/pkg/ignore
-k8s.io/helm/pkg/proto/hapi/version
-k8s.io/helm/pkg/sympath
-k8s.io/helm/pkg/version
 k8s.io/helm/pkg/manifest
+k8s.io/helm/pkg/proto/hapi/version
 k8s.io/helm/pkg/renderutil
 k8s.io/helm/pkg/storage/errors
+k8s.io/helm/pkg/version
+k8s.io/helm/pkg/ignore
+k8s.io/helm/pkg/sympath
 k8s.io/helm/pkg/releaseutil
 k8s.io/helm/pkg/engine
 # k8s.io/klog v0.3.3
