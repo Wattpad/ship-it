@@ -34,9 +34,9 @@ func NewListener(l log.Logger, h metrics.Histogram, org string, r RepositoriesSe
 
 	return &ChartListener{
 		downloader: newDownloader(r, org),
-		logger:     l,
+		logger:     log.With(l, "worker", "github"),
 		service:    svc,
-		timer:      h,
+		timer:      h.With("worker", "github", "queue", queue),
 	}, nil
 }
 
