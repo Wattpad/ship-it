@@ -11,7 +11,7 @@ type Image struct {
 	Tag        string
 }
 
-func parseImage(repo string, tag string) (*Image, error) {
+func ParseImage(repo string, tag string) (*Image, error) {
 	arr := strings.Split(repo, "/")
 
 	var registry string
@@ -38,7 +38,7 @@ func GetImagePath(obj map[string]interface{}, serviceName string) []string {
 	for key, val := range obj {
 		if key == "image" {
 			if img, ok := val.(map[string]interface{}); ok {
-				image, err := parseImage(img["repository"].(string), img["tag"].(string))
+				image, err := ParseImage(img["repository"].(string), img["tag"].(string))
 				if err != nil {
 					return []string{}
 				}

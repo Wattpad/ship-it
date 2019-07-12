@@ -3,8 +3,10 @@ package k8s
 import (
 	"context"
 	"strconv"
+	"strings"
 	"time"
 
+	"ship-it/internal"
 	"ship-it/internal/api/models"
 
 	clientset "ship-it/pkg/generated/clientset/versioned"
@@ -61,8 +63,11 @@ func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
 		if err != nil {
 			return nil, err
 		}
+		codeURL := annotations[annotationFor("code")]
+		serviceName := r.GetName()
+		image := GetImageForRepo(serviceName, r.Spec.Values)
 		releases = append(releases, models.Release{
-			Name:       r.GetName(),
+			Name:       serviceName,
 			Created:    r.GetCreationTimestamp().Time,
 			AutoDeploy: autoDeploy,
 			Owner: models.Owner{
@@ -76,16 +81,39 @@ func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
 				Sumologic: annotations[annotationFor("sumologic")],
 			},
 			Code: models.SourceCode{
-				Github: annotations[annotationFor("code")],
+				Github: findVCSRepo(codeURL),
+				Ref:    image.Tag,
 			},
 			Artifacts: models.Artifacts{
 				Chart: models.HelmArtifact{
 					Path:    r.Spec.Chart.Path,
 					Version: r.Spec.Chart.Revision,
 				},
+				Docker: models.DockerArtifact{
+					Image: image.Repository,
+					Tag:   image.Tag,
+				},
 			},
 		})
 	}
 
 	return releases, nil
+}
+
+func findVCSRepo(url string) string {
+	arr := strings.Split(url, "/")
+	if len(arr) > 4 {
+		return arr[4]
+	}
+	return ""
+}
+
+func GetImageForRepo(repo string, vals map[string]interface{}) internal.Image {
+	arr := internal.GetImagePath(vals, repo)
+	imgVals := internal.Table(vals, arr)
+	img, err := internal.ParseImage(imgVals["repository"].(string), imgVals["tag"].(string))
+	if err != nil {
+		return internal.Image{}
+	}
+	return *img
 }
