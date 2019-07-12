@@ -27,7 +27,7 @@ func TestParseImage(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		img, _ := parseImage(test.repo, test.tag)
+		img, _ := ParseImage(test.repo, test.tag)
 		assert.Equal(t, test.expected, img)
 	}
 }
