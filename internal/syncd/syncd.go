@@ -9,45 +9,42 @@ import (
 	"k8s.io/helm/pkg/proto/hapi/chart"
 )
 
-// ImageReconciler is a callback that reconciles new service images with the
-// state of ship-it's service registry chart. For example, by updating the chart
-// in a remote repository to use the new image.
+// ImageReconciler is a callback that reconciles a new image with some external
+// state. For example, updating the values of a helm chart in a remote
+// repository to use the new image's tag.
 type ImageReconciler interface {
 	Reconcile(context.Context, *internal.Image) error
 }
 
-// ImageListener models a stream of `*Image` events for service images. It calls
-// the ImageReconciler to reconcile new images with ship-it's service registry
-// chart.
+// ImageListener models a stream of `*Image` events. It calls the
+// ImageReconciler to reconcile each new image with some external state.
 type ImageListener interface {
 	Listen(context.Context, ImageReconciler) error
 }
 
-// RegistryChartReconciler is an callback that reconciles a new registry chart
-// with the kubernetes cluster state. For example, by deploying the chart to a
-// cluster.
-type RegistryChartReconciler interface {
+// ChartReconciler is an callback that reconciles a new chart with some external
+// state. For example, deploying the chart to a kubernetes cluster.
+type ChartReconciler interface {
 	Reconcile(context.Context, *chart.Chart) error
 }
 
-// RegistryChartListener models a stream of `*chart.Chart` events for ship-it's
-// service registry chart. It calls the RegistryChartReconciler to reconcile
-// each new chart with the kubernetes cluster state.
-type RegistryChartListener interface {
-	Listen(context.Context, RegistryChartReconciler) error
+// ChartListener models a stream of `*chart.Chart` events. It calls the
+// ChartReconciler to reconcile each new chart with some external state.
+type ChartListener interface {
+	Listen(context.Context, ChartReconciler) error
 }
 
-// Syncd facilitates background synchronization between a docker image registry,
-// ship-it's service registry helm chart, and kubernetes cluster state.
+// Syncd facilitates background synchronization between an image registry, a
+// helm chart repository and some external state, like a kubernetes cluster.
 type Syncd struct {
-	chartListener   RegistryChartListener
-	chartReconciler RegistryChartReconciler
+	chartListener   ChartListener
+	chartReconciler ChartReconciler
 
 	imageListener   ImageListener
 	imageReconciler ImageReconciler
 }
 
-func New(cl RegistryChartListener, cr RegistryChartReconciler, il ImageListener, ir ImageReconciler) *Syncd {
+func New(cl ChartListener, cr ChartReconciler, il ImageListener, ir ImageReconciler) *Syncd {
 	return &Syncd{
 		chartListener:   cl,
 		chartReconciler: cr,
