@@ -7,14 +7,12 @@ import (
 )
 
 func TestParseImage(t *testing.T) {
-	type testCase struct {
+	var tests = []struct {
 		repo     string
 		tag      string
 		expected *Image
-	}
-
-	testCases := map[string]testCase{
-		"valid image": {
+	}{
+		{
 			"foo/bar",
 			"baz",
 			&Image{
@@ -22,18 +20,14 @@ func TestParseImage(t *testing.T) {
 				Repository: "bar",
 				Tag:        "baz",
 			},
-		},
-		"invalid image": {
+		}, {
 			"foo-bar",
 			"baz",
 			nil,
 		},
 	}
-
-	for name, test := range testCases {
-		t.Run(name, func(t *testing.T) {
-			img, _ := ParseImage(test.repo, test.tag)
-			assert.Equal(t, test.expected, img)
-		})
+	for _, test := range tests {
+		img, _ := ParseImage(test.repo, test.tag)
+		assert.Equal(t, test.expected, img)
 	}
 }
