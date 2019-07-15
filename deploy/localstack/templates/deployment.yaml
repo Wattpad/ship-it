@@ -18,6 +18,8 @@ spec:
         ports:
         # exposing sqs
         - containerPort: 31000
+        # exposing localstack ui
+        - containerPort: 32000
         env:
           - name: SERVICES
             value: "sqs:31000"
