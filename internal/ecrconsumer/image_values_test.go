@@ -12,12 +12,14 @@ import (
 )
 
 func TestGetImagePath(t *testing.T) {
-	var tests = []struct {
+	type testCase struct {
 		serviceName string
 		inputMap    map[string]interface{}
 		expected    []string
-	}{
-		{
+	}
+
+	testCases := map[string]testCase{
+		"nested image found": {
 			"bar",
 			map[string]interface{}{
 				"apples": "delicious",
@@ -30,7 +32,8 @@ func TestGetImagePath(t *testing.T) {
 				},
 			},
 			[]string{"oranges", "image"},
-		}, {
+		},
+		"un-nested image found": {
 			"bar",
 			map[string]interface{}{
 				"apples": "delicious",
@@ -40,7 +43,8 @@ func TestGetImagePath(t *testing.T) {
 				},
 			},
 			[]string{"image"},
-		}, {
+		},
+		"matches desired nested image": {
 			"bar",
 			map[string]interface{}{
 				"apples": "delicious",
@@ -57,7 +61,8 @@ func TestGetImagePath(t *testing.T) {
 				},
 			},
 			[]string{"oranges", "image"},
-		}, {
+		},
+		"matches desired un-nested image": {
 			"bar",
 			map[string]interface{}{
 				"apples": "delicious",
@@ -74,7 +79,8 @@ func TestGetImagePath(t *testing.T) {
 				},
 			},
 			[]string{"image"},
-		}, {
+		},
+		"desired image repo not found": {
 			"bar",
 			map[string]interface{}{
 				"apples": "delicious",
@@ -87,24 +93,14 @@ func TestGetImagePath(t *testing.T) {
 				},
 			},
 			[]string{},
-		}, {
-			"bar",
-			map[string]interface{}{
-				"apples": "delicious",
-				"oranges": map[string]interface{}{
-					"taste": "delicious",
-					"image": map[string]interface{}{
-						"repository": "foo",
-						"tag":        "baz",
-					},
-				},
-			},
-			[]string{},
 		},
 	}
-	for _, test := range tests {
-		output := getImagePath(test.inputMap, test.serviceName)
-		assert.Equal(t, test.expected, output)
+
+	for name, test := range testCases {
+		t.Run(name, func(t *testing.T) {
+			output := getImagePath(test.inputMap, test.serviceName)
+			assert.Equal(t, test.expected, output)
+		})
 	}
 }
 
