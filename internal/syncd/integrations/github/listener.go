@@ -50,9 +50,9 @@ func (l *ChartListener) Listen(ctx context.Context, r syncd.ChartReconciler) err
 }
 
 type pushEvent struct {
-	Ref        string
-	Path       string
-	Repository string
+	Ref        string `json:"ref"`
+	Path       string `json:"path"`
+	Repository string `json:"repository"`
 }
 
 func (l *ChartListener) handler(r syncd.ChartReconciler) sqsconsumer.MessageHandlerFunc {
