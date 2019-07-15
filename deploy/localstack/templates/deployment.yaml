@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: localstack
+spec:
+  selector:
+    matchLabels:
+      app: localstack
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: localstack
+    spec:
+      containers:
+      - name: localstack
+        image: localstack/localstack:0.9.5
+        ports:
+        # exposing sqs
+        - containerPort: 31000
+        env:
+          - name: SERVICES
+            value: "sqs:31000"
+          - name: PORT_WEB_UI
+            value: "32000"
