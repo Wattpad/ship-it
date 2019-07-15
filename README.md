@@ -13,16 +13,16 @@ you'll need to install these tools locally:
 * minikube: https://github.com/kubernetes/minikube
 * skaffold: https://github.com/GoogleContainerTools/skaffold
 
-1. Create a new minikube cluster
+1. Start minikube cluster
 
 ```bash
-$ minikube create
+$ minikube start
 ```
 
 2. Update kubectl's cluster context
 
 ```bash
-$ minikube update-content
+$ minikube update-context
 $ kubectl config current-context
 minikube
 ```
