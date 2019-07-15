@@ -21,7 +21,7 @@ push: build
 	docker push $(REGISTRY)/$(LATEST_IMAGE)
 
 # empty target
-internal/models/*.go:
+internal/api/models/*.go:
 
 # api docs should be rebuilt when model code changes
 api/*.json: internal/api/models/*.go
