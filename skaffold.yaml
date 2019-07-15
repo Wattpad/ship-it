@@ -1,4 +1,4 @@
-apiVersion: skaffold/v1beta10
+apiVersion: skaffold/v1beta12
 kind: Config
 build:
   artifacts:
@@ -10,3 +10,12 @@ deploy:
     releases:
     - name: ship-it
       chartPath: deploy/ship-it
+      values:
+        api.image.repository: ship-it-api
+      setValues:
+        api.image.tag: "" # allow skaffold to inject the tag
+        api.image.pullPolicy: Never # use minikube's local docker
+        devEnv.DOGSTATSD_PORT: 8125
+        devEnv.DOGSTATSD_HOST: localhost
+    - name: localstack
+      chartPath: deploy/localstack
