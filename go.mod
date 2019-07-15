@@ -3,23 +3,30 @@ module ship-it
 go 1.12
 
 require (
+	github.com/Masterminds/goutils v1.1.0 // indirect
+	github.com/Masterminds/semver v1.4.2 // indirect
+	github.com/Masterminds/sprig v2.20.0+incompatible // indirect
 	github.com/VividCortex/gohistogram v1.0.0 // indirect
 	github.com/Wattpad/sqsconsumer v0.0.0-20190611184259-511082fa45b3
 	github.com/alecthomas/jsonschema v0.0.0-20190530235721-fd8d96416671
 	github.com/aws/aws-sdk-go v1.19.47
-	github.com/evanphx/json-patch v4.5.0+incompatible // indirect
+	github.com/cyphar/filepath-securejoin v0.2.2 // indirect
+	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-chi/chi v4.0.2+incompatible
 	github.com/go-kit/kit v0.8.0
 	github.com/go-logfmt/logfmt v0.4.0 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
+	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/gogo/protobuf v1.2.1 // indirect
 	github.com/golang/groupcache v0.0.0-20190129154638-5b532d6fd5ef // indirect
 	github.com/golang/mock v1.3.1 // indirect
-	github.com/golang/protobuf v1.3.1 // indirect
 	github.com/google/go-github/v26 v26.0.4
 	github.com/google/gofuzz v1.0.0 // indirect
+	github.com/google/uuid v1.1.1 // indirect
 	github.com/googleapis/gnostic v0.3.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.1 // indirect
+	github.com/huandu/xstrings v1.2.0 // indirect
+	github.com/imdario/mergo v0.3.7 // indirect
 	github.com/json-iterator/go v1.1.6 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kr/pretty v0.1.0 // indirect
@@ -34,6 +41,7 @@ require (
 	golang.org/x/sys v0.0.0-20190626221950-04f50cda93cb // indirect
 	golang.org/x/text v0.3.2 // indirect
 	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4 // indirect
+	google.golang.org/grpc v1.21.1 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.2.2
@@ -43,6 +51,5 @@ require (
 	k8s.io/code-generator v0.0.0-20190627204931-86aa6a6a5cf3
 	k8s.io/helm v2.14.1+incompatible
 	k8s.io/klog v0.3.3 // indirect
-	k8s.io/kube-openapi v0.0.0-20190603182131-db7b694dc208 // indirect
 	k8s.io/utils v0.0.0-20190607212802-c55fbcfc754a // indirect
 )
