@@ -3,12 +3,28 @@ fullnameOverride: ""
 
 api:
   image:
-    repository: ship-it-api
+    repository: 723255503624.dkr.ecr.us-east-1.amazonaws.com/ship-it-api
     tag: latest
+    pullPolicy: Never
 
-  service:
-    type: NodePort
-    port: 80
-    nodePort: 30000
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 1
+      memory: 1Gi
 
-resources: {}
+  secretName: "ship-it"
+
+  nodePort: 31901
+  containerPort: 80
+  servicePort: 80
+
+github:
+  org: "Wattpad"
+  token: "foobarbaz"
+
+awsRegion: "us-east-1"
+
+sslCertPath: "/etc/ssl/certs/ca-certificates.crt"

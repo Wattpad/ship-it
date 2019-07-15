@@ -31,9 +31,24 @@ Create chart name and version as used by the chart label.
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "ship-it.labels" -}}
-app: {{ template "ship-it.name" . }}
-chart: {{ template "ship-it.chart" . }}
-instance: {{ .Release.Name }}
-managed-by: {{ .Release.Service }}
+{{/*
+Provide standard resource labels.
+*/}}
+{{ define "ship-it.metadataLabels" }}
+  app: {{ template "ship-it.name" . }}
+  chart: {{ template "ship-it.chart" . }}
+  instance: {{ .Release.Name }}
+  managed-by: {{ .Release.Service }}
 {{- end -}}
+
+{{/*
+Image value hack for skaffold.
+*/}}
+{{- define "ship-it.api.image" -}}
+{{- if .Values.api.image.tag -}}
+{{- printf "%s:%s" .Values.api.image.repository .Values.api.image.tag -}}
+{{- else -}}
+{{- .Values.api.image.repository -}}
+{{- end -}}
+{{- end -}}
+
