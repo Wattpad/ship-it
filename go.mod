@@ -4,6 +4,8 @@ go 1.12
 
 replace ship-it-operator => ./operator
 
+replace k8s.io/apimachinery => k8s.io/apimachinery v0.0.0-20190404173353-6a84e37a896d
+
 require (
 	github.com/VividCortex/gohistogram v1.0.0 // indirect
 	github.com/Wattpad/sqsconsumer v0.0.0-20190611184259-511082fa45b3
@@ -40,5 +42,6 @@ require (
 	k8s.io/klog v0.3.3 // indirect
 	k8s.io/kube-openapi v0.0.0-20190603182131-db7b694dc208 // indirect
 	k8s.io/utils v0.0.0-20190607212802-c55fbcfc754a // indirect
-	ship-it-operator v0.0.0-00010101000000-000000000000 // indirect
+	ship-it-operator v0.0.0-00010101000000-000000000000
+	sigs.k8s.io/controller-runtime v0.2.0-beta.2
 )
