@@ -25,7 +25,7 @@ jobs:
       name: Docker
       script:
         - TARGET=ship-it-api make build
-        - TARGET=ship-it-ecrconsumer make build
+        - TARGET=ship-it-syncd make build
 
     - stage: Test
       name: Go
@@ -46,7 +46,7 @@ jobs:
         - eval $(aws ecr get-login --no-include-email --region us-east-1)
       script:
         - TARGET=ship-it-api make push
-        - TARGET=ship-it-ecrconsumer make push
+        - TARGET=ship-it-syncd make push
 
     - stage: Codecov
       name: Test Coverage Report

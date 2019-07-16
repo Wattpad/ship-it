@@ -11,27 +11,21 @@ type Image struct {
 	Tag        string
 }
 
+func (i Image) URI() string {
+	return i.Registry + "/" + i.Repository
+}
+
 func ParseImage(repo string, tag string) (*Image, error) {
 	arr := strings.Split(repo, "/")
-
-	var registry string
-	var repository string
-	if len(arr) == 2 {
-		repository = arr[1]
-		registry = arr[0]
-	} else {
+	if len(arr) != 2 {
 		return nil, fmt.Errorf("malformed repo: %s", repo)
 	}
 
 	return &Image{
-		Registry:   registry,
-		Repository: repository,
+		Registry:   arr[0],
+		Repository: arr[1],
 		Tag:        tag,
 	}, nil
-}
-
-func (i Image) URI() string {
-	return i.Registry + "/" + i.Repository
 }
 
 func GetImagePath(obj map[string]interface{}, serviceName string) []string {
