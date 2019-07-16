@@ -5,7 +5,7 @@ api:
   image:
     repository: 723255503624.dkr.ecr.us-east-1.amazonaws.com/ship-it-api
     tag: latest
-    pullPolicy: Never
+    pullPolicy: IfNotPresent
 
   resources:
     requests:
