@@ -10,7 +10,7 @@ services:
   - docker
 
 stages:
-  - name: Test
+  - name: Test and Lint
     if: type = pull_request
   - name: Build
     if: type = pull_request
@@ -27,19 +27,23 @@ jobs:
         - TARGET=ship-it-api make build
         - TARGET=ship-it-ecrconsumer make build
 
-    - stage: Test
+    - stage: Test and Lint
       name: Go
       install: go get "github.com/golangci/golangci-lint/cmd/golangci-lint"
       script: 
         - golangci-lint run -D errcheck -E goimports -E interfacer ./...
         - go test ./...
-        - curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh
-        - chmod 700 get_helm.sh && sudo ./get_helm.sh
-        - helm init --client-only && helm lint deploy/ship-it
     
-    - stage: Test
+    - stage: Test and Lint
       name: JavaScript
       script: cd web && npm install -D && npm run lint && npm run test
+
+    - stage: Test and Lint
+      name: Helm Lint
+      intsall: curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh && chmod 700 get_helm.sh && sudo ./get_helm.sh
+      script:
+        - helm init --client-only
+        - helm lint deploy/ship-it
 
     - stage: Push
       name: Push
