@@ -1,0 +1,7 @@
+version: "2"
+domain: wattpadhq.com
+repo: ship-it
+resources:
+- group: shipit
+  version: v1beta1
+  kind: HelmRelease
