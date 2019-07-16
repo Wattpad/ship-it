@@ -52,3 +52,10 @@ Image value hack for skaffold.
 {{- end -}}
 {{- end -}}
 
+{{- define "ship-it.syncd.image" -}}
+{{- if .Values.syncd.image.tag -}}
+{{- printf "%s:%s" .Values.syncd.image.repository .Values.syncd.image.tag -}}
+{{- else -}}
+{{- .Values.syncd.image.repository -}}
+{{- end -}}
+{{- end -}}

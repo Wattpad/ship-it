@@ -45,7 +45,7 @@ spec:
           - containerPort: {{ .Values.api.containerPort }}
             name: http
         resources:
-          {{ toYaml .Values.resources | nindent 10 | trim }}
+          {{ toYaml .Values.api.resources | nindent 10 | trim }}
         volumeMounts:
           - mountPath: {{ .Values.sslCertPath }}
             name: aws-cert
