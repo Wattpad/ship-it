@@ -71,7 +71,12 @@ func main() {
 func initRegistryChartListener(l log.Logger, dd *dogstatsd.Dogstatsd, cfg *config.Config) (syncd.RegistryChartListener, error) {
 	workerTime := dd.NewTiming("worker.time", 1)
 
-	awsSession := session.New(cfg.AWS())
+	awsSession, err := session.NewSession(cfg.AWS())
+	if err != nil {
+		l.Log("error", err)
+		os.Exit(1)
+	}
+
 	sqsClient := sqs.New(awsSession)
 
 	ts := oauth2.StaticTokenSource(
