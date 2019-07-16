@@ -1,5 +1,5 @@
 language: go
-
+dist: xenial
 go:
   - 1.12.1
 
@@ -33,7 +33,9 @@ jobs:
       script: 
         - golangci-lint run -D errcheck -E goimports -E interfacer ./...
         - go test ./...
-        - snap install helm --classic && helm lint deploy/ship-it
+        - curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh
+        - chmod 700 get_helm.sh && sudo ./get_helm.sh
+        - helm init --client-only && helm lint deploy/ship-it
     
     - stage: Test
       name: JavaScript
