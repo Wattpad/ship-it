@@ -22,7 +22,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	shipitv1beta1 "ship-it/api/v1beta1"
+	shipitv1beta1 "ship-it-operator/api/v1beta1"
 
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"

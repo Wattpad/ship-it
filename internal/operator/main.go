@@ -19,9 +19,9 @@ import (
 	"flag"
 	"os"
 
-	shipitv1beta1 "ship-it/api/v1beta1"
+	shipitv1beta1 "ship-it-operator/api/v1beta1"
 
-	"ship-it/controllers"
+	"ship-it-operator/controllers"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
