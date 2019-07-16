@@ -33,6 +33,7 @@ jobs:
       script: 
         - golangci-lint run -D errcheck -E goimports -E interfacer ./...
         - go test ./...
+        - snap install helm --classic && helm lint deploy/ship-it
     
     - stage: Test
       name: JavaScript
