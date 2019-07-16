@@ -40,7 +40,7 @@ func NewListener(l log.Logger, h metrics.Histogram, org string, r RepositoriesSe
 	}, nil
 }
 
-func (l *ChartListener) Listen(ctx context.Context, r syncd.ChartReconciler) error {
+func (l *ChartListener) Listen(ctx context.Context, r syncd.RegistryChartReconciler) error {
 	stack := sqsmiddleware.ApplyDecoratorsToHandler(
 		l.handler(r),
 		middleware.Timer(l.timer),
@@ -55,7 +55,7 @@ type pushEvent struct {
 	Repository string `json:"repository"`
 }
 
-func (l *ChartListener) handler(r syncd.ChartReconciler) sqsconsumer.MessageHandlerFunc {
+func (l *ChartListener) handler(r syncd.RegistryChartReconciler) sqsconsumer.MessageHandlerFunc {
 	return func(ctx context.Context, msg string) error {
 		var event pushEvent
 		if err := json.Unmarshal([]byte(msg), &event); err != nil {

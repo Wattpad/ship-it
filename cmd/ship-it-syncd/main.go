@@ -46,7 +46,7 @@ func main() {
 	dd := dogstatsd.New("wattpad.ship-it.", logger)
 	go dd.SendLoop(time.Tick(time.Second), "udp", cfg.DataDogAddress())
 
-	chartListener, err := initChartListener(logger, dd, cfg)
+	chartListener, err := initRegistryChartListener(logger, dd, cfg)
 	if err != nil {
 		logger.Log("error", err)
 		os.Exit(1)
@@ -68,7 +68,7 @@ func main() {
 	}
 }
 
-func initChartListener(l log.Logger, dd *dogstatsd.Dogstatsd, cfg *config.Config) (syncd.ChartListener, error) {
+func initRegistryChartListener(l log.Logger, dd *dogstatsd.Dogstatsd, cfg *config.Config) (syncd.RegistryChartListener, error) {
 	workerTime := dd.NewTiming("worker.time", 1)
 
 	awsSession := session.New(cfg.AWS())
