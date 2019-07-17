@@ -9,11 +9,13 @@ import (
 
 	"ship-it/internal/syncd"
 	"ship-it/internal/syncd/config"
+	"ship-it/internal/syncd/integrations/ecr"
 	"ship-it/internal/syncd/integrations/github"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/metrics"
 	"github.com/go-kit/kit/metrics/dogstatsd"
 	gogithub "github.com/google/go-github/v26/github"
 	"golang.org/x/oauth2"
@@ -46,7 +48,18 @@ func main() {
 	dd := dogstatsd.New("wattpad.ship-it.", logger)
 	go dd.SendLoop(time.Tick(time.Second), "udp", cfg.DataDogAddress())
 
-	chartListener, err := initChartListener(logger, dd, cfg)
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{
+			AccessToken: cfg.GithubToken,
+		},
+	)
+
+	oauthClient := oauth2.NewClient(context.Background(), ts)
+	githubClient := gogithub.NewClient(oauthClient)
+
+	workerTime := dd.NewTiming("worker.time", 1)
+
+	chartListener, imageListener, err := initSyncdListeners(logger, workerTime, githubClient, cfg)
 	if err != nil {
 		logger.Log("error", err)
 		os.Exit(1)
@@ -59,36 +72,48 @@ func main() {
 		cfg.HelmTimeout(),
 	)
 
+	imageReconciler := ecr.NewReconciler(
+		cfg.GithubOrg,
+		githubClient.Repositories,
+	)
+
 	// TODO: Allow configurable image/chart sync implementations. For now
 	// we'll just use our specific ecr+sqs/github+sqs implmentations.
-	syncd := syncd.New(chartListener, chartReconciler, nil, nil)
+	syncd := syncd.New(chartListener, chartReconciler, imageListener, imageReconciler)
 	if err := syncd.Run(ctx); err != nil {
 		logger.Log("error", err)
 		os.Exit(1)
 	}
 }
 
-func initChartListener(l log.Logger, dd *dogstatsd.Dogstatsd, cfg *config.Config) (syncd.ChartListener, error) {
-	workerTime := dd.NewTiming("worker.time", 1)
+func initSyncdListeners(l log.Logger, h metrics.Histogram, gc *gogithub.Client, cfg *config.Config) (syncd.ChartListener, syncd.ImageListener, error) {
+	awsSession, err := session.NewSession(cfg.AWS())
+	if err != nil {
+		return nil, nil, err
+	}
 
-	awsSession := session.New(cfg.AWS())
-	sqsClient := sqs.New(awsSession)
-
-	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{
-			AccessToken: cfg.GithubToken,
-		},
-	)
-
-	oauthClient := oauth2.NewClient(context.Background(), ts)
-	githubClient := gogithub.NewClient(oauthClient)
-
-	return github.NewListener(
+	chartListener, err := github.NewListener(
 		l,
-		workerTime,
+		h,
 		cfg.GithubOrg,
-		githubClient.Repositories,
+		gc.Repositories,
 		cfg.GithubQueue,
-		sqsClient,
+		sqs.New(awsSession),
 	)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	imageListener, err := ecr.NewListener(
+		l,
+		h,
+		cfg.EcrQueue,
+		sqs.New(awsSession),
+	)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return chartListener, imageListener, nil
 }
