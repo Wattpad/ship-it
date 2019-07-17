@@ -7,11 +7,9 @@ import (
 	"syscall"
 	"time"
 
-	"ship-it/internal/ecrconsumer"
-	"ship-it/internal/ecrconsumer/config"
+	"ship-it/internal/syncd"
+	"ship-it/internal/syncd/config"
 
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics/dogstatsd"
 )
@@ -42,18 +40,11 @@ func main() {
 	dd := dogstatsd.New("wattpad.ship-it.", logger)
 	go dd.SendLoop(time.Tick(time.Second), "udp", cfg.DataDogAddress())
 
-	s, err := session.NewSession(cfg.AWS())
-	if err != nil {
+	// TODO: Allow configurable image/chart sync implementations. For now
+	// we'll just use our specific ecr+sqs/github+sqs implmentations.
+	syncd := syncd.New(nil, nil, nil, nil)
+	if err := syncd.Run(ctx); err != nil {
 		logger.Log("error", err)
 		os.Exit(1)
 	}
-
-	gitClient := ecrconsumer.NewGitHub(cfg.GithubToken, context.Background(), cfg.GithubOrg, "miranda")
-	consumer, err := ecrconsumer.New(logger, dd.NewTiming("worker.time", 1.0).With("worker", "ecrconsumer", "queue", cfg.SQS.QueueName), sqs.New(s), gitClient, cfg.SQS)
-	if err != nil {
-		logger.Log("error", err)
-		os.Exit(1)
-	}
-
-	consumer.Run(ctx)
 }

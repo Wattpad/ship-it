@@ -1,8 +1,9 @@
 import React from 'react'
 import Chip from '@material-ui/core/Chip'
 import DoneIcon from '@material-ui/icons/Done'
-import RollBackIcon from '@material-ui/icons/Cached'
+import PendingIcon from '@material-ui/icons/Cached'
 import FailIcon from '@material-ui/icons/Clear'
+import NotInstalledIcon from '@material-ui/icons/Info'
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles'
 
 const tagTheme = createMuiTheme({
@@ -23,7 +24,7 @@ class StatusChip extends React.Component {
 
   getChip(state) {
     switch (state) {
-      case 'deployed':
+      case 'DEPLOYED':
         return (
           <MuiThemeProvider theme={tagTheme}>
             <Chip
@@ -35,19 +36,31 @@ class StatusChip extends React.Component {
             />
           </MuiThemeProvider>
         )
-      case 'deploying':
+      case 'DELETED':
         return (
           <MuiThemeProvider theme={tagTheme}>
             <Chip
-              icon={<RollBackIcon />}
-              label="Deploying"
-              color="default"
+              icon={<FailIcon />}
+              label="Deleted"
+              color="secondary"
               variant="outlined"
               clickable
             />
           </MuiThemeProvider>
         )
-      case 'failed':
+      case 'SUPERSEDED':
+        return (
+          <MuiThemeProvider theme={tagTheme}>
+            <Chip
+              icon={<DoneIcon />}
+              label="Superseded"
+              color="primary"
+              variant="outlined"
+              clickable
+            />
+          </MuiThemeProvider>
+        )
+      case 'FAILED':
         return (
           <MuiThemeProvider theme={tagTheme}>
             <Chip
@@ -59,20 +72,66 @@ class StatusChip extends React.Component {
             />
           </MuiThemeProvider>
         )
-      case 'rollback':
+      case 'DELETING':
         return (
           <MuiThemeProvider theme={tagTheme}>
             <Chip
-              icon={<RollBackIcon />}
-              label="Rolled Back"
+              icon={<PendingIcon />}
+              label="Deleting"
+              color="secondary"
+              variant="outlined"
+              clickable
+            />
+          </MuiThemeProvider>
+        )
+      case 'PENDING_INSTALL':
+        return (
+          <MuiThemeProvider theme={tagTheme}>
+            <Chip
+              icon={<PendingIcon />}
+              label="Deploying"
+              color="primary"
+              variant="outlined"
+              clickable
+            />
+          </MuiThemeProvider>
+        )
+      case 'PENDING_UPGRADE':
+        return (
+          <MuiThemeProvider theme={tagTheme}>
+            <Chip
+              icon={<PendingIcon />}
+              label="Upgrading"
+              color="primary"
+              variant="outlined"
+              clickable
+            />
+          </MuiThemeProvider>
+        )
+      case 'PENDING_ROLLBACK':
+        return (
+          <MuiThemeProvider theme={tagTheme}>
+            <Chip
+              icon={<PendingIcon />}
+              label="Rolling Back"
+              color="secondary"
+              variant="outlined"
+              clickable
+            />
+          </MuiThemeProvider>
+        )
+      default: // UNKNOWN default status case
+        return (
+          <MuiThemeProvider theme={tagTheme}>
+            <Chip
+              icon={<NotInstalledIcon />}
+              label="Unknown"
               color="default"
               variant="outlined"
               clickable
             />
           </MuiThemeProvider>
         )
-      default:
-        return null
     }
   }
 
