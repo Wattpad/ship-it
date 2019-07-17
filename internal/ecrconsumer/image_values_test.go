@@ -3,6 +3,8 @@ package ecrconsumer
 import (
 	"testing"
 
+	"ship-it/internal"
+
 	"ship-it/pkg/apis/k8s.wattpad.com/v1alpha1"
 
 	"github.com/stretchr/testify/assert"
@@ -10,12 +12,14 @@ import (
 )
 
 func TestGetImagePath(t *testing.T) {
-	var tests = []struct {
+	type testCase struct {
 		serviceName string
 		inputMap    map[string]interface{}
 		expected    []string
-	}{
-		{
+	}
+
+	testCases := map[string]testCase{
+		"nested image found": {
 			"bar",
 			map[string]interface{}{
 				"apples": "delicious",
@@ -28,7 +32,8 @@ func TestGetImagePath(t *testing.T) {
 				},
 			},
 			[]string{"oranges", "image"},
-		}, {
+		},
+		"un-nested image found": {
 			"bar",
 			map[string]interface{}{
 				"apples": "delicious",
@@ -38,7 +43,8 @@ func TestGetImagePath(t *testing.T) {
 				},
 			},
 			[]string{"image"},
-		}, {
+		},
+		"matches desired nested image": {
 			"bar",
 			map[string]interface{}{
 				"apples": "delicious",
@@ -55,7 +61,8 @@ func TestGetImagePath(t *testing.T) {
 				},
 			},
 			[]string{"oranges", "image"},
-		}, {
+		},
+		"matches desired un-nested image": {
 			"bar",
 			map[string]interface{}{
 				"apples": "delicious",
@@ -72,7 +79,8 @@ func TestGetImagePath(t *testing.T) {
 				},
 			},
 			[]string{"image"},
-		}, {
+		},
+		"desired image repo not found": {
 			"bar",
 			map[string]interface{}{
 				"apples": "delicious",
@@ -85,24 +93,14 @@ func TestGetImagePath(t *testing.T) {
 				},
 			},
 			[]string{},
-		}, {
-			"bar",
-			map[string]interface{}{
-				"apples": "delicious",
-				"oranges": map[string]interface{}{
-					"taste": "delicious",
-					"image": map[string]interface{}{
-						"repository": "foo",
-						"tag":        "baz",
-					},
-				},
-			},
-			[]string{},
 		},
 	}
-	for _, test := range tests {
-		output := getImagePath(test.inputMap, test.serviceName)
-		assert.Equal(t, test.expected, output)
+
+	for name, test := range testCases {
+		t.Run(name, func(t *testing.T) {
+			output := getImagePath(test.inputMap, test.serviceName)
+			assert.Equal(t, test.expected, output)
+		})
 	}
 }
 
@@ -156,12 +154,12 @@ func TestTable(t *testing.T) {
 
 func TestUpdateImage(t *testing.T) {
 	var tests = []struct {
-		newImage    Image
+		newImage    internal.Image
 		inputMap    map[string]interface{}
 		expectedMap map[string]interface{}
 	}{
 		{
-			Image{
+			internal.Image{
 				Registry:   "foo",
 				Repository: "bar",
 				Tag:        "newTag",
@@ -187,7 +185,7 @@ func TestUpdateImage(t *testing.T) {
 				},
 			},
 		}, {
-			Image{
+			internal.Image{
 				Registry:   "foo",
 				Repository: "bar",
 				Tag:        "newTag",
@@ -213,7 +211,7 @@ func TestUpdateImage(t *testing.T) {
 				},
 			},
 		}, {
-			Image{
+			internal.Image{
 				Registry:   "foo",
 				Repository: "bar",
 				Tag:        "newTag",
@@ -235,32 +233,6 @@ func TestUpdateImage(t *testing.T) {
 	for _, test := range tests {
 		update(test.inputMap, test.newImage)
 		assert.Equal(t, test.expectedMap, test.inputMap)
-	}
-}
-
-func TestParseImage(t *testing.T) {
-	var tests = []struct {
-		repo     string
-		tag      string
-		expected *Image
-	}{
-		{
-			"foo/bar",
-			"baz",
-			&Image{
-				Registry:   "foo",
-				Repository: "bar",
-				Tag:        "baz",
-			},
-		}, {
-			"foo-bar",
-			"baz",
-			nil,
-		},
-	}
-	for _, test := range tests {
-		img, _ := parseImage(test.repo, test.tag)
-		assert.Equal(t, test.expected, img)
 	}
 }
 
@@ -290,7 +262,7 @@ func TestWithImage(t *testing.T) {
 	}
 
 	t.Run("Matching Image Case", func(t *testing.T) {
-		expectedImg := Image{
+		expectedImg := internal.Image{
 			Registry:   "bar",
 			Repository: "foo",
 			Tag:        "new-tag",
@@ -303,7 +275,7 @@ func TestWithImage(t *testing.T) {
 
 	// Test No Matching Image Case
 	t.Run("No Matching Image Case", func(t *testing.T) {
-		expectedImg := Image{
+		expectedImg := internal.Image{
 			Registry:   "bar",
 			Repository: "oof",
 			Tag:        "new-tag",
