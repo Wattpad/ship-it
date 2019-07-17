@@ -26,7 +26,7 @@ deploy:
         devEnv.ECR_QUEUE: foo
         devEnv.GITHUB_TOKEN: foo
         devEnv.GITHUB_QUEUE: foo
-        devEnv.NAMESPACE: defualt
+        devEnv.NAMESPACE: default
         devEnv.RELEASE_NAME: ship-it
         devEnv.HELM_TIMEOUT_SECONDS: 30
     - name: localstack
