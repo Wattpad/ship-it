@@ -2,14 +2,14 @@ package ecr
 
 import (
 	"context"
-	"log"
 
 	"ship-it/internal/syncd"
 	"ship-it/internal/syncd/middleware"
 
 	"github.com/Wattpad/sqsconsumer"
 	sqsmiddleware "github.com/Wattpad/sqsconsumer/middleware"
-	"k8s.io/component-base/metrics"
+	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/metrics"
 )
 
 type ImageListener struct {
@@ -27,7 +27,7 @@ func NewListener(l log.Logger, h metrics.Histogram, queue string, sqs sqsconsume
 	return &ImageListener{
 		logger:  log.With(l, "worker", "ecr"),
 		service: svc,
-		timer:   h.With("worker", "ecr", "queue", queue),
+		timer:   h.With("worker", "ecr"),
 	}, nil
 }
 
