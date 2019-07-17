@@ -86,7 +86,7 @@ func main() {
 	}
 }
 
-func initSyncdListeners(l log.Logger, h metrics.Histogram, gc *gogithub.Client, cfg *config.Config) (syncd.ChartListener, syncd.ImageListener, error) {
+func initSyncdListeners(l log.Logger, h metrics.Histogram, gc *gogithub.Client, cfg *config.Config) (syncd.RegistryChartListener, syncd.ImageListener, error) {
 	awsSession, err := session.NewSession(cfg.AWS())
 	if err != nil {
 		return nil, nil, err

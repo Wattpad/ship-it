@@ -51,7 +51,7 @@ func TestHandlerChartDownloadFails(t *testing.T) {
 	var md mockDownloader
 	md.On("BufferDirectory", mock.Anything, testEvent.Repository, testEvent.Path, testEvent.Ref).Return(nil, errNotFound)
 
-	listener := &ChartListener{downloader: &md}
+	listener := &RegistryChartListener{downloader: &md}
 	handler := listener.handler(nil)
 
 	err = handler(context.Background(), string(eventBytes))
@@ -87,7 +87,7 @@ description: This is a foo chart.
 	var mr mockReconciler
 	mr.On("Reconcile", mock.Anything, mock.Anything).Return(nil)
 
-	listener := &ChartListener{downloader: &md}
+	listener := &RegistryChartListener{downloader: &md}
 	handler := listener.handler(&mr)
 
 	err = handler(context.Background(), string(eventBytes))

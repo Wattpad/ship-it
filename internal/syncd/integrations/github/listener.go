@@ -19,28 +19,28 @@ type githubDownloader interface {
 	BufferDirectory(ctx context.Context, repo, path, ref string) ([]*chartutil.BufferedFile, error)
 }
 
-type ChartListener struct {
+type RegistryChartListener struct {
 	downloader githubDownloader
 	logger     log.Logger
 	service    *sqsconsumer.SQSService
 	timer      metrics.Histogram
 }
 
-func NewListener(l log.Logger, h metrics.Histogram, org string, r RepositoriesService, queue string, sqs sqsconsumer.SQSAPI) (*ChartListener, error) {
+func NewListener(l log.Logger, h metrics.Histogram, org string, r RepositoriesService, queue string, sqs sqsconsumer.SQSAPI) (*RegistryChartListener, error) {
 	svc, err := sqsconsumer.NewSQSService(queue, sqs)
 	if err != nil {
 		return nil, err
 	}
 
-	return &ChartListener{
+	return &RegistryChartListener{
 		downloader: newDownloader(r, org),
 		logger:     log.With(l, "worker", "github"),
 		service:    svc,
-		timer:      h.With("worker", "github", "queue", queue),
+		timer:      h.With("worker", "github"),
 	}, nil
 }
 
-func (l *ChartListener) Listen(ctx context.Context, r syncd.ChartReconciler) error {
+func (l *RegistryChartListener) Listen(ctx context.Context, r syncd.RegistryChartReconciler) error {
 	stack := sqsmiddleware.ApplyDecoratorsToHandler(
 		l.handler(r),
 		middleware.Timer(l.timer),
@@ -55,7 +55,7 @@ type pushEvent struct {
 	Repository string `json:"repository"`
 }
 
-func (l *ChartListener) handler(r syncd.ChartReconciler) sqsconsumer.MessageHandlerFunc {
+func (l *RegistryChartListener) handler(r syncd.RegistryChartReconciler) sqsconsumer.MessageHandlerFunc {
 	return func(ctx context.Context, msg string) error {
 		var event pushEvent
 		if err := json.Unmarshal([]byte(msg), &event); err != nil {
