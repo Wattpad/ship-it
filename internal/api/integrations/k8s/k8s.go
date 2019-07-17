@@ -80,8 +80,9 @@ func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
 			},
 			Artifacts: models.Artifacts{
 				Chart: models.HelmArtifact{
-					Path:    r.Spec.Chart.Path,
-					Version: r.Spec.Chart.Revision,
+					Path:       r.Spec.Chart.Path,
+					Repository: r.Spec.Chart.Repository,
+					Version:    r.Spec.Chart.Revision,
 				},
 			},
 		})
