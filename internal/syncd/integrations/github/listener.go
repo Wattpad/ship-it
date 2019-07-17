@@ -36,7 +36,7 @@ func NewListener(l log.Logger, h metrics.Histogram, org string, r RepositoriesSe
 		downloader: newDownloader(r, org),
 		logger:     log.With(l, "worker", "github"),
 		service:    svc,
-		timer:      h.With("worker", "github", "queue", queue),
+		timer:      h.With("worker", "github"),
 	}, nil
 }
 
