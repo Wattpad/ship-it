@@ -32,27 +32,29 @@ func (d *downloader) BufferDirectory(ctx context.Context, repo, path, ref string
 		return nil, err
 	}
 
-	var files []*chartutil.BufferedFile
-
 	if file != nil {
 		content, err := file.GetContent()
 		if err != nil {
 			return nil, errors.Wrap(err, "unable to get file contents")
 		}
 
-		files = append(files, &chartutil.BufferedFile{
-			Name: file.GetName(),
-			Data: []byte(content),
-		})
-	} else {
-		for _, subDir := range dir {
-			subFiles, err := d.BufferDirectory(ctx, repo, subDir.GetPath(), ref)
-			if err != nil {
-				return nil, err
-			}
+		return []*chartutil.BufferedFile{
+			{
+				Name: file.GetName(),
+				Data: []byte(content),
+			},
+		}, nil
+	}
 
-			files = append(files, subFiles...)
+	var files []*chartutil.BufferedFile
+
+	for _, subDir := range dir {
+		subFiles, err := d.BufferDirectory(ctx, repo, subDir.GetPath(), ref)
+		if err != nil {
+			return nil, err
 		}
+
+		files = append(files, subFiles...)
 	}
 
 	return files, nil
