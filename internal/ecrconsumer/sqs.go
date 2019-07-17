@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"time"
 
+	"ship-it/internal"
 	"ship-it/internal/ecrconsumer/config"
 
 	"ship-it/pkg/apis/k8s.wattpad.com/v1alpha1"
@@ -57,8 +58,8 @@ func parseMsg(msg string) (*SQSMessage, error) {
 	return js, nil
 }
 
-func makeImage(repoName string, tag string) Image {
-	return Image{
+func makeImage(repoName string, tag string) internal.Image {
+	return internal.Image{
 		Registry:   "723255503624.dkr.ecr.us-east-1.amazonaws.com",
 		Repository: repoName,
 		Tag:        tag,

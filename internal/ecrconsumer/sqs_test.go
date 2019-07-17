@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"ship-it/internal"
+
 	"github.com/google/go-github/v26/github"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -40,7 +42,7 @@ func TestParseMessage(t *testing.T) {
 }
 
 func TestMakeImage(t *testing.T) {
-	assert.Exactly(t, Image{
+	assert.Exactly(t, internal.Image{
 		Registry:   "723255503624.dkr.ecr.us-east-1.amazonaws.com",
 		Repository: "ship-it",
 		Tag:        "shipped",
