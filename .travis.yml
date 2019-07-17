@@ -30,10 +30,10 @@ jobs:
     - stage: Test and Lint
       name: Go
       install: go get "github.com/golangci/golangci-lint/cmd/golangci-lint"
-      script: 
+      script:
         - golangci-lint run -D errcheck -E goimports -E interfacer ./...
         - go test ./...
-    
+
     - stage: Test and Lint
       name: JavaScript
       script: cd web && npm install -D && npm run lint && npm run test
@@ -44,7 +44,7 @@ jobs:
         - curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh
         - chmod 700 get_helm.sh && sudo ./get_helm.sh
         - helm init --client-only
-        - helm lint deploy/ship-it
+        - helm lint deploy/...
 
     - stage: Push
       name: Push

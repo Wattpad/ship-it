@@ -5,6 +5,9 @@ build:
   - image: ship-it-api
     docker:
       dockerfile: cmd/ship-it-api/Dockerfile
+  - image: ship-it-syncd
+    docker:
+      dockerfile: cmd/ship-it-syncd/Dockerfile
 deploy:
   helm:
     releases:
@@ -12,9 +15,12 @@ deploy:
       chartPath: deploy/ship-it
       values:
         api.image.repository: ship-it-api
+        syncd.image.repository: ship-it-syncd
       setValues:
         api.image.tag: "" # allow skaffold to inject the tag
         api.image.pullPolicy: Never # use minikube's local docker
+        syncd.image.tag: ""
+        syncd.image.pullPolicy: Never
         devEnv.DOGSTATSD_PORT: 8125
         devEnv.DOGSTATSD_HOST: localhost
     - name: localstack
