@@ -84,7 +84,7 @@ class SingleGridCell extends React.Component {
                 {deployDate.toDateString()}
               </div>
               <div className='row-align'>
-                <SelectionDialog source={this.props.SingleGridCellData.code.github} chart={urljoin(this.props.SingleGridCellData.artifacts.chart.repository, this.props.SingleGridCellData.artifacts.chart.path)}/>
+                <SelectionDialog source={this.props.SingleGridCellData.code.github} chart={urljoin('http://' + this.props.SingleGridCellData.artifacts.chart.repository, this.props.SingleGridCellData.artifacts.chart.path)}/>
                 <IconButton onClick={this.slackClicked}>
                   <img src={SlackIcon} width="32" height="32" alt={imgAlt} />
                 </IconButton>
