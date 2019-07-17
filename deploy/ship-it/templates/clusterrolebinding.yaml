@@ -1,0 +1,14 @@
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ template "ship-it.fullname" . }}
+  labels:
+    {{ include "ship-it.metadataLabels" . | nindent 2 | trim}}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ template "ship-it.fullname" . }}-readonly
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "ship-it.fullname" . }}-api
+    namespace: default

@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "ship-it.fullname" . }}-api
+  labels:
+    {{ include "ship-it.metadataLabels" . | nindent 2 | trim }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ template "ship-it.name" . }}
+      instance: {{ .Release.Name }}
+      role: api
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+  template:
+    metadata:
+      annotations:
+        iam.amazonaws.com/role: {{ template "ship-it.name" . }}
+      labels:
+        {{ include "ship-it.metadataLabels" . | nindent 6 | trim }}
+        role: api
+    spec:
+      serviceAccountName: {{ template "ship-it.fullname" . }}-api
+      containers:
+      - name: {{ template "ship-it.fullname" . }}
+        image: {{ include "ship-it.api.image" . }}
+        imagePullPolicy: {{ .Values.api.image.pullPolicy }}
+        envFrom:
+          - secretRef:
+              name: {{ .Values.api.secretName }}
+        env:
+        - name: AWS_REGION
+          value: {{ .Values.awsRegion }}
+        {{ if .Values.github }}
+        - name: GITHUB_ORG
+          value: {{ .Values.github.org }}
+        {{- end}}
+        {{- range $name, $value := .Values.devEnv }}
+        - name: {{ $name }}
+          value: {{ $value | quote }}
+        {{- end }}
+        ports:
+          - containerPort: {{ .Values.api.containerPort }}
+            name: http
+        resources:
+          {{ toYaml .Values.resources | nindent 10 | trim }}
+        volumeMounts:
+          - mountPath: {{ .Values.sslCertPath }}
+            name: aws-cert
+      volumes:
+        - name: aws-cert
+          hostPath:
+            path: {{ .Values.sslCertPath }}
