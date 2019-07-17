@@ -1,0 +1,23 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ template "ship-it.fullname" . }}-readonly
+  labels:
+    {{ include "ship-it.metadataLabels" . | nindent 2 | trim }}
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - deployments
+  - pods
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - k8s.wattpad.com
+  resources:
+  - helmreleases
+  verbs:
+  - get
+  - list
+  - watch
