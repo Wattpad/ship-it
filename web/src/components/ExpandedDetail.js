@@ -78,7 +78,7 @@ class ExpandedDetail extends React.Component {
     return (
       <div>
         {
-          this.props.data ? 
+          this.props.data ?
             <div>
               <div className="flex-container">
                 <div className="helm-status">
@@ -86,7 +86,7 @@ class ExpandedDetail extends React.Component {
                     <img src={HelmIcon} width="32" height="32" alt={imgAlt} />
                   </div>
                   <div>
-                    <Typography variant="h6">{this.props.data.artifacts.chart.version}</Typography>
+                    <Typography variant="h6">{this.props.data.artifacts.chart.path}@{this.props.data.artifacts.chart.version}</Typography>
                   </div>
                 </div>
 
@@ -161,7 +161,7 @@ class ExpandedDetail extends React.Component {
                     <Collapse in={this.state.podsVisible} timeout='auto' unmountOnExit>
                       <List component="div" disablePadding>
                         {
-                          this.state.pods ? 
+                          this.state.pods ?
                           <div>
                             {
                               this.state.pods.map((pod) =>
@@ -182,10 +182,10 @@ class ExpandedDetail extends React.Component {
                     <Collapse in={this.state.resourcesVisible} timeout='auto' unmountOnExit>
                       <List component="div" disablePadding>
                         {
-                          this.state.resources ? 
+                          this.state.resources ?
                           <div>
                             {
-                              this.state.resources.map((resource) => 
+                              this.state.resources.map((resource) =>
                                 <ListItem style={nestedStyle} key={resource.kind}>
                                   <ListItemText>{resource.kind}</ListItemText>
                                 </ListItem>
