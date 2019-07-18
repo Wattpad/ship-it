@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/url"
-	"strconv"
 	"strings"
 	"time"
 
@@ -61,7 +60,7 @@ func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
 
 	releases := make([]models.Release, 0, len(releaseList))
 	for _, r := range releaseList {
-		annotations := r.GetAnnotations()
+		annotations := helmReleaseAnnotations(r.GetAnnotations())
 
 		gitRepo, err := findVCSRepo(annotations.Code())
 		if err != nil {
@@ -97,7 +96,7 @@ func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
 				Sumologic: annotations.Sumologic(),
 			},
 			Code: models.SourceCode{
-				Github: annotations.Code(),
+				Github: gitRepo,
 				Ref:    tag,
 			},
 			Artifacts: models.Artifacts{
