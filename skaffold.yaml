@@ -5,6 +5,9 @@ build:
   - image: ship-it-api
     docker:
       dockerfile: cmd/ship-it-api/Dockerfile
+  - image: ship-it-syncd
+    docker:
+      dockerfile: cmd/ship-it-syncd/Dockerfile
 deploy:
   helm:
     releases:
@@ -12,10 +15,19 @@ deploy:
       chartPath: deploy/ship-it
       values:
         api.image.repository: ship-it-api
+        syncd.image.repository: ship-it-syncd
       setValues:
         api.image.tag: "" # allow skaffold to inject the tag
         api.image.pullPolicy: Never # use minikube's local docker
+        syncd.image.tag: ""
+        syncd.image.pullPolicy: Never
         devEnv.DOGSTATSD_PORT: 8125
         devEnv.DOGSTATSD_HOST: localhost
+        devEnv.ECR_QUEUE: foo
+        devEnv.GITHUB_TOKEN: foo
+        devEnv.GITHUB_QUEUE: foo
+        devEnv.NAMESPACE: default
+        devEnv.RELEASE_NAME: ship-it
+        devEnv.HELM_TIMEOUT_SECONDS: 30
     - name: localstack
       chartPath: deploy/localstack

@@ -21,6 +21,20 @@ api:
   containerPort: 80
   servicePort: 80
 
+syncd:
+  image:
+    repository: 723255503624.dkr.ecr.us-east-1.amazonaws.com/ship-it-syncd
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+      limits:
+        cpu: 1
+        memory: 1Gi
+
 github:
   org: "Wattpad"
   token: "foobarbaz"
