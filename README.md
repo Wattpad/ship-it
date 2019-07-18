@@ -3,3 +3,44 @@
 <img src="https://media.giphy.com/media/143vPc6b08locw/giphy.gif" width="300">
 
 _Ship-it_ is Wattpad's tool for continuously deploying code.
+
+## Local Development
+
+This project uses skaffold for local development and testing. To get started,
+you'll need to install these tools locally:
+
+* helm: https://github.com/helm/helm
+* minikube: https://github.com/kubernetes/minikube
+* skaffold: https://github.com/GoogleContainerTools/skaffold
+
+1. Start minikube cluster
+
+```bash
+$ minikube start
+```
+
+2. Update kubectl's cluster context
+
+```bash
+$ minikube update-context
+$ kubectl config current-context
+minikube
+```
+
+3. Install tiller in minikube
+
+```bash
+$ helm init
+```
+
+4. Run skaffold in development mode
+
+```bash
+$ skaffold dev
+```
+
+5. Get the service address
+
+```bash
+minikube service ship-it-api
+```

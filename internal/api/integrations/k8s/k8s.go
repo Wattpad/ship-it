@@ -14,7 +14,6 @@ import (
 	clientset "ship-it/pkg/generated/clientset/versioned"
 	informers "ship-it/pkg/generated/informers/externalversions"
 
-	"ship-it/pkg/apis/k8s.wattpad.com/v1alpha1"
 	listerv1alpha1 "ship-it/pkg/generated/listers/k8s.wattpad.com/v1alpha1"
 
 	"github.com/go-kit/kit/log"
@@ -54,10 +53,6 @@ func New(ctx context.Context, resync time.Duration, logger log.Logger) (*K8sClie
 	}, nil
 }
 
-func annotationFor(k string) string {
-	return v1alpha1.Resource("helmreleases").String() + "/" + k
-}
-
 func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
 	releaseList, err := k.lister.HelmReleases(namespace).List(labels.Everything())
 	if err != nil {
@@ -68,15 +63,7 @@ func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
 	for _, r := range releaseList {
 		annotations := r.GetAnnotations()
 
-		autoDeployStr := annotations[annotationFor("autodeploy")]
-		autoDeploy, err := strconv.ParseBool(autoDeployStr)
-		if err != nil {
-			errors.Wrapf(err, `unable to parse "%s" as boolean`, autoDeployStr)
-			k.logger.Log("error", err)
-		}
-
-		codeURL := annotations[annotationFor("code")]
-		gitRepo, err := findVCSRepo(codeURL)
+		gitRepo, err := findVCSRepo(annotations.Code())
 		if err != nil {
 			k.logger.Log("error", err)
 		}
@@ -98,25 +85,26 @@ func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
 		releases = append(releases, models.Release{
 			Name:       releaseName,
 			Created:    r.GetCreationTimestamp().Time,
-			AutoDeploy: autoDeploy,
+			AutoDeploy: annotations.AutoDeploy(),
 			Owner: models.Owner{
-				Squad: annotations[annotationFor("squad")],
-				Slack: annotations[annotationFor("slack")],
+				Squad: annotations.Squad(),
+				Slack: annotations.Slack(),
 			},
 			Monitoring: models.Monitoring{
 				Datadog: models.Datadog{
-					Dashboard: annotations[annotationFor("datadog")],
+					Dashboard: annotations.Datadog(),
 				},
-				Sumologic: annotations[annotationFor("sumologic")],
+				Sumologic: annotations.Sumologic(),
 			},
 			Code: models.SourceCode{
-				Github: gitRepo,
+				Github: annotations.Code(),
 				Ref:    tag,
 			},
 			Artifacts: models.Artifacts{
 				Chart: models.HelmArtifact{
-					Path:    r.Spec.Chart.Path,
-					Version: r.Spec.Chart.Revision,
+					Path:       r.Spec.Chart.Path,
+					Repository: r.Spec.Chart.Repository,
+					Version:    r.Spec.Chart.Revision,
 				},
 				Docker: models.DockerArtifact{
 					Image: repository,

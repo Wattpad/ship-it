@@ -13,6 +13,7 @@ import DockerIcon from '../assets/docker_icon.png'
 import StatusChip from './StatusChip';
 import SlackInfoDialog from './SlackInfoDialog';
 import ImageInfoDialog from './ImageInfoDialog';
+import urljoin from 'url-join'
 
 const imgAlt = "not found"
 
@@ -83,7 +84,7 @@ class SingleGridCell extends React.Component {
                 {deployDate.toDateString()}
               </div>
               <div className='row-align'>
-                <SelectionDialog source={this.props.SingleGridCellData.code.github} chart={this.props.SingleGridCellData.artifacts.chart.path}/>
+                <SelectionDialog source={this.props.SingleGridCellData.code.github} chart={urljoin(this.props.SingleGridCellData.artifacts.chart.repository, this.props.SingleGridCellData.artifacts.chart.path)}/>
                 <IconButton onClick={this.slackClicked}>
                   <img src={SlackIcon} width="32" height="32" alt={imgAlt} />
                 </IconButton>
