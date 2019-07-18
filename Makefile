@@ -20,23 +20,8 @@ push: build
 	docker push $(REGISTRY)/$(TARGET_IMAGE)
 	docker push $(REGISTRY)/$(LATEST_IMAGE)
 
-run: build
-	docker run -p 8080:80 \
-	    -e AWS_REGION="us-east-1" \
-	    -e QUEUE_NAME="foo" \
-	    -e DOGSTATSD_HOST="localhost" \
-	    -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
-	    -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
-	    -e AWS_SECURITY_TOKEN=${AWS_SECURITY_TOKEN} \
-	    -e AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN} \
-	    -e GITHUB_TOKEN="fake" \
-	    -e GITHUB_ORG="Wattpad" \
-	    -e RESOURCE_PATH="custom-resources" \
-	    -e RELEASE_BRANCH="master" \
-	    $(shell docker images -q $(TARGET) | head -n 1)
-
 # empty target
-internal/models/*.go:
+internal/api/models/*.go:
 
 # api docs should be rebuilt when model code changes
 api/*.json: internal/api/models/*.go

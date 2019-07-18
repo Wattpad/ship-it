@@ -52,6 +52,7 @@ type DockerArtifact struct {
 }
 
 type HelmArtifact struct {
-	Path    string `json:"path" jsonschema:"format=uri"`
-	Version string `json:"version" jsonschema:"example=1.2.3"`
+	Path       string `json:"path" jsonschema:"format=uri"`
+	Repository string `json:"repository" jsonschema:"format=uri"`
+	Version    string `json:"version" jsonschema:"example=1.2.3"`
 }
