@@ -67,21 +67,36 @@ func TestGetImageForRepo(t *testing.T) {
 }
 
 func TestFindRepo(t *testing.T) {
-	tests := []struct {
+
+	type testCase struct {
 		input    string
 		expected string
-	}{
-		{"https://github.com/Wattpad/highlander/tree/master/wattpad/src/services/word-counts", "highlander"},
-		{"https://github.com/Wattpad/miranda/", "miranda"},
-		{"https://github.com/Wattpad/", ""},
-		{"https://github.com/Wattpad", ""},
 	}
-	for _, test := range tests {
-		repo, err := findVCSRepo(test.input)
-		if err == nil {
-			assert.Equal(t, test.expected, *repo)
-		} else {
-			assert.Error(t, err)
-		}
+
+	tests := map[string]testCase{
+		"valid repo with extra content appended": {
+			"https://github.com/Wattpad/highlander/tree/master/wattpad/src/services/word-counts",
+			"highlander",
+		},
+		"valid with repo with no extra content": {
+			"https://github.com/Wattpad/miranda/",
+			"miranda",
+		},
+		"no repo with trailing /": {
+			"https://github.com/Wattpad/",
+			"",
+		},
+		"no repo without trailing /": {
+			"https://github.com/Wattpad",
+			"",
+		},
 	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			repo, _ := findVCSRepo(test.input)
+			assert.Equal(t, test.expected, repo)
+		})
+	}
+
 }

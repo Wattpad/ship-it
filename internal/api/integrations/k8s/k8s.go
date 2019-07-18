@@ -71,7 +71,7 @@ func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
 		autoDeployStr := annotations[annotationFor("autodeploy")]
 		autoDeploy, err := strconv.ParseBool(autoDeployStr)
 		if err != nil {
-			errors.Wrapf(err, `Unable to parse "%s" as boolean`, autoDeployStr)
+			errors.Wrapf(err, `unable to parse "%s" as boolean`, autoDeployStr)
 			k.logger.Log("error", err)
 		}
 
@@ -86,6 +86,13 @@ func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
 		image, err := GetImageForRepo(releaseName, r.Spec.Values)
 		if err != nil {
 			k.logger.Log("error", err)
+		}
+
+		repository := ""
+		tag := ""
+		if image != nil {
+			repository = image.Repository
+			tag = image.Tag
 		}
 
 		releases = append(releases, models.Release{
@@ -103,8 +110,8 @@ func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
 				Sumologic: annotations[annotationFor("sumologic")],
 			},
 			Code: models.SourceCode{
-				Github: *gitRepo,
-				Ref:    image.Tag,
+				Github: gitRepo,
+				Ref:    tag,
 			},
 			Artifacts: models.Artifacts{
 				Chart: models.HelmArtifact{
@@ -112,37 +119,36 @@ func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
 					Version: r.Spec.Chart.Revision,
 				},
 				Docker: models.DockerArtifact{
-					Image: image.Repository,
-					Tag:   image.Tag,
+					Image: repository,
+					Tag:   tag,
 				},
 			},
 		})
 	}
-
 	return releases, nil
 }
 
-func findVCSRepo(addr string) (*string, error) {
+func findVCSRepo(addr string) (string, error) {
 	address, err := url.Parse(addr)
 	if err != nil {
-		return nil, err
+		return "", errors.Wrap(err, "url parsing failure")
 	}
 	arr := strings.Split(address.Path, "/")
 	if len(arr) > 2 {
-		return &arr[2], nil
+		return arr[2], nil
 	}
-	return nil, fmt.Errorf("")
+	return "", fmt.Errorf("no repository found")
 }
 
 func GetImageForRepo(repo string, vals map[string]interface{}) (*internal.Image, error) {
 	arr := internal.GetImagePath(vals, repo)
 	if len(arr) == 0 {
-		return nil, fmt.Errorf("Image not found")
+		return nil, fmt.Errorf("image not found")
 	}
 	imgVals := internal.Table(vals, arr)
 	img, err := internal.ParseImage(imgVals["repository"].(string), imgVals["tag"].(string))
 	if err != nil {
-		return nil, fmt.Errorf("invalid image: %v", err)
+		return nil, errors.Wrap(err, "invalid image")
 	}
 	return img, nil
 }
