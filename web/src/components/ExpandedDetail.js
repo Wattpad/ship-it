@@ -42,10 +42,6 @@ const linkTheme = createMuiTheme({
   }
 })
 
-const nestedStyle = {
-  paddingLeft: theme.spacing(4)
-}
-
 const imgAlt = 'not found'
 
 class ExpandedDetail extends React.Component {
@@ -54,7 +50,6 @@ class ExpandedDetail extends React.Component {
     super(props)
     this.state = {
       podsVisible: false,
-      resourcesVisible: false,
       resourceString: ""
     }
   }
