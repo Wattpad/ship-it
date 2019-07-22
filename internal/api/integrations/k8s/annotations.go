@@ -6,7 +6,7 @@ import (
 
 func annotationFor(k string) string {
 	// FIXME this should be dynamic
-	return "helmrelease.shipit.wattpad.com/" + k
+	return "helmreleases.shipit.wattpad.com/" + k
 }
 
 type helmReleaseAnnotations map[string]string
