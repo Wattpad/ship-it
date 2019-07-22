@@ -23,6 +23,7 @@ func New(ctx context.Context, resync time.Duration) (*K8sClient, error) {
 	shipitv1beta1.AddToScheme(scheme)
 
 	config, err := rest.InClusterConfig()
+
 	if err != nil {
 		return nil, err
 	}
@@ -30,6 +31,10 @@ func New(ctx context.Context, resync time.Duration) (*K8sClient, error) {
 	cl, err := client.New(config, client.Options{
 		Scheme: scheme,
 	})
+
+	if err != nil {
+		return nil, err
+	}
 
 	return &K8sClient{
 		client: cl,
