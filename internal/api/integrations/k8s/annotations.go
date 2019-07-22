@@ -2,12 +2,11 @@ package k8s
 
 import (
 	"strconv"
-
-	"ship-it/pkg/apis/k8s.wattpad.com/v1alpha1"
 )
 
 func annotationFor(k string) string {
-	return v1alpha1.Resource("helmreleases").String() + "/" + k
+	// FIXME this should be dynamic
+	return "helmrelease.shipit.wattpad.com/" + k
 }
 
 type helmReleaseAnnotations map[string]string
