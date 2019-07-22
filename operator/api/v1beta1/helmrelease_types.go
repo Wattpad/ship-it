@@ -47,6 +47,7 @@ type ChartSpec struct {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:resource:path=helmreleases,shortName=rls
 
 // HelmRelease is the Schema for the helmreleases API
 type HelmRelease struct {

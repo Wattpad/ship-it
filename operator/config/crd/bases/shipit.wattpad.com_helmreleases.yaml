@@ -10,7 +10,9 @@ spec:
   names:
     kind: HelmRelease
     plural: helmreleases
-  scope: ""
+    shortNames:
+    - rls
+  scope: Namespaced
   validation:
     openAPIV3Schema:
       description: HelmRelease is the Schema for the helmreleases API
