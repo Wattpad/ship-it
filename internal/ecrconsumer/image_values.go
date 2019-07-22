@@ -97,21 +97,20 @@ func cleanUpMapValue(v interface{}) interface{} {
 	}
 }
 
-func WithImage(img internal.Image, r shipitv1beta1.HelmRelease) shipitv1beta1.HelmRelease {
+func WithImage(img internal.Image, r shipitv1beta1.HelmRelease) (shipitv1beta1.HelmRelease, error) {
 	copy := r.DeepCopy()
 
 	var values map[string]interface{}
-
-	// FIXME handle error
-	json.Unmarshal(copy.Spec.Values.Raw, &values)
+	err := json.Unmarshal(copy.Spec.Values.Raw, &values)
+	if err != nil {
+		return shipitv1beta1.HelmRelease{}, err
+	}
 
 	cleanMap := cleanUpStringMap(values)
-
 	update(cleanMap, img)
 
 	newJSON, _ := json.Marshal(cleanMap)
-
 	copy.Spec.Values.Raw = newJSON
 
-	return *copy
+	return *copy, nil
 }
