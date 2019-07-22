@@ -34,14 +34,8 @@ func New(bucketName string, dl downloaderAPI) (*Downloader, error) {
 }
 
 func (dl *Downloader) Download(key string) ([]byte, error) {
-
 	buff := aws.NewWriteAtBuffer([]byte{})
 
-	//f, err := os.Create("tempChart")
-	//if err != nil {
-	//	return nil, errors.Wrap(err, "temporary file creation failed")
-	//}
-	//
 	_, err := dl.d.Download(buff, &s3.GetObjectInput{
 		Bucket: aws.String(dl.Bucket),
 		Key: aws.String(key),
@@ -50,13 +44,6 @@ func (dl *Downloader) Download(key string) ([]byte, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "chart download failed")
 	}
-	//
-	//fileBytes := make([]byte, n)
-	//_, err = f.Read(fileBytes)
-	//
-	//if err != nil {
-	//	return nil, errors.Wrap(err, "conversion to bytes failed")
-	//}
 
-	return nil, nil
+	return buff.Bytes(), nil
 }
