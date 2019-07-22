@@ -1,6 +1,7 @@
 package downloader
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"testing"
@@ -16,19 +17,9 @@ type mockS3 struct {
 	mock.Mock
 }
 
-func (m *mockS3) Download(w io.WriterAt, input *s3.GetObjectInput, options ...func(*s3manager.Downloader)) (n int64, err error) {
-	args := m.Called(w, input)
-	return int64(args.Int(0)), args.Error(1)
-}
-
 func (m *mockS3) DownloadWithContext(ctx aws.Context, w io.WriterAt, input *s3.GetObjectInput, options ...func(*s3manager.Downloader)) (n int64, err error) {
 	args := m.Called(ctx, w, input)
 	return int64(args.Int(0)), args.Error(1)
-}
-
-func (m *mockS3) DownloadWithIterator(ctx aws.Context, iter s3manager.BatchDownloadIterator, opts ...func(*s3manager.Downloader)) error {
-	args := m.Called(ctx, iter)
-	return args.Error(0)
 }
 
 func TestNewDownloader(t *testing.T) {
@@ -48,15 +39,16 @@ func TestNewDownloader(t *testing.T) {
 
 func TestDownloadSuccess(t *testing.T) {
 	mockD := &mockS3{}
+	fakeCtx := context.Background()
 	dl, err := New("foo", mockD)
 	assert.NoError(t, err)
 
-	mockD.On("Download", mock.AnythingOfType("*aws.WriteAtBuffer"), &s3.GetObjectInput{
+	mockD.On("DownloadWithContext", fakeCtx, mock.AnythingOfType("*aws.WriteAtBuffer"), &s3.GetObjectInput{
 		Bucket: aws.String(dl.Bucket),
 		Key:    aws.String("/some-chart"),
 	}).Return(0, nil)
 
-	outBytes, err := dl.Download("/some-chart")
+	outBytes, err := dl.Download("/some-chart", fakeCtx)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, outBytes)
@@ -65,15 +57,16 @@ func TestDownloadSuccess(t *testing.T) {
 
 func TestDownloadFailure(t *testing.T) {
 	mockD := &mockS3{}
+	fakeCtx := context.Background()
 	dl, err := New("foo", mockD)
 	assert.NoError(t, err)
 
-	mockD.On("Download", mock.AnythingOfType("*aws.WriteAtBuffer"), &s3.GetObjectInput{
+	mockD.On("DownloadWithContext", fakeCtx, mock.AnythingOfType("*aws.WriteAtBuffer"), &s3.GetObjectInput{
 		Bucket: aws.String(dl.Bucket),
 		Key:    aws.String("/some-chart"),
 	}).Return(0, fmt.Errorf("some download error"))
 
-	outBytes, err := dl.Download("/some-chart")
+	outBytes, err := dl.Download("/some-chart", fakeCtx)
 
 	assert.Error(t, err)
 	assert.Nil(t, outBytes)

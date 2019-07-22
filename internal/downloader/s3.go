@@ -12,9 +12,7 @@ import (
 )
 
 type downloaderAPI interface {
-	Download(w io.WriterAt, input *s3.GetObjectInput, options ...func(*s3manager.Downloader)) (n int64, err error)
 	DownloadWithContext(ctx aws.Context, w io.WriterAt, input *s3.GetObjectInput, options ...func(*s3manager.Downloader)) (n int64, err error)
-	DownloadWithIterator(ctx aws.Context, iter s3manager.BatchDownloadIterator, opts ...func(*s3manager.Downloader)) error
 }
 
 type Downloader struct {
@@ -33,10 +31,10 @@ func New(bucketName string, dl downloaderAPI) (*Downloader, error) {
 	}, nil
 }
 
-func (dl *Downloader) Download(key string) ([]byte, error) {
+func (dl *Downloader) Download(key string, ctx aws.Context) ([]byte, error) {
 	buff := aws.NewWriteAtBuffer([]byte{})
 
-	_, err := dl.d.Download(buff, &s3.GetObjectInput{
+	_, err := dl.d.DownloadWithContext(ctx, buff, &s3.GetObjectInput{
 		Bucket: aws.String(dl.Bucket),
 		Key:    aws.String(key),
 	})
@@ -44,6 +42,8 @@ func (dl *Downloader) Download(key string) ([]byte, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "chart download failed")
 	}
+
+	// add chart loading here
 
 	return buff.Bytes(), nil
 }
