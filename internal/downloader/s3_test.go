@@ -18,7 +18,6 @@ type mockS3 struct {
 
 func (m *mockS3) Download(w io.WriterAt, input *s3.GetObjectInput, options ...func(*s3manager.Downloader)) (n int64, err error) {
 	args := m.Called(w, input)
-	w.WriteAt([]byte("this is some bytes"), 0)
 	return int64(args.Int(0)), args.Error(1)
 }
 
