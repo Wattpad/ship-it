@@ -4,7 +4,7 @@ kind: HelmRelease
 metadata:
   name: example-microservice
   annotations:
-    helmreleases.shipit.wattpad.com/autodeploy: true
+    helmreleases.shipit.wattpad.com/autodeploy: "true"
     helmreleases.shipit.wattpad.com/code: "https://github.com/Wattpad/highlander/tree/master/wattpad/src/services/foo"
     helmreleases.shipit.wattpad.com/datadog: "https://app.datadoghq.com/dashboard/a8k-ro2zk-k8a"
     helmreleases.shipit.wattpad.com/slack: "#squad-velocity"
