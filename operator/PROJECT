@@ -1,5 +1,5 @@
 version: "2"
-domain: wattpadhq.com
+domain: wattpad.com
 repo: ship-it
 resources:
 - group: shipit

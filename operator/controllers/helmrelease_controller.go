@@ -32,8 +32,8 @@ type HelmReleaseReconciler struct {
 	Log logr.Logger
 }
 
-// +kubebuilder:rbac:groups=shipit.wattpadhq.com,resources=helmreleases,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=shipit.wattpadhq.com,resources=helmreleases/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=shipit.wattpad.com,resources=helmreleases,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=shipit.wattpad.com,resources=helmreleases/status,verbs=get;update;patch
 
 func (r *HelmReleaseReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
@@ -50,7 +50,7 @@ func (r *HelmReleaseReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 		return ctrl.Result{}, err
 	}
 
-	log.Info("This is where our logic goes :D", "name", helmRelease.ObjectMeta.Name)
+	log.Info("Make things happen", "test", helmRelease.Spec)
 
 	return ctrl.Result{}, nil
 }

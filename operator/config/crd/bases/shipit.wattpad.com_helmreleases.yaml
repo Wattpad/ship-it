@@ -4,9 +4,9 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   creationTimestamp: null
-  name: helmreleases.shipit.wattpadhq.com
+  name: helmreleases.shipit.wattpad.com
 spec:
-  group: shipit.wattpadhq.com
+  group: shipit.wattpad.com
   names:
     kind: HelmRelease
     plural: helmreleases
@@ -384,6 +384,28 @@ spec:
               type: string
           type: object
         spec:
+          properties:
+            chart:
+              properties:
+                path:
+                  type: string
+                repository:
+                  type: string
+                revision:
+                  type: string
+              required:
+              - repository
+              - path
+              - revision
+              type: object
+            releaseName:
+              type: string
+            values:
+              type: object
+          required:
+          - releaseName
+          - chart
+          - values
           type: object
         status:
           type: object

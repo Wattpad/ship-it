@@ -1,7 +1,32 @@
-apiVersion: shipit.wattpadhq.com/v1beta1
+---
+apiVersion: shipit.wattpad.com/v1beta1
 kind: HelmRelease
 metadata:
-  name: helmrelease-sample
+  name: example-microservice
+  annotations:
+    helmreleases.k8s.wattpad.com/autodeploy: true
+    helmreleases.k8s.wattpad.com/code: "https://github.com/Wattpad/highlander/tree/master/wattpad/src/services/foo"
+    helmreleases.k8s.wattpad.com/datadog: "https://app.datadoghq.com/dashboard/a8k-ro2zk-k8a"
+    helmreleases.k8s.wattpad.com/slack: "#squad-velocity"
+    helmreleases.k8s.wattpad.com/squad: velocity
+    helmreleases.k8s.wattpad.com/sumologic: "https://service.us2.sumologic.com/ui/#/search/ufB9zZJ5iFYRyHOMkJwMvZW7lu32v5xHOYNLURhf"
 spec:
-  # Add fields here
-  foo: bar
+  releaseName: example-release
+
+  chart:
+    repository: wattpad.s3.amazonaws.com/helm-charts
+    path: microservice
+    revision: HEAD
+
+  values:
+    image:
+      repository: dkr.ecr.amazonaws.com/foo
+      tag: foo
+
+    iamRoleName: foo
+    serviceAccountName: foo
+
+    autoscaler:
+      minPods: 1
+      maxPods: 2
+      targetCPUUtilizationPercent: 80

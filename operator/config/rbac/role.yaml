@@ -7,7 +7,7 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
-  - shipit.wattpadhq.com
+  - shipit.wattpad.com
   resources:
   - helmreleases
   verbs:
@@ -19,7 +19,7 @@ rules:
   - patch
   - delete
 - apiGroups:
-  - shipit.wattpadhq.com
+  - shipit.wattpad.com
   resources:
   - helmreleases/status
   verbs:

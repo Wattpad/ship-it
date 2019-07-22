@@ -17,6 +17,7 @@ package v1beta1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	runtime "k8s.io/apimachinery/pkg/runtime"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -26,12 +27,23 @@ import (
 type HelmReleaseSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+
+	ReleaseName string               `json:"releaseName"`
+	Chart       ChartSpec            `json:"chart"`
+	Values      runtime.RawExtension `json:"values"`
 }
 
 // HelmReleaseStatus defines the observed state of HelmRelease
 type HelmReleaseStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+}
+
+// ChartSpec defines the desired Helm chart
+type ChartSpec struct {
+	Repository string `json:"repository"`
+	Path       string `json:"path"`
+	Revision   string `json:"revision"`
 }
 
 // +kubebuilder:object:root=true
