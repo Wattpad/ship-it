@@ -1,11 +1,9 @@
 package downloader
 
 import (
+	"fmt"
 	"io"
-	"io/ioutil"
-	"os"
 	"testing"
-
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -20,12 +18,13 @@ type mockS3 struct {
 
 func (m *mockS3) Download(w io.WriterAt, input *s3.GetObjectInput, options ...func(*s3manager.Downloader)) (n int64, err error) {
 	args := m.Called(w, input)
-	return args.Get(0).(int64), args.Error(1)
+	w.WriteAt([]byte("this is some bytes"), 0)
+	return int64(args.Int(0)), args.Error(1)
 }
 
 func (m *mockS3) DownloadWithContext(ctx aws.Context, w io.WriterAt, input *s3.GetObjectInput, options ...func(*s3manager.Downloader)) (n int64, err error) {
 	args := m.Called(ctx, w, input)
-	return args.Get(0).(int64), args.Error(1)
+	return int64(args.Int(0)), args.Error(1)
 }
 
 func (m *mockS3) DownloadWithIterator(ctx aws.Context, iter s3manager.BatchDownloadIterator, opts ...func(*s3manager.Downloader)) error {
@@ -48,12 +47,36 @@ func TestNewDownloader(t *testing.T) {
 	})
 }
 
-func TestDownload(t *testing.T) {
-	s3Downloader := &mockS3{}
-	dl, err := New("foo", s3Downloader)
+func TestDownloadSuccess(t *testing.T) {
+	mockD := &mockS3{}
+	dl, err := New("foo", mockD)
 	assert.NoError(t, err)
 
-	t.Run("download failure", func(t *testing.T) {
+	mockD.On("Download", mock.AnythingOfType("*aws.WriteAtBuffer"), &s3.GetObjectInput{
+		Bucket: aws.String(dl.Bucket),
+		Key:    aws.String("/some-chart"),
+	}).Return(0, nil)
 
-	})
+	outBytes, err := dl.Download("/some-chart")
+
+	assert.NoError(t, err)
+	assert.NotNil(t, outBytes)
+	mockD.AssertExpectations(t)
+}
+
+func TestDownloadFailure(t *testing.T) {
+	mockD := &mockS3{}
+	dl, err := New("foo", mockD)
+	assert.NoError(t, err)
+
+	mockD.On("Download", mock.AnythingOfType("*aws.WriteAtBuffer"), &s3.GetObjectInput{
+		Bucket: aws.String(dl.Bucket),
+		Key:    aws.String("/some-chart"),
+	}).Return(0, fmt.Errorf("some download error"))
+
+	outBytes, err := dl.Download("/some-chart")
+
+	assert.Error(t, err)
+	assert.Nil(t, outBytes)
+	mockD.AssertExpectations(t)
 }

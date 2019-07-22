@@ -19,7 +19,7 @@ type downloaderAPI interface {
 
 type Downloader struct {
 	Bucket string
-	d downloaderAPI
+	d      downloaderAPI
 }
 
 func New(bucketName string, dl downloaderAPI) (*Downloader, error) {
@@ -29,7 +29,7 @@ func New(bucketName string, dl downloaderAPI) (*Downloader, error) {
 
 	return &Downloader{
 		Bucket: bucketName,
-		d: dl,
+		d:      dl,
 	}, nil
 }
 
@@ -38,7 +38,7 @@ func (dl *Downloader) Download(key string) ([]byte, error) {
 
 	_, err := dl.d.Download(buff, &s3.GetObjectInput{
 		Bucket: aws.String(dl.Bucket),
-		Key: aws.String(key),
+		Key:    aws.String(key),
 	})
 
 	if err != nil {
