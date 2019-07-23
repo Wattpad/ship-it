@@ -98,5 +98,4 @@ func TestFindRepo(t *testing.T) {
 			assert.Equal(t, test.expected, repo)
 		})
 	}
-
 }

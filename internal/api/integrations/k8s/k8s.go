@@ -69,16 +69,6 @@ func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
 
 		releaseName := r.GetName()
 
-		image, err := GetImageForRepo(releaseName, r.Spec.Values)
-		if err != nil {
-			k.logger.Log("error", err)
-		}
-
-		var tag string
-		if image != nil {
-			tag = image.Tag
-		}
-
 		releases = append(releases, models.Release{
 			Name:       releaseName,
 			Created:    r.GetCreationTimestamp().Time,
@@ -95,17 +85,13 @@ func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
 			},
 			Code: models.SourceCode{
 				Github: gitRepo,
-				Ref:    tag,
+				Ref:    "",
 			},
 			Artifacts: models.Artifacts{
 				Chart: models.HelmArtifact{
 					Path:       r.Spec.Chart.Path,
 					Repository: r.Spec.Chart.Repository,
 					Version:    r.Spec.Chart.Revision,
-				},
-				Docker: models.DockerArtifact{
-					Image: image.URI(),
-					Tag:   tag,
 				},
 			},
 		})
