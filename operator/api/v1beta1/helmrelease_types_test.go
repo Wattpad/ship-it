@@ -21,6 +21,7 @@ import (
 
 	"golang.org/x/net/context"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	runtime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 )
 
@@ -57,7 +58,19 @@ var _ = Describe("HelmRelease", func() {
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo",
 					Namespace: "default",
-				}}
+				},
+				Spec: HelmReleaseSpec{
+					ReleaseName: "test",
+					Chart: ChartSpec{
+						Repository: "blah",
+						Path:       "blah",
+						Revision:   "blah",
+					},
+					Values: runtime.RawExtension{
+						Raw: []byte(`{"test":1}`),
+					},
+				},
+			}
 
 			By("creating an API obj")
 			Expect(k8sClient.Create(context.TODO(), created)).To(Succeed())
