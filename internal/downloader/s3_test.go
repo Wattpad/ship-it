@@ -46,7 +46,7 @@ func TestDownloadSuccess(t *testing.T) {
 	mockD.On("DownloadWithContext", fakeCtx, mock.AnythingOfType("*aws.WriteAtBuffer"), &s3.GetObjectInput{
 		Bucket: aws.String(dl.Bucket),
 		Key:    aws.String("/some-chart"),
-	}).Return(0, nil).Run(func (args mock.Arguments) {
+	}).Return(0, nil).Run(func(args mock.Arguments) {
 		w := args.Get(1).(*aws.WriteAtBuffer)
 		w.WriteAt(chartBytes, 0)
 	})
@@ -62,7 +62,7 @@ func TestDownloadSuccess(t *testing.T) {
 func TestDownloadFailure(t *testing.T) {
 	mockD := &mockS3{}
 	fakeCtx := context.Background()
-	dl:= New("foo", mockD)
+	dl := New("foo", mockD)
 
 	mockD.On("DownloadWithContext", fakeCtx, mock.AnythingOfType("*aws.WriteAtBuffer"), &s3.GetObjectInput{
 		Bucket: aws.String(dl.Bucket),
@@ -90,7 +90,7 @@ func TestChartDownloadSuccess(t *testing.T) {
 	mockD.On("DownloadWithContext", fakeCtx, mock.AnythingOfType("*aws.WriteAtBuffer"), &s3.GetObjectInput{
 		Bucket: aws.String(dl.Bucket),
 		Key:    aws.String("/some-chart"),
-	}).Return(0, nil).Run(func (args mock.Arguments) {
+	}).Return(0, nil).Run(func(args mock.Arguments) {
 		w := args.Get(1).(*aws.WriteAtBuffer)
 		w.WriteAt(chartBytes, 0)
 	})
@@ -105,7 +105,7 @@ func TestChartDownloadSuccess(t *testing.T) {
 func TestChartDownloadFailure(t *testing.T) {
 	mockD := &mockS3{}
 	fakeCtx := context.Background()
-	dl:= New("foo", mockD)
+	dl := New("foo", mockD)
 
 	mockD.On("DownloadWithContext", fakeCtx, mock.AnythingOfType("*aws.WriteAtBuffer"), &s3.GetObjectInput{
 		Bucket: aws.String(dl.Bucket),
@@ -131,7 +131,7 @@ func TestInvalidChartBytes(t *testing.T) {
 	mockD.On("DownloadWithContext", fakeCtx, mock.AnythingOfType("*aws.WriteAtBuffer"), &s3.GetObjectInput{
 		Bucket: aws.String(dl.Bucket),
 		Key:    aws.String("/some-chart"),
-	}).Return(0, nil).Run(func (args mock.Arguments) {
+	}).Return(0, nil).Run(func(args mock.Arguments) {
 		w := args.Get(1).(*aws.WriteAtBuffer)
 		w.WriteAt(chartBytes, 0)
 	})
@@ -144,7 +144,7 @@ func TestInvalidChartBytes(t *testing.T) {
 
 func TestMakeS3Key(t *testing.T) {
 	type testCase struct {
-		input string
+		input    string
 		expected string
 	}
 
