@@ -51,6 +51,6 @@ func (r *ImageReconciler) Reconcile(ctx context.Context, image *internal.Image) 
 		return nil
 	}
 
-	_, err = r.RepoService.UpdateFile(fmt.Sprintf("Image Tag updated to: %s", image.Tag), r.Branch, filepath.Join(r.ResourcePath, image.Repository)+".yaml", updatedBytes)
+	_, err = r.RepoService.UpdateFile(fmt.Sprintf("Image Tag updated to: %s", image.Tag), r.Branch, r.ResourcePath, updatedBytes)
 	return err
 }
