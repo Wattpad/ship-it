@@ -135,11 +135,13 @@ func TestGetImagePath(t *testing.T) {
 
 func TestTable(t *testing.T) {
 	var tests = []struct {
+		name string
 		inputMap map[string]interface{}
 		path     []string
 		expected map[string]interface{}
 	}{
 		{
+			"tabling a nested field",
 			map[string]interface{}{
 				"apples": "delicious",
 				"oranges": map[string]interface{}{
@@ -156,6 +158,7 @@ func TestTable(t *testing.T) {
 				"tag":        "baz",
 			},
 		}, {
+			"tabling a top level field",
 			map[string]interface{}{
 				"apples": "delicious",
 				"oranges": map[string]interface{}{
@@ -177,7 +180,9 @@ func TestTable(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		assert.Equal(t, test.expected, table(test.inputMap, test.path))
+		t.Run(test.name, func(t *testing.T) {
+			assert.Equal(t, test.expected, table(test.inputMap, test.path))
+		})
 	}
 }
 
