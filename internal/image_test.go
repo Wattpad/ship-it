@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
+
 func TestParseImage(t *testing.T) {
 	type testCase struct {
 		repo     string
@@ -135,7 +136,7 @@ func TestGetImagePath(t *testing.T) {
 
 func TestTable(t *testing.T) {
 	var tests = []struct {
-		name string
+		name     string
 		inputMap map[string]interface{}
 		path     []string
 		expected map[string]interface{}
