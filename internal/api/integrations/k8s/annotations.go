@@ -1,12 +1,13 @@
 package k8s
 
 import (
+	"fmt"
+	shipitv1beta1 "ship-it-operator/api/v1beta1"
 	"strconv"
 )
 
 func annotationFor(k string) string {
-	// FIXME this should be dynamic
-	return "helmreleases.shipit.wattpad.com/" + k
+	return fmt.Sprintf("helmreleases.%s/%s", shipitv1beta1.GroupVersion.Group, k)
 }
 
 type helmReleaseAnnotations map[string]string
