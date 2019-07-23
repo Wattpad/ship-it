@@ -28,6 +28,3 @@ api/*.json: internal/api/models/*.go
 	go run tools/jsonschema/main.go
 
 jsonschema: api/*.json
-
-k8s-code-gen:
-	./tools/k8s-code-gen/update-generated.sh
