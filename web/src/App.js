@@ -21,7 +21,7 @@ class App extends React.Component {
       <div className="App">
         <TopBar />
         {
-          this.state.data ? 
+          this.state.data ?
           <ReactExpandableGrid
             gridData={this.state.data}
             detailHeight={300}

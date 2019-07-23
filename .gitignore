@@ -6,8 +6,9 @@
 *.dylib
 
 # Compiled binaries
-main
-ship-it
+ship-it-api
+ship-it-syncd
+ship-it-operator
 
 # Test binary, build with `go test -c`
 *.test
@@ -21,3 +22,4 @@ web/build
 
 # Misc
 *.DS_Store
+*.idea
