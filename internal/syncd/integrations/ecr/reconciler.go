@@ -2,27 +2,55 @@ package ecr
 
 import (
 	"context"
+	"fmt"
+	"path/filepath"
 
 	"ship-it/internal"
 
+	"ship-it/pkg/apis/k8s.wattpad.com/v1alpha1"
+
 	"github.com/google/go-github/github"
+	"gopkg.in/yaml.v2"
 )
 
 type RepositoriesService interface {
-	GetContents(ctx context.Context, org, repo, path string, opts *github.RepositoryContentGetOptions) (*github.RepositoryContent, []*github.RepositoryContent, *github.Response, error)
-	UpdateFile(ctx context.Context, owner, repo, path string, opt *github.RepositoryContentFileOptions) (*github.RepositoryContentResponse, *github.Response, error)
+	UpdateFile(msg string, branch string, path string, fileContent []byte) (*github.RepositoryContentResponse, error)
+	GetFile(branch string, path string) ([]byte, error)
 }
 
 type ImageReconciler struct {
-	// TODO
+	Org          string
+	ResourcePath string
+	Branch       string
+	RepoService  RepositoriesService
 }
 
-func NewReconciler(org string, r RepositoriesService) *ImageReconciler {
+func NewReconciler(org string, valPath string, r RepositoriesService) *ImageReconciler {
 	return &ImageReconciler{
-		// TODO
+		Org:          org,
+		ResourcePath: valPath,
+		RepoService:  r,
 	}
 }
 
 func (r *ImageReconciler) Reconcile(ctx context.Context, image *internal.Image) error {
-	return nil
+	resourceBytes, err := r.RepoService.GetFile(r.Branch, r.ResourcePath)
+	if err != nil {
+		return err
+	}
+
+	rls, err := v1alpha1.LoadRelease(resourceBytes)
+	if err != nil {
+		return err
+	}
+
+	updatedRls := WithImage(*image, *rls)
+
+	updatedBytes, err := yaml.Marshal(updatedRls)
+	if err != nil {
+		return nil
+	}
+
+	_, err = r.RepoService.UpdateFile(fmt.Sprintf("Image Tag updated to: %s", image.Tag), r.Branch, filepath.Join(r.ResourcePath, image.Repository)+".yaml", updatedBytes)
+	return err
 }
