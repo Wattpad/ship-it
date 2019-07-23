@@ -74,10 +74,8 @@ func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
 			k.logger.Log("error", err)
 		}
 
-		repository := ""
-		tag := ""
+		var tag string
 		if image != nil {
-			repository = image.Repository
 			tag = image.Tag
 		}
 
@@ -106,7 +104,7 @@ func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
 					Version:    r.Spec.Chart.Revision,
 				},
 				Docker: models.DockerArtifact{
-					Image: repository,
+					Image: image.URI(),
 					Tag:   tag,
 				},
 			},

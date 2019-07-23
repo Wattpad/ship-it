@@ -50,8 +50,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	gitClient := github.New(ctx, cfg.GithubOrg, cfg.GithubToken)
-	svc := service.New(k8s, gitClient, logger)
+	githubClient := github.New(ctx, cfg.GithubOrg, cfg.GithubToken)
+	svc := service.New(k8s, githubClient, logger)
 	srv := http.Server{
 		Addr:    ":" + cfg.ServicePort,
 		Handler: api.New(svc, dd.NewTiming("api.time", 1.0)),
