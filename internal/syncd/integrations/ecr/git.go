@@ -13,7 +13,7 @@ type GitHub struct {
 	Repository   string
 }
 
-func NewGitHub(token string, ctx context.Context, org string, repo string) GitHub {
+func NewGitHub(ctx context.Context, token string, org string, repo string) GitHub {
 	tokenSource := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
@@ -49,16 +49,11 @@ func (c GitHub) UpdateFile(msg string, branch string, path string, fileContent [
 	return resp, nil
 }
 
-func (c GitHub) GetFile(branch string, path string) ([]byte, error) {
+func (c GitHub) GetFile(branch string, path string) (string, error) {
 	contents, _, _, err := c.client.Repositories.GetContents(context.Background(), c.Organization, c.Repository, path, &github.RepositoryContentGetOptions{Ref: "refs/heads/" + branch})
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	fileString, err := contents.GetContent()
-	if err != nil {
-		return nil, err
-	}
-
-	return []byte(fileString), nil
+	return contents.GetContent()
 }

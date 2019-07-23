@@ -41,14 +41,6 @@ func TestParseMessage(t *testing.T) {
 	assert.Exactly(t, expectedMessage, *inputMessage)
 }
 
-func TestMakeImage(t *testing.T) {
-	assert.Exactly(t, internal.Image{
-		Registry:   "723255503624.dkr.ecr.us-east-1.amazonaws.com",
-		Repository: "ship-it",
-		Tag:        "shipped",
-	}, makeImage("ship-it", "shipped"))
-}
-
 func (m *MockedObject) GetFile(branch string, path string) ([]byte, error) {
 	args := m.Called(branch, path)
 	return args.Get(0).([]byte), args.Error(1)

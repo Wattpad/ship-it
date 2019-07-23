@@ -3,18 +3,19 @@ package ecr
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 
 	"ship-it/internal"
 
-	"ship-it/pkg/apis/k8s.wattpad.com/v1alpha1"
-
 	"github.com/google/go-github/github"
+	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
+	"ship-it/pkg/apis/k8s.wattpad.com/v1alpha1"
 )
 
 type RepositoriesService interface {
 	UpdateFile(msg string, branch string, path string, fileContent []byte) (*github.RepositoryContentResponse, error)
-	GetFile(branch string, path string) ([]byte, error)
+	GetFile(branch string, path string) (string, error)
 }
 
 type ImageReconciler struct {
@@ -24,23 +25,25 @@ type ImageReconciler struct {
 	RepoService  RepositoriesService
 }
 
-func NewReconciler(org string, valPath string, r RepositoriesService) *ImageReconciler {
+func NewReconciler(org string, prefix string, branch string, r RepositoriesService) *ImageReconciler {
 	return &ImageReconciler{
 		Org:          org,
-		ResourcePath: valPath,
+		ResourcePath: prefix,
+		Branch:       branch,
 		RepoService:  r,
 	}
 }
 
 func (r *ImageReconciler) Reconcile(ctx context.Context, image *internal.Image) error {
-	resourceBytes, err := r.RepoService.GetFile(r.Branch, r.ResourcePath)
+	path := filepath.Join(r.ResourcePath, image.Repository+".yaml")
+	resourceStr, err := r.RepoService.GetFile(r.Branch, path)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failure to download custom resource file")
 	}
 
-	rls, err := v1alpha1.LoadRelease(resourceBytes)
+	rls, err := v1alpha1.LoadRelease([]byte(resourceStr))
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to load release from custom resource file")
 	}
 
 	updatedRls := internal.WithImage(*image, *rls)
@@ -50,6 +53,6 @@ func (r *ImageReconciler) Reconcile(ctx context.Context, image *internal.Image) 
 		return nil
 	}
 
-	_, err = r.RepoService.UpdateFile(fmt.Sprintf("Image Tag updated to: %s", image.Tag), r.Branch, r.ResourcePath, updatedBytes)
+	_, err = r.RepoService.UpdateFile(fmt.Sprintf("Image Tag updated to: %s", image.Tag), r.Branch, path, updatedBytes)
 	return err
 }
