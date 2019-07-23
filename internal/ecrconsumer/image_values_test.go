@@ -271,7 +271,8 @@ func TestWithImage(t *testing.T) {
 			Repository: "foo",
 			Tag:        "new-tag",
 		}
-		outputRls, _ := WithImage(expectedImg, rls)
+		outputRls, err := WithImage(expectedImg, rls)
+		assert.NoError(t, err)
 		outputValues := getChartValues(outputRls)
 
 		outputImg := outputValues["image"].(map[string]interface{})
@@ -285,7 +286,8 @@ func TestWithImage(t *testing.T) {
 			Repository: "oof",
 			Tag:        "new-tag",
 		}
-		outputRls, _ := WithImage(expectedImg, rls)
+		outputRls, err := WithImage(expectedImg, rls)
+		assert.NoError(t, err)
 		inputValues := getChartValues(rls)
 		outputValues := getChartValues(outputRls)
 		assert.Exactly(t, inputValues, outputValues)
