@@ -1,8 +1,13 @@
 package downloader
 
 import (
+	"bytes"
+	"context"
 	"fmt"
 	"io"
+
+	"k8s.io/helm/pkg/proto/hapi/chart"
+	"k8s.io/helm/pkg/chartutil"
 
 	"github.com/pkg/errors"
 
@@ -20,18 +25,15 @@ type Downloader struct {
 	d      downloaderAPI
 }
 
-func New(bucketName string, dl downloaderAPI) (*Downloader, error) {
-	if dl == nil {
-		return nil, fmt.Errorf("received nil downloader")
-	}
+func New(bucketName string, dl downloaderAPI) Downloader {
 
-	return &Downloader{
+	return Downloader{
 		Bucket: bucketName,
 		d:      dl,
-	}, nil
+	}
 }
 
-func (dl *Downloader) Download(key string, ctx aws.Context) ([]byte, error) {
+func (dl Downloader) Download(ctx context.Context, key string) ([]byte, error) {
 	buff := aws.NewWriteAtBuffer([]byte{})
 
 	_, err := dl.d.DownloadWithContext(ctx, buff, &s3.GetObjectInput{
@@ -43,7 +45,26 @@ func (dl *Downloader) Download(key string, ctx aws.Context) ([]byte, error) {
 		return nil, errors.Wrap(err, "chart download failed")
 	}
 
-	// add chart loading here
-
 	return buff.Bytes(), nil
+}
+
+func makeS3Key(chartName string) string {
+	if fmt.Sprintf("%c", chartName[0]) != "/" {
+		return "/" + chartName
+	}
+	return chartName
+}
+
+func (dl Downloader) DownloadChart(ctx context.Context, chartName string) (*chart.Chart, error) {
+	chartBytes, err := dl.Download(ctx, chartName)
+	if err != nil {
+		return nil, err
+	}
+
+	chartObj, err := chartutil.LoadArchive(bytes.NewBuffer(chartBytes))
+	if err != nil {
+		return nil, err
+	}
+
+	return chartObj, nil
 }

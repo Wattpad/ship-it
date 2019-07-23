@@ -1,10 +1,14 @@
 package downloader
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"testing"
+
+	"k8s.io/helm/pkg/chartutil"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -23,52 +27,133 @@ func (m *mockS3) DownloadWithContext(ctx aws.Context, w io.WriterAt, input *s3.G
 }
 
 func TestNewDownloader(t *testing.T) {
-	t.Run("valid downloader", func(t *testing.T) {
-		var m *mockS3
-		dl, err := New("foo", m)
-		assert.NoError(t, err)
-		assert.NotNil(t, dl)
-	})
+	var m *mockS3
+	dl := New("foo", m)
+	assert.NotNil(t, dl)
+	assert.Equal(t, "foo", dl.Bucket)
+	assert.Equal(t, m, dl.d)
 
-	t.Run("invalid downloader", func(t *testing.T) {
-		dl, err := New("foo", nil)
-		assert.Error(t, err)
-		assert.Nil(t, dl)
-	})
 }
 
 func TestDownloadSuccess(t *testing.T) {
 	mockD := &mockS3{}
 	fakeCtx := context.Background()
-	dl, err := New("foo", mockD)
+	dl := New("foo", mockD)
+
+	chartBytes, err := ioutil.ReadFile("../../testdata/foo-0.1.0.tgz")
 	assert.NoError(t, err)
 
 	mockD.On("DownloadWithContext", fakeCtx, mock.AnythingOfType("*aws.WriteAtBuffer"), &s3.GetObjectInput{
 		Bucket: aws.String(dl.Bucket),
 		Key:    aws.String("/some-chart"),
-	}).Return(0, nil)
+	}).Return(0, nil).Run(func (args mock.Arguments) {
+		w := args.Get(1).(*aws.WriteAtBuffer)
+		w.WriteAt(chartBytes, 0)
+	})
 
-	outBytes, err := dl.Download("/some-chart", fakeCtx)
+	outBytes, err := dl.Download(fakeCtx, "/some-chart")
 
 	assert.NoError(t, err)
 	assert.NotNil(t, outBytes)
+	assert.Equal(t, chartBytes, outBytes)
 	mockD.AssertExpectations(t)
 }
 
 func TestDownloadFailure(t *testing.T) {
 	mockD := &mockS3{}
 	fakeCtx := context.Background()
-	dl, err := New("foo", mockD)
-	assert.NoError(t, err)
+	dl:= New("foo", mockD)
 
 	mockD.On("DownloadWithContext", fakeCtx, mock.AnythingOfType("*aws.WriteAtBuffer"), &s3.GetObjectInput{
 		Bucket: aws.String(dl.Bucket),
 		Key:    aws.String("/some-chart"),
 	}).Return(0, fmt.Errorf("some download error"))
 
-	outBytes, err := dl.Download("/some-chart", fakeCtx)
+	outBytes, err := dl.Download(fakeCtx, "/some-chart")
 
 	assert.Error(t, err)
 	assert.Nil(t, outBytes)
 	mockD.AssertExpectations(t)
+}
+
+func TestChartDownloadSuccess(t *testing.T) {
+	mockD := &mockS3{}
+	fakeCtx := context.Background()
+	dl := New("foo", mockD)
+
+	chartBytes, err := ioutil.ReadFile("../../testdata/foo-0.1.0.tgz")
+	assert.NoError(t, err)
+
+	expectedChart, err := chartutil.LoadArchive(bytes.NewBuffer(chartBytes))
+	assert.NoError(t, err)
+
+	mockD.On("DownloadWithContext", fakeCtx, mock.AnythingOfType("*aws.WriteAtBuffer"), &s3.GetObjectInput{
+		Bucket: aws.String(dl.Bucket),
+		Key:    aws.String("/some-chart"),
+	}).Return(0, nil).Run(func (args mock.Arguments) {
+		w := args.Get(1).(*aws.WriteAtBuffer)
+		w.WriteAt(chartBytes, 0)
+	})
+
+	outChart, err := dl.DownloadChart(fakeCtx, "/some-chart")
+	assert.NoError(t, err)
+
+	assert.Equal(t, expectedChart, outChart)
+	mockD.AssertExpectations(t)
+}
+
+func TestChartDownloadFailure(t *testing.T) {
+	mockD := &mockS3{}
+	fakeCtx := context.Background()
+	dl:= New("foo", mockD)
+
+	mockD.On("DownloadWithContext", fakeCtx, mock.AnythingOfType("*aws.WriteAtBuffer"), &s3.GetObjectInput{
+		Bucket: aws.String(dl.Bucket),
+		Key:    aws.String("/some-chart"),
+	}).Return(0, fmt.Errorf("some download error"))
+
+	outChart, err := dl.DownloadChart(fakeCtx, "/some-chart")
+	assert.Error(t, err)
+
+	assert.Nil(t, outChart)
+	mockD.AssertExpectations(t)
+
+}
+
+func TestInvalidChartBytes(t *testing.T) {
+	mockD := &mockS3{}
+	fakeCtx := context.Background()
+	dl := New("foo", mockD)
+
+	chartBytes, err := ioutil.ReadFile("../../testdata/fakeChart")
+	assert.NoError(t, err)
+
+	mockD.On("DownloadWithContext", fakeCtx, mock.AnythingOfType("*aws.WriteAtBuffer"), &s3.GetObjectInput{
+		Bucket: aws.String(dl.Bucket),
+		Key:    aws.String("/some-chart"),
+	}).Return(0, nil).Run(func (args mock.Arguments) {
+		w := args.Get(1).(*aws.WriteAtBuffer)
+		w.WriteAt(chartBytes, 0)
+	})
+
+	outChart, err := dl.DownloadChart(fakeCtx, "/some-chart")
+	assert.Error(t, err)
+	assert.Nil(t, outChart)
+	mockD.AssertExpectations(t)
+}
+
+func TestMakeS3Key(t *testing.T) {
+	type testCase struct {
+		input string
+		expected string
+	}
+
+	tests := []testCase{
+		{"some-chart", "/some-chart"},
+		{"/some-chart", "/some-chart"},
+	}
+
+	for _, test := range tests {
+		assert.Equal(t, test.expected, makeS3Key(test.input))
+	}
 }
