@@ -3,7 +3,6 @@ package ecr
 import (
 	"context"
 	"fmt"
-	"path/filepath"
 
 	"ship-it/internal"
 
@@ -44,7 +43,7 @@ func (r *ImageReconciler) Reconcile(ctx context.Context, image *internal.Image) 
 		return err
 	}
 
-	updatedRls := WithImage(*image, *rls)
+	updatedRls := internal.WithImage(*image, *rls)
 
 	updatedBytes, err := yaml.Marshal(updatedRls)
 	if err != nil {
