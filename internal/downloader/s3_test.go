@@ -125,8 +125,7 @@ func TestInvalidChartBytes(t *testing.T) {
 	fakeCtx := context.Background()
 	dl := New("foo", mockD)
 
-	chartBytes, err := ioutil.ReadFile("../../testdata/fakeChart")
-	assert.NoError(t, err)
+	chartBytes := []byte("some bad bytes")
 
 	mockD.On("DownloadWithContext", fakeCtx, mock.AnythingOfType("*aws.WriteAtBuffer"), &s3.GetObjectInput{
 		Bucket: aws.String(dl.Bucket),
