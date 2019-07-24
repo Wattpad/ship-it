@@ -43,10 +43,8 @@ func (c GitHub) UpdateFile(msg string, branch string, path string, fileContent [
 	}
 
 	resp, _, err := c.client.Repositories.UpdateFile(ctx, c.Organization, c.Repository, path, options)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
+
+	return resp, err
 }
 
 func (c GitHub) GetFile(branch string, path string) (string, error) {
