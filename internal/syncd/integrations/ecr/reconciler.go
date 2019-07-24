@@ -7,7 +7,7 @@ import (
 
 	"ship-it/internal"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v26/github"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 	"ship-it/pkg/apis/k8s.wattpad.com/v1alpha1"
@@ -38,12 +38,12 @@ func (r *ImageReconciler) Reconcile(ctx context.Context, image *internal.Image) 
 	path := filepath.Join(r.ResourcePath, image.Repository+".yaml")
 	resourceStr, err := r.RepoService.GetFile(r.Branch, path)
 	if err != nil {
-		return errors.Wrap(err, "failure to download custom resource file")
+		return errors.Wrapf(err, "failure to download custom resource file for path: %s", path)
 	}
 
 	rls, err := v1alpha1.LoadRelease([]byte(resourceStr))
 	if err != nil {
-		return errors.Wrap(err, "failed to load release from custom resource file")
+		return errors.Wrapf(err, "failed to load release from custom resource file at path: %s", path)
 	}
 
 	updatedRls := internal.WithImage(*image, *rls)

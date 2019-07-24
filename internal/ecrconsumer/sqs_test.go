@@ -5,8 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"ship-it/internal"
-
 	"github.com/google/go-github/v26/github"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"

@@ -1,10 +1,14 @@
 package ecr
 
 import (
+	"context"
 	"testing"
 
 	"ship-it/internal"
 
+	"github.com/Wattpad/sqsconsumer"
+	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/metrics"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -28,4 +32,37 @@ func TestValidateTag(t *testing.T) {
 	for _, test := range tests {
 		assert.Equal(t, test.expected, validImageTagRegex.MatchString(test.inputString))
 	}
+}
+
+func TestECRHandler(t *testing.T) {
+	mockSQSClient := new(MockSQS)
+	fakeURL := "www.wattpad.com"
+	var fakeHist metrics.Histogram
+	mockSQSService := &sqsconsumer.SQSService{
+		Svc:    mockSQSClient,
+		URL:    &fakeURL,
+		Logger: func(format string, args ...interface{}) {},
+	}
+	fakeListener := &ImageListener{
+		logger:  log.NewNopLogger(),
+		service: mockSQSService,
+		timer:   fakeHist,
+	}
+
+	mockRepoService := new(MockRepoService)
+	fakeReconciler := NewReconciler("Wattpad", "custom-resources/path", "foo", mockRepoService)
+
+	err := fakeListener.handler(fakeReconciler)(context.Background(), `some bad message`)
+	assert.Error(t, err)
+
+	inputJSON := `
+{
+	"eventTime": "2019-07-11T14:19:59Z", 
+	"repositoryName": "monolith-php", 
+	"tag": "some invalid tag",
+	"registryId": "723255503624"
+}
+`
+	err = fakeListener.handler(fakeReconciler)(context.Background(), inputJSON)
+	assert.Error(t, err)
 }
