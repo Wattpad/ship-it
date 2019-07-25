@@ -2,7 +2,6 @@ package k8s
 
 import (
 	"context"
-	"time"
 
 	"ship-it/internal/api/models"
 
@@ -18,7 +17,7 @@ type K8sClient struct {
 	client client.Client
 }
 
-func New(ctx context.Context, resync time.Duration) (*K8sClient, error) {
+func New() (*K8sClient, error) {
 	scheme := runtime.NewScheme()
 	shipitv1beta1.AddToScheme(scheme)
 
@@ -41,10 +40,10 @@ func New(ctx context.Context, resync time.Duration) (*K8sClient, error) {
 	}, nil
 }
 
-func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
+func (k *K8sClient) ListAll(ctx context.Context, namespace string) ([]models.Release, error) {
 	releaseList := &shipitv1beta1.HelmReleaseList{}
 
-	err := k.client.List(context.Background(), releaseList, client.InNamespace(namespace))
+	err := k.client.List(ctx, releaseList, client.InNamespace(namespace))
 
 	if err != nil {
 		return nil, err

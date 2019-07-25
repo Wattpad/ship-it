@@ -16,7 +16,7 @@ func New(l ReleaseLister) *Service {
 }
 
 type ReleaseLister interface {
-	ListAll(namespace string) ([]models.Release, error)
+	ListAll(ctx context.Context, namespace string) ([]models.Release, error)
 }
 
 type Service struct {
@@ -24,7 +24,7 @@ type Service struct {
 }
 
 func (s *Service) ListReleases(ctx context.Context) ([]models.Release, error) {
-	releases, err := s.lister.ListAll(v1.NamespaceAll)
+	releases, err := s.lister.ListAll(ctx, v1.NamespaceAll)
 	if err != nil {
 		return nil, err
 	}
