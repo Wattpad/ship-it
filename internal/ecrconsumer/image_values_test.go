@@ -242,7 +242,7 @@ func TestWithImage(t *testing.T) {
 	rls := shipitv1beta1.HelmRelease{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "HelmRelease",
-			APIVersion: "apiVersion: helmreleases.shipit.wattpad.com/v1beta1",
+			APIVersion: "helmreleases.shipit.wattpad.com/v1beta1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "example-microservice",
