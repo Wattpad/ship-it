@@ -65,8 +65,8 @@ func makeImage(repoName string, tag string, registryId string) internal.Image {
 
 func (l *ImageListener) handler(r syncd.ImageReconciler) sqsconsumer.MessageHandlerFunc {
 	return func(ctx context.Context, msg string) error {
-		ecrEvent := &ecrPushEvent{}
-		err := json.Unmarshal([]byte(msg), ecrEvent)
+		var ecrEvent ecrPushEvent
+		err := json.Unmarshal([]byte(msg), &ecrEvent)
 		if err != nil {
 			return errors.Wrap(err, "failure to parse ecr push event")
 		}

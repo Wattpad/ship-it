@@ -19,26 +19,26 @@ type RepositoriesService interface {
 }
 
 type ImageReconciler struct {
-	Org          string
-	ResourcePath string
-	Branch       string
-	RepoService  RepositoriesService
+	Org               string
+	RegistryChartPath string
+	Branch            string
+	RepoService       RepositoriesService
 }
 
 func NewReconciler(org string, prefix string, branch string, r RepositoriesService) *ImageReconciler {
 	return &ImageReconciler{
-		Org:          org,
-		ResourcePath: prefix,
-		Branch:       branch,
-		RepoService:  r,
+		Org:               org,
+		RegistryChartPath: prefix,
+		Branch:            branch,
+		RepoService:       r,
 	}
 }
 
 func (r *ImageReconciler) Reconcile(ctx context.Context, image *internal.Image) error {
-	path := filepath.Join(r.ResourcePath, image.Repository+".yaml")
+	path := filepath.Join(r.RegistryChartPath, image.Repository+".yaml")
 	resourceStr, err := r.RepoService.GetFile(r.Branch, path)
 	if err != nil {
-		return errors.Wrapf(err, "failure to download custom resource file for path: %s", path)
+		return errors.Wrapf(err, "failed to download custom resource file for path: %s", path)
 	}
 
 	rls, err := v1alpha1.LoadRelease([]byte(resourceStr))
@@ -50,7 +50,7 @@ func (r *ImageReconciler) Reconcile(ctx context.Context, image *internal.Image) 
 
 	updatedBytes, err := yaml.Marshal(updatedRls)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	_, err = r.RepoService.UpdateFile(fmt.Sprintf("Image Tag updated to: %s", image.Tag), r.Branch, path, updatedBytes)

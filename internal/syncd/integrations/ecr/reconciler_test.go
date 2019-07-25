@@ -66,10 +66,10 @@ func (m *MockRepoService) UpdateFile(msg string, branch string, path string, fil
 func TestReconcilerSuccess(t *testing.T) {
 	mockRepoService := new(MockRepoService)
 	fakeReconciler := &ImageReconciler{
-		Org:          "Wattpad",
-		ResourcePath: "foo/bar/resources",
-		Branch:       "oof",
-		RepoService:  mockRepoService,
+		Org:               "Wattpad",
+		RegistryChartPath: "foo/bar/resources",
+		Branch:            "oof",
+		RepoService:       mockRepoService,
 	}
 
 	inputImage := &internal.Image{
@@ -77,7 +77,7 @@ func TestReconcilerSuccess(t *testing.T) {
 		Repository: "bar",
 		Tag:        "78bc9ccf64eb838c6a0e0492ded722274925e2bd",
 	}
-	path := filepath.Join(fakeReconciler.ResourcePath, inputImage.Repository+".yaml")
+	path := filepath.Join(fakeReconciler.RegistryChartPath, inputImage.Repository+".yaml")
 	mockRepoService.On("GetFile", fakeReconciler.Branch, path).Return(inputYaml, error(nil))
 	mockRepoService.On("UpdateFile", fmt.Sprintf("Image Tag updated to: %s", inputImage.Tag), fakeReconciler.Branch, path, []byte(expectedYaml)).Return(&github.RepositoryContentResponse{}, error(nil))
 	err := fakeReconciler.Reconcile(context.Background(), inputImage)
@@ -89,10 +89,10 @@ func TestReconcilerSuccess(t *testing.T) {
 func TestReconcilerDownloadFailure(t *testing.T) {
 	mockRepoService := new(MockRepoService)
 	fakeReconciler := &ImageReconciler{
-		Org:          "Wattpad",
-		ResourcePath: "foo/bar/resources",
-		Branch:       "oof",
-		RepoService:  mockRepoService,
+		Org:               "Wattpad",
+		RegistryChartPath: "foo/bar/resources",
+		Branch:            "oof",
+		RepoService:       mockRepoService,
 	}
 
 	inputImage := &internal.Image{
@@ -101,7 +101,7 @@ func TestReconcilerDownloadFailure(t *testing.T) {
 		Tag:        "78bc9ccf64eb838c6a0e0492ded722274925e2bd",
 	}
 
-	mockRepoService.On("GetFile", fakeReconciler.Branch, filepath.Join(fakeReconciler.ResourcePath, inputImage.Repository+".yaml")).Return("", fmt.Errorf("some error"))
+	mockRepoService.On("GetFile", fakeReconciler.Branch, filepath.Join(fakeReconciler.RegistryChartPath, inputImage.Repository+".yaml")).Return("", fmt.Errorf("some error"))
 	err := fakeReconciler.Reconcile(context.Background(), inputImage)
 	assert.Error(t, err)
 	mockRepoService.AssertExpectations(t)
@@ -110,10 +110,10 @@ func TestReconcilerDownloadFailure(t *testing.T) {
 func TestReconcilerUploadFailure(t *testing.T) {
 	mockRepoService := new(MockRepoService)
 	fakeReconciler := &ImageReconciler{
-		Org:          "Wattpad",
-		ResourcePath: "foo/bar/resources",
-		Branch:       "oof",
-		RepoService:  mockRepoService,
+		Org:               "Wattpad",
+		RegistryChartPath: "foo/bar/resources",
+		Branch:            "oof",
+		RepoService:       mockRepoService,
 	}
 
 	inputImage := &internal.Image{
@@ -121,7 +121,7 @@ func TestReconcilerUploadFailure(t *testing.T) {
 		Repository: "bar",
 		Tag:        "78bc9ccf64eb838c6a0e0492ded722274925e2bd",
 	}
-	path := filepath.Join(fakeReconciler.ResourcePath, inputImage.Repository+".yaml")
+	path := filepath.Join(fakeReconciler.RegistryChartPath, inputImage.Repository+".yaml")
 	mockRepoService.On("GetFile", fakeReconciler.Branch, path).Return(inputYaml, error(nil))
 	mockRepoService.On("UpdateFile", fmt.Sprintf("Image Tag updated to: %s", inputImage.Tag), fakeReconciler.Branch, path, []byte(expectedYaml)).Return((*github.RepositoryContentResponse)(nil), fmt.Errorf("some upload error"))
 	err := fakeReconciler.Reconcile(context.Background(), inputImage)
@@ -133,10 +133,10 @@ func TestReconcilerUploadFailure(t *testing.T) {
 func TestReconcilerInvalidYaml(t *testing.T) {
 	mockRepoService := new(MockRepoService)
 	fakeReconciler := &ImageReconciler{
-		Org:          "Wattpad",
-		ResourcePath: "foo/bar/resources",
-		Branch:       "oof",
-		RepoService:  mockRepoService,
+		Org:               "Wattpad",
+		RegistryChartPath: "foo/bar/resources",
+		Branch:            "oof",
+		RepoService:       mockRepoService,
 	}
 
 	inputImage := &internal.Image{
@@ -145,7 +145,7 @@ func TestReconcilerInvalidYaml(t *testing.T) {
 		Tag:        "78bc9ccf64eb838c6a0e0492ded722274925e2bd",
 	}
 
-	mockRepoService.On("GetFile", fakeReconciler.Branch, filepath.Join(fakeReconciler.ResourcePath, inputImage.Repository+".yaml")).Return("some malformed yaml", error(nil))
+	mockRepoService.On("GetFile", fakeReconciler.Branch, filepath.Join(fakeReconciler.RegistryChartPath, inputImage.Repository+".yaml")).Return("some malformed yaml", error(nil))
 	err := fakeReconciler.Reconcile(context.Background(), inputImage)
 	assert.Error(t, err)
 	mockRepoService.AssertExpectations(t)
