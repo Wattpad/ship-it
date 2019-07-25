@@ -1,13 +1,12 @@
 package k8s
 
 import (
-	"fmt"
 	shipitv1beta1 "ship-it-operator/api/v1beta1"
 	"strconv"
 )
 
 func annotationFor(k string) string {
-	return fmt.Sprintf("helmreleases.%s/%s", shipitv1beta1.GroupVersion.Group, k)
+	return shipitv1beta1.Resource("helmrelease").String() + "/" + k
 }
 
 type helmReleaseAnnotations map[string]string
