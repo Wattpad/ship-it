@@ -51,7 +51,7 @@ func TestDownloadSuccess(t *testing.T) {
 		w.WriteAt(chartBytes, 0)
 	})
 
-	outBytes, err := dl.Download(fakeCtx, "/some-chart")
+	outBytes, err := dl.download(fakeCtx, "/some-chart")
 
 	assert.NoError(t, err)
 	assert.NotNil(t, outBytes)
@@ -69,10 +69,9 @@ func TestDownloadFailure(t *testing.T) {
 		Key:    aws.String("/some-chart"),
 	}).Return(0, fmt.Errorf("some download error"))
 
-	outBytes, err := dl.Download(fakeCtx, "/some-chart")
+	_, err := dl.download(fakeCtx, "/some-chart")
 
 	assert.Error(t, err)
-	assert.Nil(t, outBytes)
 	mockD.AssertExpectations(t)
 }
 
