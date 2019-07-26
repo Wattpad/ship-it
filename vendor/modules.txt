@@ -1,3 +1,7 @@
+# github.com/BurntSushi/toml v0.3.1
+github.com/BurntSushi/toml
+# github.com/Masterminds/semver v1.4.2
+github.com/Masterminds/semver
 # github.com/VividCortex/gohistogram v1.0.0
 github.com/VividCortex/gohistogram
 # github.com/Wattpad/sqsconsumer v0.0.0-20190611184259-511082fa45b3
@@ -9,40 +13,51 @@ github.com/Wattpad/sqsconsumer/middleware/movingaverage
 github.com/alecthomas/jsonschema
 # github.com/aws/aws-sdk-go v1.19.47
 github.com/aws/aws-sdk-go/aws
-github.com/aws/aws-sdk-go/aws/session
-github.com/aws/aws-sdk-go/service/sqs
+github.com/aws/aws-sdk-go/service/s3
+github.com/aws/aws-sdk-go/service/s3/s3manager
 github.com/aws/aws-sdk-go/aws/awserr
 github.com/aws/aws-sdk-go/aws/credentials
 github.com/aws/aws-sdk-go/aws/endpoints
 github.com/aws/aws-sdk-go/internal/sdkio
+github.com/aws/aws-sdk-go/aws/awsutil
 github.com/aws/aws-sdk-go/aws/client
+github.com/aws/aws-sdk-go/aws/client/metadata
+github.com/aws/aws-sdk-go/aws/request
+github.com/aws/aws-sdk-go/aws/signer/v4
+github.com/aws/aws-sdk-go/internal/s3err
+github.com/aws/aws-sdk-go/private/protocol
+github.com/aws/aws-sdk-go/private/protocol/eventstream
+github.com/aws/aws-sdk-go/private/protocol/eventstream/eventstreamapi
+github.com/aws/aws-sdk-go/private/protocol/rest
+github.com/aws/aws-sdk-go/private/protocol/restxml
+github.com/aws/aws-sdk-go/private/protocol/xml/xmlutil
+github.com/aws/aws-sdk-go/service/s3/s3iface
+github.com/aws/aws-sdk-go/aws/session
+github.com/aws/aws-sdk-go/service/sqs
+github.com/aws/aws-sdk-go/internal/ini
+github.com/aws/aws-sdk-go/internal/shareddefaults
+github.com/aws/aws-sdk-go/internal/sdkrand
+github.com/aws/aws-sdk-go/private/protocol/query
 github.com/aws/aws-sdk-go/aws/corehandlers
 github.com/aws/aws-sdk-go/aws/credentials/processcreds
 github.com/aws/aws-sdk-go/aws/credentials/stscreds
 github.com/aws/aws-sdk-go/aws/csm
 github.com/aws/aws-sdk-go/aws/defaults
-github.com/aws/aws-sdk-go/aws/request
-github.com/aws/aws-sdk-go/internal/ini
-github.com/aws/aws-sdk-go/internal/shareddefaults
-github.com/aws/aws-sdk-go/aws/awsutil
-github.com/aws/aws-sdk-go/aws/client/metadata
-github.com/aws/aws-sdk-go/aws/signer/v4
-github.com/aws/aws-sdk-go/private/protocol
-github.com/aws/aws-sdk-go/private/protocol/query
-github.com/aws/aws-sdk-go/internal/sdkrand
+github.com/aws/aws-sdk-go/private/protocol/query/queryutil
 github.com/aws/aws-sdk-go/service/sts
 github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds
 github.com/aws/aws-sdk-go/aws/credentials/endpointcreds
 github.com/aws/aws-sdk-go/aws/ec2metadata
-github.com/aws/aws-sdk-go/private/protocol/rest
-github.com/aws/aws-sdk-go/private/protocol/query/queryutil
-github.com/aws/aws-sdk-go/private/protocol/xml/xmlutil
 github.com/aws/aws-sdk-go/internal/sdkuri
 github.com/aws/aws-sdk-go/private/protocol/json/jsonutil
+# github.com/cyphar/filepath-securejoin v0.2.2
+github.com/cyphar/filepath-securejoin
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
 # github.com/evanphx/json-patch v4.5.0+incompatible
 github.com/evanphx/json-patch
+# github.com/ghodss/yaml v1.0.0
+github.com/ghodss/yaml
 # github.com/go-chi/chi v4.0.2+incompatible
 github.com/go-chi/chi
 # github.com/go-kit/kit v0.8.0
@@ -55,6 +70,15 @@ github.com/go-kit/kit/metrics/internal/ratemap
 github.com/go-kit/kit/util/conn
 # github.com/go-logfmt/logfmt v0.4.0
 github.com/go-logfmt/logfmt
+# github.com/gobwas/glob v0.2.3
+github.com/gobwas/glob
+github.com/gobwas/glob/compiler
+github.com/gobwas/glob/syntax
+github.com/gobwas/glob/match
+github.com/gobwas/glob/syntax/ast
+github.com/gobwas/glob/util/runes
+github.com/gobwas/glob/syntax/lexer
+github.com/gobwas/glob/util/strings
 # github.com/gogo/protobuf v1.2.1
 github.com/gogo/protobuf/proto
 github.com/gogo/protobuf/sortkeys
@@ -191,10 +215,10 @@ k8s.io/apimachinery/pkg/labels
 k8s.io/apimachinery/pkg/runtime/serializer
 k8s.io/apimachinery/pkg/api/resource
 k8s.io/apimachinery/pkg/util/intstr
+k8s.io/apimachinery/pkg/version
 k8s.io/apimachinery/third_party/forked/golang/reflect
 k8s.io/apimachinery/pkg/util/validation/field
 k8s.io/apimachinery/pkg/selection
-k8s.io/apimachinery/pkg/version
 k8s.io/apimachinery/pkg/util/clock
 k8s.io/apimachinery/pkg/apis/meta/v1beta1
 k8s.io/apimachinery/pkg/util/validation
@@ -225,7 +249,12 @@ k8s.io/client-go/discovery
 k8s.io/client-go/restmapper
 # k8s.io/helm v2.14.1+incompatible
 k8s.io/helm/pkg/proto/hapi/release
+k8s.io/helm/pkg/chartutil
 k8s.io/helm/pkg/proto/hapi/chart
+k8s.io/helm/pkg/ignore
+k8s.io/helm/pkg/proto/hapi/version
+k8s.io/helm/pkg/sympath
+k8s.io/helm/pkg/version
 # k8s.io/klog v0.3.3
 k8s.io/klog
 # k8s.io/utils v0.0.0-20190607212802-c55fbcfc754a

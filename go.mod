@@ -7,15 +7,19 @@ replace ship-it-operator => ./operator
 replace k8s.io/apimachinery => k8s.io/apimachinery v0.0.0-20190404173353-6a84e37a896d
 
 require (
+	github.com/BurntSushi/toml v0.3.1 // indirect
+	github.com/Masterminds/semver v1.4.2 // indirect
 	github.com/VividCortex/gohistogram v1.0.0 // indirect
 	github.com/Wattpad/sqsconsumer v0.0.0-20190611184259-511082fa45b3
 	github.com/alecthomas/jsonschema v0.0.0-20190530235721-fd8d96416671
 	github.com/aws/aws-sdk-go v1.19.47
+	github.com/cyphar/filepath-securejoin v0.2.2 // indirect
 	github.com/evanphx/json-patch v4.5.0+incompatible // indirect
 	github.com/go-chi/chi v4.0.2+incompatible
 	github.com/go-kit/kit v0.8.0
 	github.com/go-logfmt/logfmt v0.4.0 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
+	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/golang/mock v1.3.1 // indirect
 	github.com/golang/protobuf v1.3.1 // indirect
 	github.com/google/go-github v17.0.0+incompatible
