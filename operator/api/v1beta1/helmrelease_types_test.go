@@ -16,6 +16,8 @@ limitations under the License.
 package v1beta1
 
 import (
+	"encoding/json"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -84,6 +86,25 @@ var _ = Describe("HelmRelease", func() {
 			Expect(k8sClient.Get(context.TODO(), key, created)).ToNot(Succeed())
 		})
 
+	})
+
+	Context("Serializing Helm values", func() {
+		It("should unmarshal values as a JSON object", func() {
+			expectedVals := map[string]interface{}{"hello": "world"}
+
+			expectedRaw, _ := json.Marshal(expectedVals)
+
+			hr := HelmRelease{
+				Spec: HelmReleaseSpec{
+					Values: runtime.RawExtension{
+						Raw: expectedRaw,
+					},
+				},
+			}
+
+			By("calling HelmValues method")
+			Expect(hr.HelmValues()).To(Equal(expectedVals))
+		})
 	})
 
 })

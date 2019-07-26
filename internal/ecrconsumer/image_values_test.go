@@ -1,7 +1,6 @@
 package ecrconsumer
 
 import (
-	"encoding/json"
 	"testing"
 
 	"ship-it/internal"
@@ -273,7 +272,7 @@ func TestWithImage(t *testing.T) {
 		}
 		outputRls, err := WithImage(expectedImg, rls)
 		assert.NoError(t, err)
-		outputValues := getChartValues(outputRls)
+		outputValues := outputRls.HelmValues()
 
 		outputImg := outputValues["image"].(map[string]interface{})
 		assert.Equal(t, expectedImg.Tag, outputImg["tag"].(string))
@@ -288,16 +287,10 @@ func TestWithImage(t *testing.T) {
 		}
 		outputRls, err := WithImage(expectedImg, rls)
 		assert.NoError(t, err)
-		inputValues := getChartValues(rls)
-		outputValues := getChartValues(outputRls)
+		inputValues := rls.HelmValues()
+		outputValues := outputRls.HelmValues()
 		assert.Exactly(t, inputValues, outputValues)
 	})
-}
-
-func getChartValues(r shipitv1beta1.HelmRelease) map[string]interface{} {
-	var v map[string]interface{}
-	json.Unmarshal(r.Spec.Values.Raw, &v)
-	return v
 }
 
 func TestStringMapCleanup(t *testing.T) {

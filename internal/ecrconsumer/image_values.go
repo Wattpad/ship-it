@@ -100,13 +100,7 @@ func cleanUpMapValue(v interface{}) interface{} {
 func WithImage(img internal.Image, r shipitv1beta1.HelmRelease) (shipitv1beta1.HelmRelease, error) {
 	copy := r.DeepCopy()
 
-	var values map[string]interface{}
-	err := json.Unmarshal(copy.Spec.Values.Raw, &values)
-	if err != nil {
-		return shipitv1beta1.HelmRelease{}, err
-	}
-
-	cleanMap := cleanUpStringMap(values)
+	cleanMap := cleanUpStringMap(r.HelmValues())
 	update(cleanMap, img)
 
 	newJSON, _ := json.Marshal(cleanMap)
