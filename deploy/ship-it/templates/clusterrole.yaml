@@ -14,7 +14,7 @@ rules:
   - get
   - list
 - apiGroups:
-  - k8s.wattpad.com
+  - shipit.wattpad.com
   resources:
   - helmreleases
   verbs:
