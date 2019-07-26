@@ -6,7 +6,7 @@ import (
 )
 
 func annotationFor(k string) string {
-	return shipitv1beta1.Resource("helmrelease").String() + "/" + k
+	return shipitv1beta1.Resource("helmreleases").String() + "/" + k
 }
 
 type helmReleaseAnnotations map[string]string
