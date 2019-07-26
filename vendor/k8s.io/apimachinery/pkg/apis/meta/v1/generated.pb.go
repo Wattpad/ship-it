@@ -41,6 +41,8 @@ limitations under the License.
 		GroupVersionForDiscovery
 		GroupVersionKind
 		GroupVersionResource
+		Initializer
+		Initializers
 		LabelSelector
 		LabelSelectorRequirement
 		List
@@ -76,7 +78,7 @@ import k8s_io_apimachinery_pkg_runtime "k8s.io/apimachinery/pkg/runtime"
 import time "time"
 import k8s_io_apimachinery_pkg_types "k8s.io/apimachinery/pkg/types"
 
-import sortkeys "github.com/gogo/protobuf/sortkeys"
+import github_com_gogo_protobuf_sortkeys "github.com/gogo/protobuf/sortkeys"
 
 import strings "strings"
 import reflect "reflect"
@@ -165,43 +167,51 @@ func (m *GroupVersionResource) Reset()                    { *m = GroupVersionRes
 func (*GroupVersionResource) ProtoMessage()               {}
 func (*GroupVersionResource) Descriptor() ([]byte, []int) { return fileDescriptorGenerated, []int{16} }
 
+func (m *Initializer) Reset()                    { *m = Initializer{} }
+func (*Initializer) ProtoMessage()               {}
+func (*Initializer) Descriptor() ([]byte, []int) { return fileDescriptorGenerated, []int{17} }
+
+func (m *Initializers) Reset()                    { *m = Initializers{} }
+func (*Initializers) ProtoMessage()               {}
+func (*Initializers) Descriptor() ([]byte, []int) { return fileDescriptorGenerated, []int{18} }
+
 func (m *LabelSelector) Reset()                    { *m = LabelSelector{} }
 func (*LabelSelector) ProtoMessage()               {}
-func (*LabelSelector) Descriptor() ([]byte, []int) { return fileDescriptorGenerated, []int{17} }
+func (*LabelSelector) Descriptor() ([]byte, []int) { return fileDescriptorGenerated, []int{19} }
 
 func (m *LabelSelectorRequirement) Reset()      { *m = LabelSelectorRequirement{} }
 func (*LabelSelectorRequirement) ProtoMessage() {}
 func (*LabelSelectorRequirement) Descriptor() ([]byte, []int) {
-	return fileDescriptorGenerated, []int{18}
+	return fileDescriptorGenerated, []int{20}
 }
 
 func (m *List) Reset()                    { *m = List{} }
 func (*List) ProtoMessage()               {}
-func (*List) Descriptor() ([]byte, []int) { return fileDescriptorGenerated, []int{19} }
+func (*List) Descriptor() ([]byte, []int) { return fileDescriptorGenerated, []int{21} }
 
 func (m *ListMeta) Reset()                    { *m = ListMeta{} }
 func (*ListMeta) ProtoMessage()               {}
-func (*ListMeta) Descriptor() ([]byte, []int) { return fileDescriptorGenerated, []int{20} }
+func (*ListMeta) Descriptor() ([]byte, []int) { return fileDescriptorGenerated, []int{22} }
 
 func (m *ListOptions) Reset()                    { *m = ListOptions{} }
 func (*ListOptions) ProtoMessage()               {}
-func (*ListOptions) Descriptor() ([]byte, []int) { return fileDescriptorGenerated, []int{21} }
+func (*ListOptions) Descriptor() ([]byte, []int) { return fileDescriptorGenerated, []int{23} }
 
 func (m *ManagedFieldsEntry) Reset()                    { *m = ManagedFieldsEntry{} }
 func (*ManagedFieldsEntry) ProtoMessage()               {}
-func (*ManagedFieldsEntry) Descriptor() ([]byte, []int) { return fileDescriptorGenerated, []int{22} }
+func (*ManagedFieldsEntry) Descriptor() ([]byte, []int) { return fileDescriptorGenerated, []int{24} }
 
 func (m *MicroTime) Reset()                    { *m = MicroTime{} }
 func (*MicroTime) ProtoMessage()               {}
-func (*MicroTime) Descriptor() ([]byte, []int) { return fileDescriptorGenerated, []int{23} }
+func (*MicroTime) Descriptor() ([]byte, []int) { return fileDescriptorGenerated, []int{25} }
 
 func (m *ObjectMeta) Reset()                    { *m = ObjectMeta{} }
 func (*ObjectMeta) ProtoMessage()               {}
-func (*ObjectMeta) Descriptor() ([]byte, []int) { return fileDescriptorGenerated, []int{24} }
+func (*ObjectMeta) Descriptor() ([]byte, []int) { return fileDescriptorGenerated, []int{26} }
 
 func (m *OwnerReference) Reset()                    { *m = OwnerReference{} }
 func (*OwnerReference) ProtoMessage()               {}
-func (*OwnerReference) Descriptor() ([]byte, []int) { return fileDescriptorGenerated, []int{25} }
+func (*OwnerReference) Descriptor() ([]byte, []int) { return fileDescriptorGenerated, []int{27} }
 
 func (m *Patch) Reset()                    { *m = Patch{} }
 func (*Patch) ProtoMessage()               {}
@@ -279,6 +289,8 @@ func init() {
 	proto.RegisterType((*GroupVersionForDiscovery)(nil), "k8s.io.apimachinery.pkg.apis.meta.v1.GroupVersionForDiscovery")
 	proto.RegisterType((*GroupVersionKind)(nil), "k8s.io.apimachinery.pkg.apis.meta.v1.GroupVersionKind")
 	proto.RegisterType((*GroupVersionResource)(nil), "k8s.io.apimachinery.pkg.apis.meta.v1.GroupVersionResource")
+	proto.RegisterType((*Initializer)(nil), "k8s.io.apimachinery.pkg.apis.meta.v1.Initializer")
+	proto.RegisterType((*Initializers)(nil), "k8s.io.apimachinery.pkg.apis.meta.v1.Initializers")
 	proto.RegisterType((*LabelSelector)(nil), "k8s.io.apimachinery.pkg.apis.meta.v1.LabelSelector")
 	proto.RegisterType((*LabelSelectorRequirement)(nil), "k8s.io.apimachinery.pkg.apis.meta.v1.LabelSelectorRequirement")
 	proto.RegisterType((*List)(nil), "k8s.io.apimachinery.pkg.apis.meta.v1.List")
@@ -732,7 +744,7 @@ func (m *Fields) MarshalTo(dAtA []byte) (int, error) {
 		for k := range m.Map {
 			keysForMap = append(keysForMap, string(k))
 		}
-		sortkeys.Strings(keysForMap)
+		github_com_gogo_protobuf_sortkeys.Strings(keysForMap)
 		for _, k := range keysForMap {
 			dAtA[i] = 0xa
 			i++
@@ -947,6 +959,68 @@ func (m *GroupVersionResource) MarshalTo(dAtA []byte) (int, error) {
 	return i, nil
 }
 
+func (m *Initializer) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalTo(dAtA)
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *Initializer) MarshalTo(dAtA []byte) (int, error) {
+	var i int
+	_ = i
+	var l int
+	_ = l
+	dAtA[i] = 0xa
+	i++
+	i = encodeVarintGenerated(dAtA, i, uint64(len(m.Name)))
+	i += copy(dAtA[i:], m.Name)
+	return i, nil
+}
+
+func (m *Initializers) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalTo(dAtA)
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *Initializers) MarshalTo(dAtA []byte) (int, error) {
+	var i int
+	_ = i
+	var l int
+	_ = l
+	if len(m.Pending) > 0 {
+		for _, msg := range m.Pending {
+			dAtA[i] = 0xa
+			i++
+			i = encodeVarintGenerated(dAtA, i, uint64(msg.Size()))
+			n, err := msg.MarshalTo(dAtA[i:])
+			if err != nil {
+				return 0, err
+			}
+			i += n
+		}
+	}
+	if m.Result != nil {
+		dAtA[i] = 0x12
+		i++
+		i = encodeVarintGenerated(dAtA, i, uint64(m.Result.Size()))
+		n5, err := m.Result.MarshalTo(dAtA[i:])
+		if err != nil {
+			return 0, err
+		}
+		i += n5
+	}
+	return i, nil
+}
+
 func (m *LabelSelector) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -967,7 +1041,7 @@ func (m *LabelSelector) MarshalTo(dAtA []byte) (int, error) {
 		for k := range m.MatchLabels {
 			keysForMatchLabels = append(keysForMatchLabels, string(k))
 		}
-		sortkeys.Strings(keysForMatchLabels)
+		github_com_gogo_protobuf_sortkeys.Strings(keysForMatchLabels)
 		for _, k := range keysForMatchLabels {
 			dAtA[i] = 0xa
 			i++
@@ -1058,11 +1132,11 @@ func (m *List) MarshalTo(dAtA []byte) (int, error) {
 	dAtA[i] = 0xa
 	i++
 	i = encodeVarintGenerated(dAtA, i, uint64(m.ListMeta.Size()))
-	n5, err := m.ListMeta.MarshalTo(dAtA[i:])
+	n6, err := m.ListMeta.MarshalTo(dAtA[i:])
 	if err != nil {
 		return 0, err
 	}
-	i += n5
+	i += n6
 	if len(m.Items) > 0 {
 		for _, msg := range m.Items {
 			dAtA[i] = 0x12
@@ -1189,21 +1263,21 @@ func (m *ManagedFieldsEntry) MarshalTo(dAtA []byte) (int, error) {
 		dAtA[i] = 0x22
 		i++
 		i = encodeVarintGenerated(dAtA, i, uint64(m.Time.Size()))
-		n6, err := m.Time.MarshalTo(dAtA[i:])
+		n7, err := m.Time.MarshalTo(dAtA[i:])
 		if err != nil {
 			return 0, err
 		}
-		i += n6
+		i += n7
 	}
 	if m.Fields != nil {
 		dAtA[i] = 0x2a
 		i++
 		i = encodeVarintGenerated(dAtA, i, uint64(m.Fields.Size()))
-		n7, err := m.Fields.MarshalTo(dAtA[i:])
+		n8, err := m.Fields.MarshalTo(dAtA[i:])
 		if err != nil {
 			return 0, err
 		}
-		i += n7
+		i += n8
 	}
 	return i, nil
 }
@@ -1253,20 +1327,20 @@ func (m *ObjectMeta) MarshalTo(dAtA []byte) (int, error) {
 	dAtA[i] = 0x42
 	i++
 	i = encodeVarintGenerated(dAtA, i, uint64(m.CreationTimestamp.Size()))
-	n8, err := m.CreationTimestamp.MarshalTo(dAtA[i:])
+	n9, err := m.CreationTimestamp.MarshalTo(dAtA[i:])
 	if err != nil {
 		return 0, err
 	}
-	i += n8
+	i += n9
 	if m.DeletionTimestamp != nil {
 		dAtA[i] = 0x4a
 		i++
 		i = encodeVarintGenerated(dAtA, i, uint64(m.DeletionTimestamp.Size()))
-		n9, err := m.DeletionTimestamp.MarshalTo(dAtA[i:])
+		n10, err := m.DeletionTimestamp.MarshalTo(dAtA[i:])
 		if err != nil {
 			return 0, err
 		}
-		i += n9
+		i += n10
 	}
 	if m.DeletionGracePeriodSeconds != nil {
 		dAtA[i] = 0x50
@@ -1278,7 +1352,7 @@ func (m *ObjectMeta) MarshalTo(dAtA []byte) (int, error) {
 		for k := range m.Labels {
 			keysForLabels = append(keysForLabels, string(k))
 		}
-		sortkeys.Strings(keysForLabels)
+		github_com_gogo_protobuf_sortkeys.Strings(keysForLabels)
 		for _, k := range keysForLabels {
 			dAtA[i] = 0x5a
 			i++
@@ -1300,7 +1374,7 @@ func (m *ObjectMeta) MarshalTo(dAtA []byte) (int, error) {
 		for k := range m.Annotations {
 			keysForAnnotations = append(keysForAnnotations, string(k))
 		}
-		sortkeys.Strings(keysForAnnotations)
+		github_com_gogo_protobuf_sortkeys.Strings(keysForAnnotations)
 		for _, k := range keysForAnnotations {
 			dAtA[i] = 0x62
 			i++
@@ -1348,6 +1422,18 @@ func (m *ObjectMeta) MarshalTo(dAtA []byte) (int, error) {
 	i++
 	i = encodeVarintGenerated(dAtA, i, uint64(len(m.ClusterName)))
 	i += copy(dAtA[i:], m.ClusterName)
+	if m.Initializers != nil {
+		dAtA[i] = 0x82
+		i++
+		dAtA[i] = 0x1
+		i++
+		i = encodeVarintGenerated(dAtA, i, uint64(m.Initializers.Size()))
+		n11, err := m.Initializers.MarshalTo(dAtA[i:])
+		if err != nil {
+			return 0, err
+		}
+		i += n11
+	}
 	if len(m.ManagedFields) > 0 {
 		for _, msg := range m.ManagedFields {
 			dAtA[i] = 0x8a
@@ -2105,6 +2191,30 @@ func (m *GroupVersionResource) Size() (n int) {
 	return n
 }
 
+func (m *Initializer) Size() (n int) {
+	var l int
+	_ = l
+	l = len(m.Name)
+	n += 1 + l + sovGenerated(uint64(l))
+	return n
+}
+
+func (m *Initializers) Size() (n int) {
+	var l int
+	_ = l
+	if len(m.Pending) > 0 {
+		for _, e := range m.Pending {
+			l = e.Size()
+			n += 1 + l + sovGenerated(uint64(l))
+		}
+	}
+	if m.Result != nil {
+		l = m.Result.Size()
+		n += 1 + l + sovGenerated(uint64(l))
+	}
+	return n
+}
+
 func (m *LabelSelector) Size() (n int) {
 	var l int
 	_ = l
@@ -2261,6 +2371,10 @@ func (m *ObjectMeta) Size() (n int) {
 	}
 	l = len(m.ClusterName)
 	n += 1 + l + sovGenerated(uint64(l))
+	if m.Initializers != nil {
+		l = m.Initializers.Size()
+		n += 2 + l + sovGenerated(uint64(l))
+	}
 	if len(m.ManagedFields) > 0 {
 		for _, e := range m.ManagedFields {
 			l = e.Size()
@@ -2575,7 +2689,7 @@ func (this *Fields) String() string {
 	for k := range this.Map {
 		keysForMap = append(keysForMap, k)
 	}
-	sortkeys.Strings(keysForMap)
+	github_com_gogo_protobuf_sortkeys.Strings(keysForMap)
 	mapStringForMap := "map[string]Fields{"
 	for _, k := range keysForMap {
 		mapStringForMap += fmt.Sprintf("%v: %v,", k, this.Map[k])
@@ -2608,6 +2722,27 @@ func (this *GroupVersionForDiscovery) String() string {
 	}, "")
 	return s
 }
+func (this *Initializer) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&Initializer{`,
+		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *Initializers) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&Initializers{`,
+		`Pending:` + strings.Replace(strings.Replace(fmt.Sprintf("%v", this.Pending), "Initializer", "Initializer", 1), `&`, ``, 1) + `,`,
+		`Result:` + strings.Replace(fmt.Sprintf("%v", this.Result), "Status", "Status", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
 func (this *LabelSelector) String() string {
 	if this == nil {
 		return "nil"
@@ -2616,7 +2751,7 @@ func (this *LabelSelector) String() string {
 	for k := range this.MatchLabels {
 		keysForMatchLabels = append(keysForMatchLabels, k)
 	}
-	sortkeys.Strings(keysForMatchLabels)
+	github_com_gogo_protobuf_sortkeys.Strings(keysForMatchLabels)
 	mapStringForMatchLabels := "map[string]string{"
 	for _, k := range keysForMatchLabels {
 		mapStringForMatchLabels += fmt.Sprintf("%v: %v,", k, this.MatchLabels[k])
@@ -2702,7 +2837,7 @@ func (this *ObjectMeta) String() string {
 	for k := range this.Labels {
 		keysForLabels = append(keysForLabels, k)
 	}
-	sortkeys.Strings(keysForLabels)
+	github_com_gogo_protobuf_sortkeys.Strings(keysForLabels)
 	mapStringForLabels := "map[string]string{"
 	for _, k := range keysForLabels {
 		mapStringForLabels += fmt.Sprintf("%v: %v,", k, this.Labels[k])
@@ -2712,7 +2847,7 @@ func (this *ObjectMeta) String() string {
 	for k := range this.Annotations {
 		keysForAnnotations = append(keysForAnnotations, k)
 	}
-	sortkeys.Strings(keysForAnnotations)
+	github_com_gogo_protobuf_sortkeys.Strings(keysForAnnotations)
 	mapStringForAnnotations := "map[string]string{"
 	for _, k := range keysForAnnotations {
 		mapStringForAnnotations += fmt.Sprintf("%v: %v,", k, this.Annotations[k])
@@ -2734,6 +2869,7 @@ func (this *ObjectMeta) String() string {
 		`OwnerReferences:` + strings.Replace(strings.Replace(fmt.Sprintf("%v", this.OwnerReferences), "OwnerReference", "OwnerReference", 1), `&`, ``, 1) + `,`,
 		`Finalizers:` + fmt.Sprintf("%v", this.Finalizers) + `,`,
 		`ClusterName:` + fmt.Sprintf("%v", this.ClusterName) + `,`,
+		`Initializers:` + strings.Replace(fmt.Sprintf("%v", this.Initializers), "Initializers", "Initializers", 1) + `,`,
 		`ManagedFields:` + strings.Replace(strings.Replace(fmt.Sprintf("%v", this.ManagedFields), "ManagedFieldsEntry", "ManagedFieldsEntry", 1), `&`, ``, 1) + `,`,
 		`}`,
 	}, "")
@@ -5116,6 +5252,199 @@ func (m *GroupVersionResource) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
+func (m *Initializer) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowGenerated
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= (uint64(b) & 0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Initializer: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Initializer: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowGenerated
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipGenerated(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *Initializers) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowGenerated
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= (uint64(b) & 0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Initializers: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Initializers: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Pending", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowGenerated
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= (int(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			postIndex := iNdEx + msglen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Pending = append(m.Pending, Initializer{})
+			if err := m.Pending[len(m.Pending)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Result", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowGenerated
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= (int(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			postIndex := iNdEx + msglen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Result == nil {
+				m.Result = &Status{}
+			}
+			if err := m.Result.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipGenerated(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
 func (m *LabelSelector) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
@@ -6757,6 +7086,39 @@ func (m *ObjectMeta) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			m.ClusterName = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 16:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Initializers", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowGenerated
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= (int(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			postIndex := iNdEx + msglen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Initializers == nil {
+				m.Initializers = &Initializers{}
+			}
+			if err := m.Initializers.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
 			iNdEx = postIndex
 		case 17:
 			if wireType != 2 {
