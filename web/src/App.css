@@ -71,3 +71,7 @@
   max-height: 60%;
   padding: 5px;
 }
+
+.ImageListItem label {
+  font-weight: bold
+}
