@@ -1,28 +1,90 @@
 package k8s
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	shipitv1beta1 "ship-it-operator/api/v1beta1"
 	"ship-it/internal/api/models"
 
 	"github.com/stretchr/testify/assert"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
-func TestDockerArtifacts(t *testing.T) {
+func newTestK8sClient(objs ...runtime.Object) *K8sClient {
+	scheme := runtime.NewScheme()
+	shipitv1beta1.AddToScheme(scheme)
+
+	return &K8sClient{
+		client: fake.NewFakeClientWithScheme(scheme, objs...),
+	}
+}
+
+func TestListAll(t *testing.T) {
+	autodeploy := true
+	created := metav1.Unix(42, 0) // arbitrary, but non-zero nanoseconds causes rounding issues
+	dashboard := "dashboard"
+	github := "github"
+	release := "release"
+	slack := "slack"
+	squad := "squad"
+	sumologic := "sumologic"
+	chartRepo := "chartRepo"
+	chartPath := "chartPath"
+	chartVersion := "chartVersion"
+	dockerImage := "docker/foo"
+	dockerImageTag := "aoeuhtns"
+
+	expectedRelease := models.Release{
+		Name:       release,
+		Created:    created.Time,
+		AutoDeploy: autodeploy,
+		Code: models.SourceCode{
+			Github: github,
+		},
+		Monitoring: models.Monitoring{
+			Datadog: models.Datadog{
+				Dashboard: dashboard,
+			},
+			Sumologic: sumologic,
+		},
+		Artifacts: models.Artifacts{
+			Chart: models.HelmArtifact{
+				Path:       chartPath,
+				Repository: chartRepo,
+				Version:    chartVersion,
+			},
+			Docker: []models.DockerArtifact{
+				{
+					Image: dockerImage,
+					Tag:   dockerImageTag,
+				},
+			},
+		},
+		Owner: models.Owner{
+			Squad: squad,
+			Slack: slack,
+		},
+	}
+
 	values := map[string]interface{}{
 		"foo": map[string]interface{}{
+			// this should appear in the final DockerArtifacts
 			"image": map[string]interface{}{
-				"repository": "docker/foo",
-				"tag":        "aoeu",
+				"repository": dockerImage,
+				"tag":        dockerImageTag,
 			},
 		},
 		"bar": map[string]interface{}{
+			// this should not, since the image fields are invalid
 			"image": map[string]interface{}{
-				"repository": "docker/bar",
-				"tag":        "htns",
+				"badbad":  "docker/bar",
+				"notgood": "htns",
 			},
 		},
 	}
@@ -32,50 +94,41 @@ func TestDockerArtifacts(t *testing.T) {
 		t.FailNow()
 	}
 
-	hr := shipitv1beta1.HelmRelease{
+	k8sRelease := shipitv1beta1.HelmRelease{
+		TypeMeta: metav1.TypeMeta{
+			Kind: "HelmRelease",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:              release,
+			Namespace:         v1.NamespaceDefault,
+			CreationTimestamp: created,
+			Annotations: map[string]string{
+				"helmreleases.shipit.wattpad.com/code":       github,
+				"helmreleases.shipit.wattpad.com/autodeploy": fmt.Sprintf("%t", autodeploy),
+				"helmreleases.shipit.wattpad.com/squad":      squad,
+				"helmreleases.shipit.wattpad.com/slack":      slack,
+				"helmreleases.shipit.wattpad.com/datadog":    dashboard,
+				"helmreleases.shipit.wattpad.com/sumologic":  sumologic,
+			},
+		},
 		Spec: shipitv1beta1.HelmReleaseSpec{
+			ReleaseName: release,
+			Chart: shipitv1beta1.ChartSpec{
+				Repository: chartRepo,
+				Path:       chartPath,
+				Revision:   chartVersion,
+			},
 			Values: runtime.RawExtension{
 				Raw: valuesRaw,
 			},
 		},
 	}
 
-	expected := []models.DockerArtifact{
-		{
-			Image: "docker/foo",
-			Tag:   "aoeu",
-		},
-		{
-			Image: "docker/bar",
-			Tag:   "htns",
-		},
+	client := newTestK8sClient(&k8sRelease)
+
+	apiReleases, err := client.ListAll(context.Background(), v1.NamespaceAll)
+	if assert.NoError(t, err) {
+		assert.Len(t, apiReleases, 1)
+		assert.Equal(t, expectedRelease, apiReleases[0])
 	}
-
-	assert.ElementsMatch(t, expected, dockerArtifacts(hr))
-}
-
-func TestDockerArtifactsBadImageValues(t *testing.T) {
-	values := map[string]interface{}{
-		"foo": map[string]interface{}{
-			"image": map[string]interface{}{
-				"bar": "docker/foo",
-				"baz": "aoeu",
-			},
-		},
-	}
-
-	valuesRaw, err := json.Marshal(values)
-	if !assert.NoError(t, err) {
-		t.FailNow()
-	}
-
-	hr := shipitv1beta1.HelmRelease{
-		Spec: shipitv1beta1.HelmReleaseSpec{
-			Values: runtime.RawExtension{
-				Raw: valuesRaw,
-			},
-		},
-	}
-
-	assert.Len(t, dockerArtifacts(hr), 0)
 }
