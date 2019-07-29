@@ -3,31 +3,22 @@ package unstructured
 import (
 	"testing"
 
-	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/assert"
 )
-
-type mockCallback struct {
-	mock.Mock
-}
-
-func (m *mockCallback) VoidMethod(x interface{}) {
-	m.Called(x)
-}
 
 func TestFindAll(t *testing.T) {
 	obj := map[string]interface{}{
-		"bar": 0,
+		"bar": "happy",
 		"foo": map[string]interface{}{
-			"bar": 1,
+			"bar": "path",
 		},
 		"qux": 2,
 	}
 
-	var cb mockCallback
-	cb.On("VoidMethod", interface{}(0)).Once()
-	cb.On("VoidMethod", interface{}(1)).Once()
+	var values []string
+	FindAll(obj, "bar", func(x interface{}) {
+		values = append(values, x.(string))
+	})
 
-	FindAll(obj, "bar", cb.VoidMethod)
-
-	cb.AssertExpectations(t)
+	assert.ElementsMatch(t, []string{"happy", "path"}, values)
 }
