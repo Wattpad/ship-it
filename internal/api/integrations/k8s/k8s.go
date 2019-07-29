@@ -91,9 +91,19 @@ func dockerArtifacts(hr shipitv1beta1.HelmRelease) []models.DockerArtifact {
 	// one into a docker artifact
 	unstructured.FindAll(hr.HelmValues(), "image", func(x interface{}) {
 		if img, ok := x.(map[string]interface{}); ok {
+			repo, ok := img["repository"].(string)
+			if !ok {
+				return
+			}
+
+			tag, ok := img["tag"].(string)
+			if !ok {
+				return
+			}
+
 			artifacts = append(artifacts, models.DockerArtifact{
-				Image: img["repository"].(string),
-				Tag:   img["tag"].(string),
+				Image: repo,
+				Tag:   tag,
 			})
 		}
 	})

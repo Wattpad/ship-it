@@ -53,3 +53,29 @@ func TestDockerArtifacts(t *testing.T) {
 
 	assert.ElementsMatch(t, expected, dockerArtifacts(hr))
 }
+
+func TestDockerArtifactsBadImageValues(t *testing.T) {
+	values := map[string]interface{}{
+		"foo": map[string]interface{}{
+			"image": map[string]interface{}{
+				"bar": "docker/foo",
+				"baz": "aoeu",
+			},
+		},
+	}
+
+	valuesRaw, err := json.Marshal(values)
+	if !assert.NoError(t, err) {
+		t.FailNow()
+	}
+
+	hr := shipitv1beta1.HelmRelease{
+		Spec: shipitv1beta1.HelmReleaseSpec{
+			Values: runtime.RawExtension{
+				Raw: valuesRaw,
+			},
+		},
+	}
+
+	assert.Len(t, dockerArtifacts(hr), 0)
+}
