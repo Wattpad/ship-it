@@ -24,11 +24,11 @@ class ImageInfoDialog extends React.Component {
     render() {
         this.images = this.props.docker.map(d => 
             <div>
-                <ListItem>
+                <ListItem className="ImageListItem">
                     <ListItemText>
-                        <Typography><b>Registry:</b> {this.getRegistry(d)}</Typography>
-                        <Typography><b>Repository:</b> {this.getRepo(d)}</Typography>
-                        <Typography><b>Tag:</b> {this.getTag(d)}</Typography>
+                        <Typography><label>Registry:</label> {this.getRegistry(d)}</Typography>
+                        <Typography><label>Repository:</label> {this.getRepo(d)}</Typography>
+                        <Typography><label>Tag:</label> {this.getTag(d)}</Typography>
                     </ListItemText>
                 </ListItem>
             </div>
