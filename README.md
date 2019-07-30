@@ -2,7 +2,9 @@
 
 <img src="https://media.giphy.com/media/143vPc6b08locw/giphy.gif" width="300">
 
-_Ship-it_ is Wattpad's tool for continuously deploying code.
+_Ship-it_ is Wattpad's tool for continuously deploying code.  
+
+The technical background and architecture of Ship-it can be found in the overview documentation [here](./docs/OVERVIEW.md)
 
 ## Local Development
 
