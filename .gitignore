@@ -6,9 +6,10 @@
 *.dylib
 
 # Compiled binaries
-ship-it-api
-ship-it-syncd
-ship-it-operator
+/main
+/ship-it-api
+/ship-it-syncd
+/ship-it-operator
 
 # Test binary, build with `go test -c`
 *.test

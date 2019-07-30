@@ -18,7 +18,7 @@ type mockK8sClient struct {
 	releases []models.Release
 }
 
-func (k *mockK8sClient) ListAll(namespace string) ([]models.Release, error) {
+func (k *mockK8sClient) ListAll(ctx context.Context, namespace string) ([]models.Release, error) {
 	return k.releases, nil
 }
 

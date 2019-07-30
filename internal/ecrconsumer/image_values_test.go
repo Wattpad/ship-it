@@ -5,10 +5,11 @@ import (
 
 	"ship-it/internal"
 
-	"ship-it/pkg/apis/k8s.wattpad.com/v1alpha1"
+	shipitv1beta1 "ship-it-operator/api/v1beta1"
 
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	runtime "k8s.io/apimachinery/pkg/runtime"
 )
 
 func TestUpdateImage(t *testing.T) {
@@ -96,26 +97,28 @@ func TestUpdateImage(t *testing.T) {
 }
 
 func TestWithImage(t *testing.T) {
-	rls := v1alpha1.HelmRelease{
+	rls := shipitv1beta1.HelmRelease{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "HelmRelease",
-			APIVersion: "apiVersion: helmreleases.k8s.wattpad.com/v1alpha1",
+			APIVersion: "helmreleases.shipit.wattpad.com/v1beta1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "example-microservice",
 		},
-		Spec: v1alpha1.HelmReleaseSpec{
+		Spec: shipitv1beta1.HelmReleaseSpec{
 			ReleaseName: "example-release",
-			Chart: v1alpha1.ChartSpec{
+			Chart: shipitv1beta1.ChartSpec{
 				Repository: "wattpad.s3.amazonaws.com/helm-charts",
 				Path:       "microservice",
 				Revision:   "HEAD",
 			},
-			Values: map[string]interface{}{
-				"image": map[string]interface{}{
-					"repository": "bar/foo",
-					"tag":        "baz",
-				},
+			Values: runtime.RawExtension{
+				Raw: []byte(`{
+					"image": {
+						"repository": "bar/foo",
+						"tag": "baz"
+					}
+				}`),
 			},
 		},
 	}
@@ -126,9 +129,11 @@ func TestWithImage(t *testing.T) {
 			Repository: "foo",
 			Tag:        "new-tag",
 		}
-		outputRls := WithImage(expectedImg, rls)
+		outputRls, err := WithImage(expectedImg, rls)
+		assert.NoError(t, err)
+		outputValues := outputRls.HelmValues()
 
-		outputImg := outputRls.Spec.Values["image"].(map[string]interface{})
+		outputImg := outputValues["image"].(map[string]interface{})
 		assert.Equal(t, expectedImg.Tag, outputImg["tag"].(string))
 	})
 
@@ -139,8 +144,11 @@ func TestWithImage(t *testing.T) {
 			Repository: "oof",
 			Tag:        "new-tag",
 		}
-		outputRls := WithImage(expectedImg, rls)
-		assert.Exactly(t, rls, outputRls)
+		outputRls, err := WithImage(expectedImg, rls)
+		assert.NoError(t, err)
+		inputValues := rls.HelmValues()
+		outputValues := outputRls.HelmValues()
+		assert.Exactly(t, inputValues, outputValues)
 	})
 }
 

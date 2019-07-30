@@ -42,10 +42,6 @@ const linkTheme = createMuiTheme({
   }
 })
 
-const nestedStyle = {
-  paddingLeft: theme.spacing(4)
-}
-
 const imgAlt = 'not found'
 
 class ExpandedDetail extends React.Component {
@@ -54,19 +50,14 @@ class ExpandedDetail extends React.Component {
     super(props)
     this.state = {
       podsVisible: false,
-      resourcesVisible: false,
-      pods: null,
-      resources: null
+      resourceString: ""
     }
   }
 
   podClick = () => {
     this.setState({podsVisible: !this.state.podsVisible})
     axios.get(urljoin(this.props.API_ADDRESS, 'releases', this.props.data.name, 'resources')).then(response => {
-      this.setState({
-        pods: response.data.filter((d) => d.kind === 'Pod'),
-        resources: response.data.filter((d) => d.kind !== 'Pod')
-      })
+      this.setState({resourceString: response.data.resources})
     })
   }
 
@@ -155,45 +146,11 @@ class ExpandedDetail extends React.Component {
                     component="nav"
                   >
                     <ListItem button onClick={this.podClick}>
-                      <ListItemText>Pods</ListItemText>
+                      <ListItemText>Helm Status</ListItemText>
                       {this.state.podsVisible ? <ExpandLess /> : <ExpandMore />}
                     </ListItem>
                     <Collapse in={this.state.podsVisible} timeout='auto' unmountOnExit>
-                      <List component="div" disablePadding>
-                        {
-                          this.state.pods ?
-                          <div>
-                            {
-                              this.state.pods.map((pod) =>
-                                <ListItem button style={nestedStyle} key={pod.metadata.name}>
-                                  <ListItemText>{pod.metadata.name}</ListItemText>
-                                </ListItem>
-                              )
-                            }
-                          </div>
-                          : <CircularProgress/>
-                        }
-                      </List>
-                    </Collapse>
-                    <ListItem button onClick={this.resourceClick}>
-                      <ListItemText>Other Resources</ListItemText>
-                      {this.state.resourcesVisible ? <ExpandLess /> : <ExpandMore />}
-                    </ListItem>
-                    <Collapse in={this.state.resourcesVisible} timeout='auto' unmountOnExit>
-                      <List component="div" disablePadding>
-                        {
-                          this.state.resources ?
-                          <div>
-                            {
-                              this.state.resources.map((resource) =>
-                                <ListItem style={nestedStyle} key={resource.kind}>
-                                  <ListItemText>{resource.kind}</ListItemText>
-                                </ListItem>
-                              )
-                            }
-                          </div> : <CircularProgress/>
-                        }
-                      </List>
+                      <pre>{this.state.resourceString}</pre>
                     </Collapse>
                   </List>
                 </Paper>
