@@ -16,6 +16,8 @@ limitations under the License.
 package v1beta1
 
 import (
+	"encoding/json"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 )
@@ -56,6 +58,17 @@ type HelmRelease struct {
 
 	Spec   HelmReleaseSpec   `json:"spec,omitempty"`
 	Status HelmReleaseStatus `json:"status,omitempty"`
+}
+
+func (hr HelmRelease) HelmValues() map[string]interface{} {
+	var obj map[string]interface{}
+	if err := json.Unmarshal(hr.Spec.Values.Raw, &obj); err != nil {
+		// this is temporary until we're using a representation of the
+		// values that doesn't force us to handle this impossible error
+		return make(map[string]interface{})
+	}
+
+	return obj
 }
 
 // +kubebuilder:object:root=true
