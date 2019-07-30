@@ -26,6 +26,13 @@ jobs:
       script:
         - TARGET=ship-it-api make build
         - TARGET=ship-it-syncd make build
+    
+    - stage: Build
+      name: Operator
+      before_script:
+        - cd operator
+      script:
+        - make docker-build
 
     - stage: Test and Lint
       name: Go
@@ -33,6 +40,16 @@ jobs:
       script:
         - golangci-lint run -D errcheck -E goimports -E interfacer ./...
         - go test ./...
+
+    - stage: Test and Lint
+      name: Operator
+      before_script:
+        - curl -sL https://github.com/kubernetes-sigs/kubebuilder/releases/download/v1.0.8/kubebuilder_1.0.8_linux_amd64.tar.gz | tar -xz -C /tmp/
+        - sudo mv /tmp/kubebuilder_1.0.8_linux_amd64 /usr/local/kubebuilder
+        - export PATH=$PATH:/usr/local/kubebuilder/bin
+        - cd operator
+      script:
+        - make test
 
     - stage: Test and Lint
       name: JavaScript
@@ -56,6 +73,7 @@ jobs:
       script:
         - TARGET=ship-it-api make push
         - TARGET=ship-it-syncd make push
+        - cd operator && make docker-push
 
     - stage: Codecov
       name: Test Coverage Report
