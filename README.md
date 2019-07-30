@@ -2,7 +2,7 @@
 
 <img src="https://media.giphy.com/media/143vPc6b08locw/giphy.gif" width="300">
 
-_Ship it!_ is Wattpad's tool for continuously deploying code.
+_Ship it!_ is Wattpad's tool for continuous deployment to Kubernetes.
 
 ## Local Development
 
