@@ -19,10 +19,6 @@ const imageRepositoriesIndex = "ImageRepositoriesIndex"
 
 var errCacheSyncFailed = errors.New("repository informer: image repository cache sync failed")
 
-func errReleaseNotFound(repo string) error {
-	return fmt.Errorf("repository informer: no release found for image repository \"%s\"", repo)
-}
-
 func errUnexpectedObjectType(obj interface{}) error {
 	return fmt.Errorf("repository informer: unexpected object type %T", obj)
 }
