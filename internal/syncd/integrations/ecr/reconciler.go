@@ -47,11 +47,9 @@ func (r *ImageReconciler) Reconcile(ctx context.Context, image *internal.Image) 
 		return errors.Wrapf(err, "failed to parse the YAML file")
 	}
 
-	cleanMap := internal.CleanUpStringMap(rls)
+	updatedRls := internal.WithImage(*image, rls)
 
-	internal.WithImage(*image, cleanMap)
-
-	updatedBytes, err := yaml.Marshal(cleanMap)
+	updatedBytes, err := yaml.Marshal(updatedRls)
 	if err != nil {
 		return err
 	}

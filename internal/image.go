@@ -116,22 +116,19 @@ func cleanUpMapValue(v interface{}) interface{} {
 	}
 }
 
-// func WithImage(img Image, r v1beta1.HelmRelease) (v1beta1.HelmRelease, error) {
-//     copy := r.DeepCopy()
-//
-//     cleanMap := CleanUpStringMap(r.HelmValues())
-//     update(cleanMap, img)
-//
-//     newJSON, err := json.Marshal(cleanMap)
-//     if err != nil {
-//         return *copy, err
-//     }
-//     copy.Spec.Values.Raw = newJSON
-//     return *copy, nil
-/* } */
+func DeepCopyMap(in map[string]interface{}) map[string]interface{} {
+	mapCopy := make(map[string]interface{})
+	for k, v := range in {
+		mapCopy[k] = v
+	}
+	return mapCopy
+}
 
-func WithImage(img Image, rlsMap map[string]interface{}) {
-	// NOTE: The final version of this method should perform a deepcopy of the map but this just for testing
+func WithImage(img Image, rlsMap map[string]interface{}) map[string]interface{} {
 	cleanMap := CleanUpStringMap(rlsMap)
-	update(cleanMap, img)
+	copiedMap := DeepCopyMap(cleanMap)
+
+	update(copiedMap, img)
+
+	return copiedMap
 }

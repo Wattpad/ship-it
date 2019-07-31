@@ -269,57 +269,62 @@ func TestUpdateImage(t *testing.T) {
 }
 
 func TestWithImage(t *testing.T) {
+	type testCase struct {
+		name        string
+		inputMap    map[string]interface{}
+		inputImage  Image
+		expectedMap map[string]interface{}
+	}
 
+	testCases := []testCase{
+		{
+			name: "Matching Image Case",
+			inputMap: map[string]interface{}{
+				"image": map[string]interface{}{
+					"repository": "foo/bar",
+					"tag":        "baz",
+				},
+			},
+			inputImage: Image{
+				Registry:   "foo",
+				Repository: "bar",
+				Tag:        "a-new-tag",
+			},
+			expectedMap: map[string]interface{}{
+				"image": map[string]interface{}{
+					"repository": "foo/bar",
+					"tag":        "a-new-tag",
+				},
+			},
+		}, {
+			name: "No Matching Image Case",
+			inputMap: map[string]interface{}{
+				"image": map[string]interface{}{
+					"repository": "foo/bar",
+					"tag":        "baz",
+				},
+			},
+			inputImage: Image{
+				Registry:   "foo",
+				Repository: "oof",
+				Tag:        "a-new-tag",
+			},
+			expectedMap: map[string]interface{}{
+				"image": map[string]interface{}{
+					"repository": "foo/bar",
+					"tag":        "baz",
+				},
+			},
+		},
+	}
+
+	for _, test := range testCases {
+		t.Run(test.name, func(t *testing.T) {
+			WithImage(test.inputImage, test.inputMap)
+			assert.Equal(t, test.expectedMap, test.inputMap)
+		})
+	}
 }
-
-// func TestWithImage(t *testing.T) {
-//     rls := v1beta1.HelmRelease{
-//         TypeMeta: metav1.TypeMeta{
-//             Kind:       "HelmRelease",
-//             APIVersion: "apiVersion: helmreleases.k8s.wattpad.com/v1beta1",
-//         },
-//         ObjectMeta: metav1.ObjectMeta{
-//             Name: "example-microservice",
-//         },
-//         Spec: v1beta1.HelmReleaseSpec{
-//             ReleaseName: "example-release",
-//             Chart: v1beta1.ChartSpec{
-//                 Repository: "wattpad.s3.amazonaws.com/helm-charts",
-//                 Path:       "microservice",
-//                 Revision:   "HEAD",
-//             },
-//             Values: runtime.RawExtension{
-//                 Raw: []byte(`{"image":{"repository":"bar/foo","tag":"some-new-tag"}}`),
-//             },
-//         },
-//     }
-//
-//     t.Run("Matching Image Case", func(t *testing.T) {
-//         expectedValues := runtime.RawExtension{
-//             Raw: []byte(`{"image":{"repository":"bar/foo","tag":"some-new-tag"}}`),
-//         }
-//         inputImage := Image{
-//             Registry:   "bar",
-//             Repository: "foo",
-//             Tag:        "some-new-tag",
-//         }
-//         outputRls, err := WithImage(inputImage, rls)
-//         assert.NoError(t, err)
-//
-//         assert.Equal(t, string(expectedValues.Raw), string(outputRls.Spec.Values.Raw))
-//     })
-//
-//     t.Run("No Matching Image Case", func(t *testing.T) {
-//         expectedImg := Image{
-//             Registry:   "bar",
-//             Repository: "oof",
-//             Tag:        "new-tag",
-//         }
-//         outputRls, err := WithImage(expectedImg, rls)
-//         assert.NoError(t, err)
-//         assert.Exactly(t, rls, outputRls)
-//     })
-/* } */
 
 func TestStringMapCleanup(t *testing.T) {
 	inputMap := map[string]interface{}{
@@ -333,4 +338,21 @@ func TestStringMapCleanup(t *testing.T) {
 		},
 	}
 	assert.Equal(t, expectedMap, CleanUpStringMap(inputMap))
+}
+
+func TestDeepCopyMap(t *testing.T) {
+	inputMap := map[string]interface{}{
+		"a": map[string]interface{}{
+			"b": "a-fake-value",
+		},
+		"c": "fake",
+	}
+
+	copiedMap := DeepCopyMap(inputMap)
+	assert.Equal(t, inputMap, copiedMap)
+
+	// Modify the input map and check that the copy does not change
+	inputMap["c"] = "some new value"
+
+	assert.NotEqual(t, inputMap, copiedMap)
 }
