@@ -17,12 +17,6 @@ import (
 
 const imageRepositoriesIndex = "ImageRepositoriesIndex"
 
-var errCacheSyncFailed = errors.New("repository informer: image repository cache sync failed")
-
-func errUnexpectedObjectType(obj interface{}) error {
-	return fmt.Errorf("repository informer: unexpected object type %T", obj)
-}
-
 func eventHandler(indexer toolscache.Indexer) *toolscache.ResourceEventHandlerFuncs {
 	// TODO: should we log indexer errors?
 	return &toolscache.ResourceEventHandlerFuncs{
@@ -81,7 +75,7 @@ func NewInformerWithCache(ctx context.Context, c cache.Cache) (*ImageRepositoryI
 	c.Start(ctx.Done())
 
 	if !c.WaitForCacheSync(ctx.Done()) {
-		return nil, errCacheSyncFailed
+		return nil, errors.New("repository informer: image repository cache sync failed")
 	}
 
 	return &ImageRepositoryInformer{indexer}, nil
@@ -113,7 +107,7 @@ func imageRepositoriesIndexFunc(obj interface{}) ([]string, error) {
 	if hr, ok := obj.(*shipitv1beta1.HelmRelease); ok {
 		return imageRepositories(hr), nil
 	}
-	return nil, errUnexpectedObjectType(obj)
+	return nil, fmt.Errorf("repository informer: unexpected object type %T", obj)
 }
 
 func imageRepositories(hr *shipitv1beta1.HelmRelease) []string {

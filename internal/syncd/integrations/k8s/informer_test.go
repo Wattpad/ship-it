@@ -102,7 +102,7 @@ func TestLookup(t *testing.T) {
 		assert.Equal(t, names[0], expected)
 	}
 
-	// delete the HelmRelease
+	// delete the release
 	fakeInformer.Delete(&updatedHR)
 	names, err = informer.Lookup(wordCountsRepository)
 	if assert.NoError(t, err) {
