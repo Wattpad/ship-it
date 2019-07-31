@@ -42,8 +42,8 @@ type Datadog struct {
 }
 
 type Artifacts struct {
-	Docker DockerArtifact `json:"docker"`
-	Chart  HelmArtifact   `json:"chart"`
+	Docker []DockerArtifact `json:"docker"`
+	Chart  HelmArtifact     `json:"chart"`
 }
 
 type DockerArtifact struct {

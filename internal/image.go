@@ -3,8 +3,6 @@ package internal
 import (
 	"fmt"
 	"strings"
-
-	"ship-it/pkg/apis/k8s.wattpad.com/v1alpha1"
 )
 
 type Image struct {
@@ -91,7 +89,7 @@ func cleanUpInterfaceArray(in []interface{}) []interface{} {
 	return result
 }
 
-func cleanUpStringMap(in map[string]interface{}) map[string]interface{} {
+func CleanUpStringMap(in map[string]interface{}) map[string]interface{} {
 	result := make(map[string]interface{}, len(in))
 	for k, v := range in {
 		result[fmt.Sprintf("%v", k)] = cleanUpMapValue(v)
@@ -118,13 +116,22 @@ func cleanUpMapValue(v interface{}) interface{} {
 	}
 }
 
-func WithImage(img Image, r v1alpha1.HelmRelease) v1alpha1.HelmRelease {
-	copy := r.DeepCopy()
+// func WithImage(img Image, r v1beta1.HelmRelease) (v1beta1.HelmRelease, error) {
+//     copy := r.DeepCopy()
+//
+//     cleanMap := CleanUpStringMap(r.HelmValues())
+//     update(cleanMap, img)
+//
+//     newJSON, err := json.Marshal(cleanMap)
+//     if err != nil {
+//         return *copy, err
+//     }
+//     copy.Spec.Values.Raw = newJSON
+//     return *copy, nil
+/* } */
 
-	cleanMap := cleanUpStringMap(copy.Spec.Values)
-	copy.Spec.Values = v1alpha1.HelmValues(cleanMap)
-
-	update(copy.Spec.Values, img)
-
-	return *copy
+func WithImage(img Image, rlsMap map[string]interface{}) {
+	// NOTE: The final version of this method should perform a deepcopy of the map but this just for testing
+	cleanMap := CleanUpStringMap(rlsMap)
+	update(cleanMap, img)
 }

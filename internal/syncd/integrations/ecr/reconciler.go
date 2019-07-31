@@ -10,7 +10,6 @@ import (
 	"github.com/google/go-github/v26/github"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
-	"ship-it/pkg/apis/k8s.wattpad.com/v1alpha1"
 )
 
 type RepositoriesService interface {
@@ -41,14 +40,18 @@ func (r *ImageReconciler) Reconcile(ctx context.Context, image *internal.Image) 
 		return errors.Wrapf(err, "failed to download custom resource file for path: %s", path)
 	}
 
-	rls, err := v1alpha1.LoadRelease([]byte(resourceStr))
+	rls := make(map[string]interface{})
+
+	err = yaml.Unmarshal([]byte(resourceStr), rls)
 	if err != nil {
-		return errors.Wrapf(err, "failed to load release from custom resource file at path: %s", path)
+		return errors.Wrapf(err, "failed to parse the YAML file")
 	}
 
-	updatedRls := internal.WithImage(*image, *rls)
+	cleanMap := internal.CleanUpStringMap(rls)
 
-	updatedBytes, err := yaml.Marshal(updatedRls)
+	internal.WithImage(*image, cleanMap)
+
+	updatedBytes, err := yaml.Marshal(cleanMap)
 	if err != nil {
 		return err
 	}
