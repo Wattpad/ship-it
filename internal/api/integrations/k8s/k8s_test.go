@@ -26,7 +26,7 @@ func newTestK8sClient(objs ...runtime.Object) *K8sClient {
 	}
 }
 
-func TestList(t *testing.T) {
+func TestGetAndList(t *testing.T) {
 	autodeploy := true
 	chartPath := "chartPath"
 	chartRepo := "chartRepo"

@@ -33,6 +33,23 @@ func (c *controller) ListReleases(w http.ResponseWriter, r *http.Request) {
 	Success200(w, releases)
 }
 
+func (c *controller) GetRelease(w http.ResponseWriter, r *http.Request) {
+	name := chi.URLParam(r, "name")
+
+	if err := validateReleaseName(name); err != nil {
+		Error400(w, err)
+		return
+	}
+
+	release, err := c.svc.GetRelease(r.Context(), name)
+	if err != nil {
+		Error500(w, err)
+		return
+	}
+
+	Success200(w, release)
+}
+
 func (c *controller) GetReleaseResources(w http.ResponseWriter, r *http.Request) {
 	name := chi.URLParam(r, "name")
 

@@ -89,6 +89,58 @@ func TestListReleases(t *testing.T) {
 	})
 }
 
+func TestGetRelease(t *testing.T) {
+	testRelease := "test-release"
+	invalidRelease := "bad$release#name"
+
+	t.Run("endpoint returns 200 on success", func(t *testing.T) {
+		var m mockService
+		m.On("GetRelease", mock.Anything, testRelease).Return(&models.Release{}, nil)
+
+		rec := httptest.NewRecorder()
+
+		req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/releases/%s", testRelease), nil)
+		req = withRouteContext(req, "name", testRelease)
+
+		c := newController(&m)
+		c.GetRelease(rec, req)
+
+		m.AssertExpectations(t)
+		assert.Equal(t, rec.Code, http.StatusOK)
+	})
+
+	t.Run("endpoint returns 400 for invalid request", func(t *testing.T) {
+		rec := httptest.NewRecorder()
+
+		req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/releases/%s", invalidRelease), nil)
+		req = withRouteContext(req, "name", invalidRelease)
+
+		m := new(mockService)
+		c := newController(m)
+
+		c.GetRelease(rec, req)
+
+		m.AssertNotCalled(t, "GetRelease")
+		assert.Equal(t, rec.Code, http.StatusBadRequest)
+	})
+
+	t.Run("endpoint returns 500 for internal error", func(t *testing.T) {
+		var m mockService
+		m.On("GetRelease", mock.Anything, testRelease).Return(nil, errors.New("internal error"))
+
+		rec := httptest.NewRecorder()
+
+		req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/releases/%s", testRelease), nil)
+		req = withRouteContext(req, "name", testRelease)
+
+		c := newController(&m)
+		c.GetRelease(rec, req)
+
+		m.AssertExpectations(t)
+		assert.Equal(t, rec.Code, http.StatusInternalServerError)
+	})
+}
+
 func TestGetReleaseResources(t *testing.T) {
 	testRelease := "test-release"
 	invalidRelease := "bad$release#name"

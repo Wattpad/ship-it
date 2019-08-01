@@ -50,7 +50,7 @@ func newMockK8sClient(name string, time time.Time) *mockK8sClient {
 	}
 }
 
-func TestListReleases(t *testing.T) {
+func TestGetAndListReleases(t *testing.T) {
 	name := "releaseName"
 	currentTime := time.Now()
 
@@ -62,6 +62,12 @@ func TestListReleases(t *testing.T) {
 		assert.Len(t, releases, 1)
 		assert.Equal(t, name, releases[0].Name)
 		assert.Equal(t, currentTime, releases[0].Created)
+	}
+
+	release, err := svc.GetRelease(context.Background(), name)
+	if !assert.NoError(t, err) {
+		assert.Equal(t, name, release.Name)
+		assert.Equal(t, currentTime, release.Created)
 	}
 }
 

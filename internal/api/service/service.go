@@ -9,6 +9,7 @@ import (
 )
 
 type ReleaseLister interface {
+	Get(ctx context.Context, namespace, release string) (*models.Release, error)
 	List(ctx context.Context, namespace string) ([]models.Release, error)
 }
 
@@ -32,6 +33,10 @@ type Service struct {
 
 func (s *Service) ListReleases(ctx context.Context) ([]models.Release, error) {
 	return s.releases.List(ctx, s.Namespace)
+}
+
+func (s *Service) GetRelease(ctx context.Context, name string) (*models.Release, error) {
+	return s.releases.Get(ctx, s.Namespace, name)
 }
 
 func (s *Service) GetReleaseResources(ctx context.Context, name string) (*models.ReleaseResources, error) {
