@@ -50,7 +50,8 @@ func TestECRHandler(t *testing.T) {
 	}
 
 	mockRepoService := new(MockRepoService)
-	fakeReconciler := NewReconciler("Wattpad", "custom-resources/path", "foo", mockRepoService)
+	fakeIndexService := new(MockIndexerService)
+	fakeReconciler := NewReconciler("Wattpad", "custom-resources/path", "foo", mockRepoService, fakeIndexService)
 
 	err := fakeListener.handler(fakeReconciler)(context.Background(), `some bad message`)
 	assert.Error(t, err)
