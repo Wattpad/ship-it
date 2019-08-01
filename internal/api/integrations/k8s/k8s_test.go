@@ -13,6 +13,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/helm/pkg/proto/hapi/release"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
@@ -25,23 +26,24 @@ func newTestK8sClient(objs ...runtime.Object) *K8sClient {
 	}
 }
 
-func TestListAll(t *testing.T) {
+func TestList(t *testing.T) {
 	autodeploy := true
+	chartPath := "chartPath"
+	chartRepo := "chartRepo"
+	chartVersion := "chartVersion"
 	created := metav1.Unix(42, 0) // arbitrary, but non-zero nanoseconds causes rounding issues
 	dashboard := "dashboard"
+	dockerImage := "docker/foo"
+	dockerImageTag := "aoeuhtns"
 	github := "github"
-	release := "release"
+	releaseName := "releaseName"
+	releaseStatus := release.Status_DEPLOYED
 	slack := "slack"
 	squad := "squad"
 	sumologic := "sumologic"
-	chartRepo := "chartRepo"
-	chartPath := "chartPath"
-	chartVersion := "chartVersion"
-	dockerImage := "docker/foo"
-	dockerImageTag := "aoeuhtns"
 
 	expectedRelease := models.Release{
-		Name:       release,
+		Name:       releaseName,
 		Created:    created.Time,
 		AutoDeploy: autodeploy,
 		Code: models.SourceCode{
@@ -70,6 +72,7 @@ func TestListAll(t *testing.T) {
 			Squad: squad,
 			Slack: slack,
 		},
+		Status: releaseStatus.String(),
 	}
 
 	values := map[string]interface{}{
@@ -99,7 +102,7 @@ func TestListAll(t *testing.T) {
 			Kind: "HelmRelease",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:              release,
+			Name:              releaseName,
 			Namespace:         v1.NamespaceDefault,
 			CreationTimestamp: created,
 			Annotations: map[string]string{
@@ -112,7 +115,7 @@ func TestListAll(t *testing.T) {
 			},
 		},
 		Spec: shipitv1beta1.HelmReleaseSpec{
-			ReleaseName: release,
+			ReleaseName: releaseName,
 			Chart: shipitv1beta1.ChartSpec{
 				Repository: chartRepo,
 				Path:       chartPath,
@@ -122,13 +125,21 @@ func TestListAll(t *testing.T) {
 				Raw: valuesRaw,
 			},
 		},
+		Status: shipitv1beta1.HelmReleaseStatus{
+			Code: releaseStatus,
+		},
 	}
 
 	client := newTestK8sClient(&k8sRelease)
 
-	apiReleases, err := client.ListAll(context.Background(), v1.NamespaceAll)
+	apiReleases, err := client.List(context.Background(), v1.NamespaceAll)
 	if assert.NoError(t, err) {
 		assert.Len(t, apiReleases, 1)
 		assert.Equal(t, expectedRelease, apiReleases[0])
+	}
+
+	apiRelease, err := client.Get(context.Background(), v1.NamespaceAll, releaseName)
+	if assert.NoError(t, err) && assert.NotNil(t, apiRelease) {
+		assert.Equal(t, expectedRelease, *apiRelease)
 	}
 }

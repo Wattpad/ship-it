@@ -6,40 +6,42 @@ import (
 	"ship-it/internal/api/models"
 
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/helm/pkg/proto/hapi/release"
 )
 
-func New(l ReleaseLister) *Service {
+type ReleaseLister interface {
+	List(ctx context.Context, namespace string) ([]models.Release, error)
+}
+
+type ResourcesGetter interface {
+	Get(namespace, release string) (string, error)
+}
+
+func New(rl ReleaseLister, rg ResourcesGetter) *Service {
 	return &Service{
-		lister: l,
+		Namespace: v1.NamespaceAll,
+		releases:  rl,
+		resources: rg,
 	}
 }
 
-type ReleaseLister interface {
-	ListAll(ctx context.Context, namespace string) ([]models.Release, error)
-}
-
 type Service struct {
-	lister ReleaseLister
+	Namespace string
+	releases  ReleaseLister
+	resources ResourcesGetter
 }
 
 func (s *Service) ListReleases(ctx context.Context) ([]models.Release, error) {
-	releases, err := s.lister.ListAll(ctx, v1.NamespaceAll)
+	return s.releases.List(ctx, s.Namespace)
+}
+
+func (s *Service) GetReleaseResources(ctx context.Context, name string) (*models.ReleaseResources, error) {
+	resources, err := s.resources.Get(s.Namespace, name)
 	if err != nil {
 		return nil, err
 	}
 
-	for i := range releases {
-		r := &releases[i]
-
-		r.Status = s.getReleaseStatus(r).String()
-	}
-
-	return releases, err
-}
-
-func (s *Service) getReleaseStatus(_ *models.Release) release.Status_Code {
-	// The default state of a registered service is 'PENDING_INSTALL'.
-	// There's only one possible release status for now.
-	return release.Status_PENDING_INSTALL
+	return &models.ReleaseResources{
+		Name:      name,
+		Resources: resources,
+	}, nil
 }
