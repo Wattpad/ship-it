@@ -15,11 +15,11 @@ func newController(s Service) *controller {
 }
 
 func (c *controller) ListReleases(w http.ResponseWriter, r *http.Request) {
-	deps, err := c.svc.ListReleases(r.Context())
+	releases, err := c.svc.ListReleases(r.Context())
 	if err != nil {
 		Error500(w, err)
 		return
 	}
 
-	Success200(w, deps)
+	Success200(w, releases)
 }
