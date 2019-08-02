@@ -1,6 +1,7 @@
 package ecr
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 	"testing"
@@ -68,9 +69,102 @@ type MockIndexerService struct {
 }
 
 func (m *MockIndexerService) Lookup(repo string) ([]types.NamespacedName, error) {
-	fmt.Println("called")
 	args := m.Called(repo)
 	return args.Get(0).([]types.NamespacedName), args.Error(1)
+}
+
+func TestReconcile(t *testing.T) {
+	mockRepoService := new(MockRepoService)
+	mockIndexService := new(MockIndexerService)
+	fakeReconciler := &ImageReconciler{
+		Org:               "Wattpad",
+		RegistryChartPath: "foo/bar/resources",
+		Branch:            "oof",
+		RepoService:       mockRepoService,
+		IndexService:      mockIndexService,
+	}
+
+	inputImage := &internal.Image{
+		Registry:   "723255503624.dkr.ecr.us-east-1.amazonaws.com",
+		Repository: "bar",
+		Tag:        "78bc9ccf64eb838c6a0e0492ded722274925e2bd",
+	}
+
+	mockIndexService.On("Lookup", "bar").Return([]types.NamespacedName{
+		{
+			Namespace: "default",
+			Name:      "bar",
+		},
+	}, error(nil))
+
+	mockRepoService.On("GetFile", fakeReconciler.Branch, mock.AnythingOfType("string")).Return(inputYaml, error(nil))
+	mockRepoService.On("UpdateFile", fmt.Sprintf("Image Tag updated to: %s", inputImage.Tag), fakeReconciler.Branch, mock.AnythingOfType("string"), []byte(expectedYaml)).Return(&github.RepositoryContentResponse{}, error(nil))
+
+	err := fakeReconciler.Reconcile(context.Background(), inputImage)
+	if !assert.NoError(t, err) {
+		t.FailNow()
+	}
+	mockIndexService.AssertExpectations(t)
+	mockRepoService.AssertExpectations(t)
+}
+
+func TestReconcileLookupFailure(t *testing.T) {
+	mockRepoService := new(MockRepoService)
+	mockIndexService := new(MockIndexerService)
+	fakeReconciler := &ImageReconciler{
+		Org:               "Wattpad",
+		RegistryChartPath: "foo/bar/resources",
+		Branch:            "oof",
+		RepoService:       mockRepoService,
+		IndexService:      mockIndexService,
+	}
+
+	inputImage := &internal.Image{
+		Registry:   "723255503624.dkr.ecr.us-east-1.amazonaws.com",
+		Repository: "bar",
+		Tag:        "78bc9ccf64eb838c6a0e0492ded722274925e2bd",
+	}
+
+	mockIndexService.On("Lookup", "bar").Return([]types.NamespacedName{}, fmt.Errorf("some error finding release"))
+
+	err := fakeReconciler.Reconcile(context.Background(), inputImage)
+
+	assert.Error(t, err)
+	mockIndexService.AssertExpectations(t)
+}
+
+func TestReconcileUpdateFailure(t *testing.T) {
+	mockRepoService := new(MockRepoService)
+	mockIndexService := new(MockIndexerService)
+	fakeReconciler := &ImageReconciler{
+		Org:               "Wattpad",
+		RegistryChartPath: "foo/bar/resources",
+		Branch:            "oof",
+		RepoService:       mockRepoService,
+		IndexService:      mockIndexService,
+	}
+
+	inputImage := &internal.Image{
+		Registry:   "723255503624.dkr.ecr.us-east-1.amazonaws.com",
+		Repository: "bar",
+		Tag:        "78bc9ccf64eb838c6a0e0492ded722274925e2bd",
+	}
+
+	mockIndexService.On("Lookup", "bar").Return([]types.NamespacedName{
+		{
+			Namespace: "default",
+			Name:      "bar",
+		},
+	}, error(nil))
+
+	mockRepoService.On("GetFile", fakeReconciler.Branch, mock.AnythingOfType("string")).Return("", fmt.Errorf("some error"))
+
+	err := fakeReconciler.Reconcile(context.Background(), inputImage)
+
+	assert.Error(t, err)
+
+	mockIndexService.AssertExpectations(t)
+	mockRepoService.AssertExpectations(t)
 }
 
 func TestUpdateResourceSuccess(t *testing.T) {
