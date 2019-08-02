@@ -60,7 +60,7 @@ type HelmRelease struct {
 	Status HelmReleaseStatus `json:"status,omitempty"`
 }
 
-func (hr *HelmRelease) HelmValues() map[string]interface{} {
+func (hr HelmRelease) HelmValues() map[string]interface{} {
 	var obj map[string]interface{}
 	if err := json.Unmarshal(hr.Spec.Values.Raw, &obj); err != nil {
 		// this is temporary until we're using a representation of the

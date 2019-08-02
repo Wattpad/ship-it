@@ -1,35 +1,46 @@
 import React from 'react'
 import Dialog from '@material-ui/core/Dialog'
-import { DialogContent, DialogActions, Button, DialogTitle, Typography } from '@material-ui/core';
+import { DialogContent, DialogActions, List, Button, DialogTitle, Typography, ListItem, ListItemText } from '@material-ui/core';
 
 class ImageInfoDialog extends React.Component {
-    getRegistry() {
-        let arr = this.props.docker.image.split('/')
+    getRegistry(docker) {
+        let arr = docker.image.split('/')
         return arr[0]
     }
 
-    getRepo() {
-        let arr = this.props.docker.image.split('/')
+    getRepo(docker) {
+        let arr = docker.image.split('/')
         return arr[1]
     }
 
-    getTag() {
-        return this.props.docker.tag
+    getTag(docker) {
+        return docker.tag
     }
 
-    getURI() {
-        return this.props.docker.image + ':' + this.getTag()
+    getURI(docker) {
+        return docker.image + ':' + this.getTag()
     }
 
     render() {
+        this.images = this.props.docker.map(d => 
+            <div>
+                <ListItem className="ImageListItem">
+                    <ListItemText>
+                        <Typography><label>Registry:</label> {this.getRegistry(d)}</Typography>
+                        <Typography><label>Repository:</label> {this.getRepo(d)}</Typography>
+                        <Typography><label>Tag:</label> {this.getTag(d)}</Typography>
+                    </ListItemText>
+                </ListItem>
+            </div>
+        )
+        
         return (
             <Dialog open={this.props.open} onClose={this.props.handleClose} maxWidth="xl">
                 <DialogTitle>Docker Image Information</DialogTitle>
                 <DialogContent>
-                    <Typography>Docker Registry: {this.getRegistry()}</Typography>
-                    <Typography>Repository: {this.getRepo()}</Typography>
-                    <Typography>Tag: {this.getTag()}</Typography>
-                    <Typography>Full URI: {this.getURI()}</Typography>
+                    <List>
+                        {this.images}
+                    </List>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={this.props.handleClose}>Close</Button>

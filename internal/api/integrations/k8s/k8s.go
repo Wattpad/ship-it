@@ -3,13 +3,12 @@ package k8s
 import (
 	"context"
 
-	"ship-it/internal/api/models"
-
-	"k8s.io/client-go/rest"
-
 	shipitv1beta1 "ship-it-operator/api/v1beta1"
+	"ship-it/internal/api/models"
+	"ship-it/internal/unstructured"
 
 	runtime "k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/rest"
 	client "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -41,9 +40,9 @@ func New() (*K8sClient, error) {
 }
 
 func (k *K8sClient) ListAll(ctx context.Context, namespace string) ([]models.Release, error) {
-	releaseList := &shipitv1beta1.HelmReleaseList{}
+	var releaseList shipitv1beta1.HelmReleaseList
 
-	err := k.client.List(ctx, releaseList, client.InNamespace(namespace))
+	err := k.client.List(ctx, &releaseList, client.InNamespace(namespace))
 
 	if err != nil {
 		return nil, err
@@ -77,9 +76,37 @@ func (k *K8sClient) ListAll(ctx context.Context, namespace string) ([]models.Rel
 					Repository: r.Spec.Chart.Repository,
 					Version:    r.Spec.Chart.Revision,
 				},
+				Docker: dockerArtifacts(r),
 			},
 		})
 	}
 
 	return releases, nil
+}
+
+func dockerArtifacts(hr shipitv1beta1.HelmRelease) []models.DockerArtifact {
+	var artifacts []models.DockerArtifact
+
+	// find all "image" sections in the release's values, transforming each
+	// one into a docker artifact
+	unstructured.FindAll(hr.HelmValues(), "image", func(x interface{}) {
+		if img, ok := x.(map[string]interface{}); ok {
+			repo, ok := img["repository"].(string)
+			if !ok {
+				return
+			}
+
+			tag, ok := img["tag"].(string)
+			if !ok {
+				return
+			}
+
+			artifacts = append(artifacts, models.DockerArtifact{
+				Image: repo,
+				Tag:   tag,
+			})
+		}
+	})
+
+	return artifacts
 }
