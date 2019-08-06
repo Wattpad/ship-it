@@ -1,13 +1,12 @@
 package k8s
 
 import (
+	shipitv1beta1 "ship-it-operator/api/v1beta1"
 	"strconv"
-
-	"ship-it/pkg/apis/k8s.wattpad.com/v1alpha1"
 )
 
 func annotationFor(k string) string {
-	return v1alpha1.Resource("helmreleases").String() + "/" + k
+	return shipitv1beta1.Resource("helmreleases").String() + "/" + k
 }
 
 type helmReleaseAnnotations map[string]string

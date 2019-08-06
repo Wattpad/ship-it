@@ -2,59 +2,60 @@ package k8s
 
 import (
 	"context"
-	"time"
 
+	shipitv1beta1 "ship-it-operator/api/v1beta1"
 	"ship-it/internal/api/models"
+	"ship-it/internal/unstructured"
 
-	clientset "ship-it/pkg/generated/clientset/versioned"
-	informers "ship-it/pkg/generated/informers/externalversions"
-
-	listerv1alpha1 "ship-it/pkg/generated/listers/k8s.wattpad.com/v1alpha1"
-
-	"k8s.io/apimachinery/pkg/labels"
+	runtime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/rest"
+	client "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type K8sClient struct {
-	lister listerv1alpha1.HelmReleaseLister
+	client client.Client
 }
 
-func New(ctx context.Context, resync time.Duration) (*K8sClient, error) {
+func New() (*K8sClient, error) {
+	scheme := runtime.NewScheme()
+	shipitv1beta1.AddToScheme(scheme)
+
 	config, err := rest.InClusterConfig()
+
 	if err != nil {
 		return nil, err
 	}
 
-	client, err := clientset.NewForConfig(config)
+	cl, err := client.New(config, client.Options{
+		Scheme: scheme,
+	})
+
 	if err != nil {
 		return nil, err
 	}
-
-	factory := informers.NewSharedInformerFactory(client, resync)
-
-	helmReleaseLister := factory.Helmreleases().V1alpha1().HelmReleases().Lister()
-
-	// factory must be started after all informers/listers have been created
-	factory.Start(ctx.Done())
 
 	return &K8sClient{
-		lister: helmReleaseLister,
+		client: cl,
 	}, nil
 }
 
-func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
-	releaseList, err := k.lister.HelmReleases(namespace).List(labels.Everything())
+func (k *K8sClient) ListAll(ctx context.Context, namespace string) ([]models.Release, error) {
+	var releaseList shipitv1beta1.HelmReleaseList
+
+	err := k.client.List(ctx, &releaseList, client.InNamespace(namespace))
+
 	if err != nil {
 		return nil, err
 	}
 
-	releases := make([]models.Release, 0, len(releaseList))
-	for _, r := range releaseList {
+	releases := make([]models.Release, 0, len(releaseList.Items))
+
+	for _, r := range releaseList.Items {
 		annotations := helmReleaseAnnotations(r.GetAnnotations())
 
 		releases = append(releases, models.Release{
-			Name:       r.GetName(),
-			Created:    r.GetCreationTimestamp().Time,
+			Name:       r.ObjectMeta.GetName(),
+			Created:    r.ObjectMeta.GetCreationTimestamp().Time,
 			AutoDeploy: annotations.AutoDeploy(),
 			Owner: models.Owner{
 				Squad: annotations.Squad(),
@@ -75,9 +76,37 @@ func (k *K8sClient) ListAll(namespace string) ([]models.Release, error) {
 					Repository: r.Spec.Chart.Repository,
 					Version:    r.Spec.Chart.Revision,
 				},
+				Docker: dockerArtifacts(r),
 			},
 		})
 	}
 
 	return releases, nil
+}
+
+func dockerArtifacts(hr shipitv1beta1.HelmRelease) []models.DockerArtifact {
+	var artifacts []models.DockerArtifact
+
+	// find all "image" sections in the release's values, transforming each
+	// one into a docker artifact
+	unstructured.FindAll(hr.HelmValues(), "image", func(x interface{}) {
+		if img, ok := x.(map[string]interface{}); ok {
+			repo, ok := img["repository"].(string)
+			if !ok {
+				return
+			}
+
+			tag, ok := img["tag"].(string)
+			if !ok {
+				return
+			}
+
+			artifacts = append(artifacts, models.DockerArtifact{
+				Image: repo,
+				Tag:   tag,
+			})
+		}
+	})
+
+	return artifacts
 }

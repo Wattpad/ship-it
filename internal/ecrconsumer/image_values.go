@@ -1,11 +1,12 @@
 package ecrconsumer
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"ship-it/internal"
 
-	"ship-it/pkg/apis/k8s.wattpad.com/v1alpha1"
+	shipitv1beta1 "ship-it-operator/api/v1beta1"
 )
 
 func getImagePath(obj map[string]interface{}, serviceName string) []string {
@@ -96,13 +97,14 @@ func cleanUpMapValue(v interface{}) interface{} {
 	}
 }
 
-func WithImage(img internal.Image, r v1alpha1.HelmRelease) v1alpha1.HelmRelease {
+func WithImage(img internal.Image, r shipitv1beta1.HelmRelease) (shipitv1beta1.HelmRelease, error) {
 	copy := r.DeepCopy()
 
-	cleanMap := cleanUpStringMap(copy.Spec.Values)
-	copy.Spec.Values = v1alpha1.HelmValues(cleanMap)
+	cleanMap := cleanUpStringMap(r.HelmValues())
+	update(cleanMap, img)
 
-	update(copy.Spec.Values, img)
+	newJSON, _ := json.Marshal(cleanMap)
+	copy.Spec.Values.Raw = newJSON
 
-	return *copy
+	return *copy, nil
 }
