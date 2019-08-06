@@ -87,14 +87,10 @@ func TestLookup(t *testing.T) {
 	originalHR.DeepCopyInto(&updatedHR)
 
 	customNamespace := "custom-namespace"
+	expected.Namespace = customNamespace
 	updatedHR.ObjectMeta.Namespace = customNamespace
 
 	fakeInformer.Update(originalHR, &updatedHR)
-
-	expected = types.NamespacedName{
-		Name:      wordCountsRelease,
-		Namespace: customNamespace,
-	}
 
 	names, err = informer.Lookup(wordCountsRepository)
 	if assert.NoError(t, err) {
