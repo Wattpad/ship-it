@@ -18,7 +18,6 @@ import (
 const imageRepositoriesIndex = "ImageRepositoriesIndex"
 
 func eventHandler(indexer toolscache.Indexer) *toolscache.ResourceEventHandlerFuncs {
-	// TODO: should we log indexer errors?
 	return &toolscache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
 			indexer.Add(obj)
