@@ -39,7 +39,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, chart *chart.Chart) error {
 	err = errors.Wrap(err, "failed to update release from chart")
 
 	if err != nil {
-		_, err = r.client.InstallReleaseFromChart(chart, r.Namespace, helm.InstallTimeout(timeoutSeconds))
+		_, err = r.client.InstallReleaseFromChart(chart, r.Namespace, helm.InstallTimeout(timeoutSeconds), helm.ReleaseName(r.Release))
 		err = errors.Wrap(err, "failed to install release from chart")
 	}
 
