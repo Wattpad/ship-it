@@ -8,16 +8,31 @@ import (
 
 	"github.com/Wattpad/sqsconsumer"
 	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/metrics"
+	"github.com/go-kit/kit/metrics/discard"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
-func TestMakeImage(t *testing.T) {
-	assert.Exactly(t, internal.Image{
+type MockReconciler struct {
+	mock.Mock
+}
+
+func (m *MockReconciler) Reconcile(ctx context.Context, image *internal.Image) error {
+	args := m.Called(ctx, image)
+	return args.Error(0)
+}
+
+func TestMakeImageFromEvent(t *testing.T) {
+	event := &ecrPushEvent{
+		RepositoryName: "ship-it",
+		RegistryId:     "723255503624",
+		Tag:            "shipped",
+	}
+	assert.Exactly(t, &internal.Image{
 		Registry:   "723255503624.dkr.ecr.us-east-1.amazonaws.com",
 		Repository: "ship-it",
 		Tag:        "shipped",
-	}, makeImage("ship-it", "shipped", "723255503624"))
+	}, event.Image())
 }
 
 func TestValidateTag(t *testing.T) {
@@ -37,7 +52,6 @@ func TestValidateTag(t *testing.T) {
 func TestECRHandler(t *testing.T) {
 	mockSQSClient := new(MockSQS)
 	fakeURL := "www.wattpad.com"
-	var fakeHist metrics.Histogram
 	mockSQSService := &sqsconsumer.SQSService{
 		Svc:    mockSQSClient,
 		URL:    &fakeURL,
@@ -46,12 +60,10 @@ func TestECRHandler(t *testing.T) {
 	fakeListener := &ImageListener{
 		logger:  log.NewNopLogger(),
 		service: mockSQSService,
-		timer:   fakeHist,
+		timer:   discard.NewHistogram(),
 	}
 
-	mockRepoService := new(MockRepoService)
-	fakeIndexService := new(MockIndexerService)
-	fakeReconciler := NewReconciler("Wattpad", "custom-resources/path", "foo", mockRepoService, fakeIndexService)
+	fakeReconciler := new(MockReconciler)
 
 	err := fakeListener.handler(fakeReconciler)(context.Background(), `some bad message`)
 	assert.Error(t, err)
@@ -66,4 +78,22 @@ func TestECRHandler(t *testing.T) {
 `
 	err = fakeListener.handler(fakeReconciler)(context.Background(), inputJSON)
 	assert.Error(t, err)
+
+	fakeReconciler.On("Reconcile", mock.Anything, &internal.Image{
+		Registry:   "723255503624.dkr.ecr.us-east-1.amazonaws.com",
+		Repository: "monolith-php",
+		Tag:        "78bc9ccf64eb838c6a0e0492ded722274925e2bd",
+	}).Return(error(nil))
+
+	inputJSON = `
+{
+	"eventTime": "2019-07-11T14:19:59Z", 
+	"repositoryName": "monolith-php", 
+	"tag": "78bc9ccf64eb838c6a0e0492ded722274925e2bd",
+	"registryId": "723255503624"
+}
+`
+	err = fakeListener.handler(fakeReconciler)(context.Background(), inputJSON)
+	assert.NoError(t, err)
+	fakeReconciler.AssertExpectations(t)
 }

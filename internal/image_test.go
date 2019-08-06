@@ -184,101 +184,15 @@ func TestTable(t *testing.T) {
 	}
 }
 
-func TestUpdateImage(t *testing.T) {
-	var tests = []struct {
-		newImage    Image
-		inputMap    map[string]interface{}
-		expectedMap map[string]interface{}
-	}{
-		{
-			Image{
-				Registry:   "foo",
-				Repository: "bar",
-				Tag:        "newTag",
-			},
-			map[string]interface{}{
-				"apples": "delicious",
-				"oranges": map[string]interface{}{
-					"taste": "delicious",
-				},
-				"image": map[string]interface{}{
-					"repository": "foo/bar",
-					"tag":        "baz",
-				},
-			},
-			map[string]interface{}{
-				"apples": "delicious",
-				"oranges": map[string]interface{}{
-					"taste": "delicious",
-				},
-				"image": map[string]interface{}{
-					"repository": "foo/bar",
-					"tag":        "newTag",
-				},
-			},
-		}, {
-			Image{
-				Registry:   "foo",
-				Repository: "bar",
-				Tag:        "newTag",
-			},
-			map[string]interface{}{
-				"apples": "delicious",
-				"oranges": map[string]interface{}{
-					"taste": "delicious",
-					"image": map[string]interface{}{
-						"repository": "foo/bar",
-						"tag":        "baz",
-					},
-				},
-			},
-			map[string]interface{}{
-				"apples": "delicious",
-				"oranges": map[string]interface{}{
-					"taste": "delicious",
-					"image": map[string]interface{}{
-						"repository": "foo/bar",
-						"tag":        "newTag",
-					},
-				},
-			},
-		}, {
-			Image{
-				Registry:   "foo",
-				Repository: "bar",
-				Tag:        "newTag",
-			},
-			map[string]interface{}{
-				"apples": "delicious",
-				"oranges": map[string]interface{}{
-					"taste": "delicious",
-				},
-			},
-			map[string]interface{}{
-				"apples": "delicious",
-				"oranges": map[string]interface{}{
-					"taste": "delicious",
-				},
-			},
-		},
-	}
-	for _, test := range tests {
-		update(test.inputMap, test.newImage)
-		assert.Equal(t, test.expectedMap, test.inputMap)
-	}
-}
-
 func TestWithImage(t *testing.T) {
 	type testCase struct {
-		name        string
 		inputMap    map[string]interface{}
 		inputImage  Image
 		expectedMap map[string]interface{}
 	}
 
-	testCases := []testCase{
-		{
-			name: "Matching Image Case",
+	testCases := map[string]testCase{
+		"matching image found": {
 			inputMap: map[string]interface{}{
 				"image": map[string]interface{}{
 					"repository": "foo/bar",
@@ -296,8 +210,8 @@ func TestWithImage(t *testing.T) {
 					"tag":        "a-new-tag",
 				},
 			},
-		}, {
-			name: "No Matching Image Case",
+		},
+		"no matching image found": {
 			inputMap: map[string]interface{}{
 				"image": map[string]interface{}{
 					"repository": "foo/bar",
@@ -318,8 +232,8 @@ func TestWithImage(t *testing.T) {
 		},
 	}
 
-	for _, test := range testCases {
-		t.Run(test.name, func(t *testing.T) {
+	for name, test := range testCases {
+		t.Run(name, func(t *testing.T) {
 			WithImage(test.inputImage, test.inputMap)
 			assert.Equal(t, test.expectedMap, test.inputMap)
 		})
@@ -337,7 +251,7 @@ func TestStringMapCleanup(t *testing.T) {
 			"bar": "baz",
 		},
 	}
-	assert.Equal(t, expectedMap, CleanUpStringMap(inputMap))
+	assert.Equal(t, expectedMap, cleanUpStringMap(inputMap))
 }
 
 func TestDeepCopyMap(t *testing.T) {
@@ -353,6 +267,7 @@ func TestDeepCopyMap(t *testing.T) {
 
 	// Modify the input map and check that the copy does not change
 	inputMap["c"] = "some new value"
+	inputMap["a"].(map[string]interface{})["b"] = "some new value"
 
 	assert.NotEqual(t, inputMap, copiedMap)
 }

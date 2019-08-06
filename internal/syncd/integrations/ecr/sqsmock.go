@@ -41,9 +41,3 @@ func (m *MockSQS) ReceiveMessage(input *sqs.ReceiveMessageInput) (*sqs.ReceiveMe
 	args := m.Called(input)
 	return args.Get(0).(*sqs.ReceiveMessageOutput), args.Error(1)
 }
-
-type MockSQSService struct {
-	Svc    SQSAPI
-	URL    *string
-	Logger func(format string, args ...interface{})
-}

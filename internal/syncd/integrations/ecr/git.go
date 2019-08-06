@@ -2,56 +2,80 @@ package ecr
 
 import (
 	"context"
+	"fmt"
+	"ship-it/internal"
 
 	"github.com/google/go-github/v26/github"
+	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
+	"gopkg.in/yaml.v2"
 )
 
 type GitHub struct {
 	client       *github.Client
 	Organization string
+	Branch       string
 	Repository   string
 }
 
-func NewGitHub(ctx context.Context, token string, org string, repo string) GitHub {
+func NewGitHub(ctx context.Context, token string, org string, repo string, branch string) GitHub {
 	tokenSource := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
 
-	client := GitHub{
+	return GitHub{
 		client:       github.NewClient(oauth2.NewClient(ctx, tokenSource)),
 		Organization: org,
+		Branch:       branch,
 		Repository:   repo,
 	}
-
-	return client
 }
 
-func (c GitHub) UpdateFile(msg string, branch string, path string, fileContent []byte) (*github.RepositoryContentResponse, error) {
-	ctx := context.Background()
-	// Get File's Blob SHA
-	contents, _, _, err := c.client.Repositories.GetContents(ctx, c.Organization, c.Repository, path, &github.RepositoryContentGetOptions{Ref: "refs/heads/" + branch})
+func transformBytes(in []byte, image *internal.Image) ([]byte, error) {
+	rls := make(map[string]interface{})
+
+	err := yaml.Unmarshal(in, rls)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "failed to parse the YAML file")
 	}
 
-	options := &github.RepositoryContentFileOptions{ // Add commit author
+	updatedRls := internal.WithImage(*image, rls)
+
+	return yaml.Marshal(updatedRls)
+}
+
+func (c GitHub) getFile(ctx context.Context, path string) (*github.RepositoryContent, error) {
+	contents, _, _, err := c.client.Repositories.GetContents(ctx, c.Organization, c.Repository, path, &github.RepositoryContentGetOptions{Ref: "refs/heads/" + c.Branch})
+	return contents, err
+}
+
+func (c GitHub) updateFile(ctx context.Context, path string, fileContent []byte, SHA string, msg string) error {
+	options := &github.RepositoryContentFileOptions{
 		Message: github.String(msg),
 		Content: fileContent,
-		SHA:     github.String(contents.GetSHA()),
-		Branch:  github.String(branch),
+		SHA:     github.String(SHA),
+		Branch:  github.String(c.Branch),
 	}
 
-	resp, _, err := c.client.Repositories.UpdateFile(ctx, c.Organization, c.Repository, path, options)
-
-	return resp, err
+	_, _, err := c.client.Repositories.UpdateFile(ctx, c.Organization, c.Repository, path, options)
+	return err
 }
 
-func (c GitHub) GetFile(branch string, path string) (string, error) {
-	contents, _, _, err := c.client.Repositories.GetContents(context.Background(), c.Organization, c.Repository, path, &github.RepositoryContentGetOptions{Ref: "refs/heads/" + branch})
+func (c GitHub) UpdateAndReplace(ctx context.Context, path string, image *internal.Image, msg string) error {
+	contents, err := c.getFile(ctx, path)
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	return contents.GetContent()
+	resourceStr, err := contents.GetContent()
+	if err != nil {
+		return err
+	}
+
+	fileContent, err := transformBytes([]byte(resourceStr), image)
+	if err != nil {
+		return errors.Wrap(err, "failed to update the image tag in file")
+	}
+
+	return c.updateFile(ctx, path, fileContent, contents.GetSHA(), fmt.Sprintf("Image Tag updated to %s", image.Tag))
 }

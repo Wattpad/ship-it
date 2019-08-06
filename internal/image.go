@@ -77,7 +77,6 @@ func update(vals map[string]interface{}, img Image) {
 	if imgVals == nil {
 		return
 	}
-	imgVals["repository"] = img.URI()
 	imgVals["tag"] = img.Tag
 }
 
@@ -89,7 +88,7 @@ func cleanUpInterfaceArray(in []interface{}) []interface{} {
 	return result
 }
 
-func CleanUpStringMap(in map[string]interface{}) map[string]interface{} {
+func cleanUpStringMap(in map[string]interface{}) map[string]interface{} {
 	result := make(map[string]interface{}, len(in))
 	for k, v := range in {
 		result[fmt.Sprintf("%v", k)] = cleanUpMapValue(v)
@@ -117,15 +116,18 @@ func cleanUpMapValue(v interface{}) interface{} {
 }
 
 func DeepCopyMap(in map[string]interface{}) map[string]interface{} {
-	mapCopy := make(map[string]interface{})
-	for k, v := range in {
-		mapCopy[k] = v
+	result := make(map[string]interface{}, len(in))
+	for key, val := range in {
+		if nested, ok := val.(map[string]interface{}); ok {
+			result[key] = DeepCopyMap(nested)
+		}
+		result[key] = val
 	}
-	return mapCopy
+	return result
 }
 
 func WithImage(img Image, rlsMap map[string]interface{}) map[string]interface{} {
-	cleanMap := CleanUpStringMap(rlsMap)
+	cleanMap := cleanUpStringMap(rlsMap)
 	copiedMap := DeepCopyMap(cleanMap)
 
 	update(copiedMap, img)
