@@ -73,8 +73,7 @@ func initRegistryChartListener(l log.Logger, dd *dogstatsd.Dogstatsd, cfg *confi
 
 	awsSession, err := session.NewSession(cfg.AWS())
 	if err != nil {
-		l.Log("error", err)
-		os.Exit(1)
+		return nil, err
 	}
 
 	sqsClient := sqs.New(awsSession)
