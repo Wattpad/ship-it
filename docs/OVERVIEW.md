@@ -3,6 +3,8 @@
 
 This document provides a summary of Velocity's Kubernetes deployment tool Ship-it. Documentation pretaining to registering and deploying microservices with Ship-it is [here](./REGISTER.md).
 
+Ship-it is designed to be a GitOps tool for Kubernetes, to learn more about GitOps click [here](https://www.weave.works/blog/what-is-gitops-really).
+
 ## Background
 
 Before Ship-it, there was [Kube-deploy](https://github.com/Wattpad/kube-deploy). Kube-deploy serves the simple purpose of deploying docker images to Wattpad's Kubernetes cluster. As a result, Kube-deploy is not built in an extensible way. The technical debt introduced by Kube-deploy came to a head when Velocity attempted to introduce an automated rollback feature for failed releases. The squad discovered that to achieve this, a large swath of Kube-deploy would need to be rewritten. Instead of rewriting, Velocity decided to either use a pre-existing tool or build a new one. The final decision was to build Ship-it. Ship-it would have the features required for developers to confidently push changes to production. while providing full visibility at each stage of the deployment process. Specifically, Ship-it would put in place the following features and practices:  
