@@ -8,7 +8,7 @@ import (
 	"github.com/go-chi/chi"
 )
 
-// importing "k8s.io/helm/pkg/tiller" (specifically it's transitive dependency
+// importing "k8s.io/helm/pkg/tiller" (specifically its transitive dependency
 // on 'k8s.io/kubernetes' pkgs) breaks the build horribly.
 // https://github.com/helm/helm/blob/master/pkg/tiller/release_server.go#L82
 var tillerValidName = regexp.MustCompile("^(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])+$")
