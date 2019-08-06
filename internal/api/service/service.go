@@ -14,7 +14,7 @@ type ReleaseLister interface {
 }
 
 type ResourcesGetter interface {
-	Get(namespace, release string) (string, error)
+	Get(release string) (string, error)
 }
 
 func New(rl ReleaseLister, rg ResourcesGetter) *Service {
@@ -40,7 +40,7 @@ func (s *Service) GetRelease(ctx context.Context, name string) (*models.Release,
 }
 
 func (s *Service) GetReleaseResources(ctx context.Context, name string) (*models.ReleaseResources, error) {
-	resources, err := s.resources.Get(s.Namespace, name)
+	resources, err := s.resources.Get(name)
 	if err != nil {
 		return nil, err
 	}

@@ -15,7 +15,7 @@ type mockHelmClient struct {
 	resources map[string]string
 }
 
-func (m *mockHelmClient) Get(namespace, name string) (string, error) {
+func (m *mockHelmClient) Get(name string) (string, error) {
 	if res, ok := m.resources[name]; ok {
 		return res, nil
 	}

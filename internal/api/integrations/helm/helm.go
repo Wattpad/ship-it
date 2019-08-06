@@ -20,7 +20,7 @@ func New() *ReleaseResources {
 	}
 }
 
-func (r *ReleaseResources) Get(namespace, name string) (string, error) {
+func (r *ReleaseResources) Get(name string) (string, error) {
 	resp, err := r.client.ReleaseStatus(name)
 	if err != nil {
 		return "", errors.Wrap(err, "helm client error")
