@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"ship-it/internal"
+	"ship-it/internal/syncd"
 	"ship-it/internal/syncd/middleware"
 
 	"github.com/Wattpad/sqsconsumer"
@@ -16,10 +17,6 @@ import (
 	"github.com/go-kit/kit/metrics"
 	"github.com/pkg/errors"
 )
-
-type ReconcilerService interface {
-	Reconcile(ctx context.Context, image *internal.Image) error
-}
 
 type ImageListener struct {
 	logger  log.Logger
@@ -36,7 +33,7 @@ type ecrPushEvent struct {
 
 var validImageTagRegex = regexp.MustCompile("^[0-9a-f]{40}$")
 
-func (e *ecrPushEvent) Image() *internal.Image {
+func (e ecrPushEvent) Image() *internal.Image {
 	return &internal.Image{
 		Registry:   e.RegistryId + ".dkr.ecr.us-east-1.amazonaws.com",
 		Repository: e.RepositoryName,
@@ -57,7 +54,7 @@ func NewListener(l log.Logger, h metrics.Histogram, queue string, sqs sqsconsume
 	}, nil
 }
 
-func (l *ImageListener) Listen(ctx context.Context, r ReconcilerService) error {
+func (l *ImageListener) Listen(ctx context.Context, r syncd.ImageReconciler) error {
 	stack := sqsmiddleware.ApplyDecoratorsToHandler(
 		l.handler(r),
 		middleware.Timer(l.timer),
@@ -66,7 +63,7 @@ func (l *ImageListener) Listen(ctx context.Context, r ReconcilerService) error {
 	return sqsconsumer.NewConsumer(l.service, stack).Run(ctx)
 }
 
-func (l *ImageListener) handler(r ReconcilerService) sqsconsumer.MessageHandlerFunc {
+func (l *ImageListener) handler(r syncd.ImageReconciler) sqsconsumer.MessageHandlerFunc {
 	return func(ctx context.Context, msg string) error {
 		var ecrEvent ecrPushEvent
 		err := json.Unmarshal([]byte(msg), &ecrEvent)

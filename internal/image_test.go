@@ -132,14 +132,14 @@ func TestGetImagePath(t *testing.T) {
 }
 
 func TestTable(t *testing.T) {
-	var tests = []struct {
-		name     string
+	type testCase struct {
 		inputMap map[string]interface{}
 		path     []string
 		expected map[string]interface{}
-	}{
-		{
-			"tabling a nested field",
+	}
+
+	testCases := map[string]testCase{
+		"tabling a nested map level": {
 			map[string]interface{}{
 				"apples": "delicious",
 				"oranges": map[string]interface{}{
@@ -155,8 +155,8 @@ func TestTable(t *testing.T) {
 				"repository": "foo/not-the-desired-image",
 				"tag":        "baz",
 			},
-		}, {
-			"tabling a top level field",
+		},
+		"tabling the top level of the map": {
 			map[string]interface{}{
 				"apples": "delicious",
 				"oranges": map[string]interface{}{
@@ -177,8 +177,8 @@ func TestTable(t *testing.T) {
 			},
 		},
 	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
+	for name, test := range testCases {
+		t.Run(name, func(t *testing.T) {
 			assert.Equal(t, test.expected, table(test.inputMap, test.path))
 		})
 	}

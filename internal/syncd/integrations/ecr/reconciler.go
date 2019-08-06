@@ -2,16 +2,14 @@ package ecr
 
 import (
 	"context"
-	"fmt"
-	"path/filepath"
 	"ship-it/internal"
 
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/types"
 )
 
-type RepositoriesService interface {
-	UpdateAndReplace(ctx context.Context, path string, image *internal.Image, msg string) error
+type HelmReleaseEditor interface {
+	UpdateAndReplace(ctx context.Context, releaseName string, image *internal.Image) error
 }
 
 type IndexerService interface {
@@ -19,16 +17,14 @@ type IndexerService interface {
 }
 
 type ImageReconciler struct {
-	RegistryChartPath string
-	RepoService       RepositoriesService
-	IndexService      IndexerService
+	RepoService  HelmReleaseEditor
+	IndexService IndexerService
 }
 
-func NewReconciler(prefix string, r RepositoriesService, i IndexerService) *ImageReconciler {
+func NewReconciler(r HelmReleaseEditor, i IndexerService) *ImageReconciler {
 	return &ImageReconciler{
-		RegistryChartPath: prefix,
-		RepoService:       r,
-		IndexService:      i,
+		RepoService:  r,
+		IndexService: i,
 	}
 }
 
@@ -38,7 +34,7 @@ func (r *ImageReconciler) Reconcile(ctx context.Context, image *internal.Image) 
 		return errors.Wrapf(err, "failed to obtain the releases corresponding to the repository: %s", image.Repository)
 	}
 	for _, release := range releases {
-		err := r.RepoService.UpdateAndReplace(ctx, filepath.Join(r.RegistryChartPath, release.Name+".yaml"), image, fmt.Sprintf("Image Tag updated to: %s", image.Tag))
+		err := r.RepoService.UpdateAndReplace(ctx, release.Name, image)
 		if err != nil {
 			return err
 		}

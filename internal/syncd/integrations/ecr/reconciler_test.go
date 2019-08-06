@@ -52,8 +52,8 @@ type MockRepoService struct {
 	mock.Mock
 }
 
-func (m *MockRepoService) UpdateAndReplace(ctx context.Context, path string, image *internal.Image, msg string) error {
-	args := m.Called(ctx, path, image, msg)
+func (m *MockRepoService) UpdateAndReplace(ctx context.Context, releaseName string, image *internal.Image) error {
+	args := m.Called(ctx, releaseName, image)
 	return args.Error(0)
 }
 
@@ -69,7 +69,7 @@ func (m *MockIndexerService) Lookup(repo string) ([]types.NamespacedName, error)
 func TestReconcileLookupFailure(t *testing.T) {
 	mockRepoService := new(MockRepoService)
 	mockIndexService := new(MockIndexerService)
-	fakeReconciler := NewReconciler("foo/bar/resources", mockRepoService, mockIndexService)
+	mockReconciler := NewReconciler(mockRepoService, mockIndexService)
 	inputImage := &internal.Image{
 		Registry:   "723255503624.dkr.ecr.us-east-1.amazonaws.com",
 		Repository: "bar",
@@ -78,7 +78,7 @@ func TestReconcileLookupFailure(t *testing.T) {
 
 	mockIndexService.On("Lookup", "bar").Return([]types.NamespacedName{}, fmt.Errorf("some error finding release"))
 
-	err := fakeReconciler.Reconcile(context.Background(), inputImage)
+	err := mockReconciler.Reconcile(context.Background(), inputImage)
 
 	assert.Error(t, err)
 	mockIndexService.AssertExpectations(t)
@@ -89,7 +89,7 @@ func TestReconcilerUpdateFailure(t *testing.T) {
 	mockRepoService := new(MockRepoService)
 	mockIndexService := new(MockIndexerService)
 
-	fakeReconciler := NewReconciler("foo/bar/resources", mockRepoService, mockIndexService)
+	mockReconciler := NewReconciler(mockRepoService, mockIndexService)
 
 	inputImage := &internal.Image{
 		Registry:   "723255503624.dkr.ecr.us-east-1.amazonaws.com",
@@ -104,9 +104,9 @@ func TestReconcilerUpdateFailure(t *testing.T) {
 		},
 	}, error(nil))
 
-	mockRepoService.On("UpdateAndReplace", mock.Anything, mock.Anything, inputImage, fmt.Sprintf("Image Tag updated to: %s", inputImage.Tag)).Return(fmt.Errorf("some update image error"))
+	mockRepoService.On("UpdateAndReplace", mock.Anything, mock.Anything, inputImage).Return(fmt.Errorf("some update image error"))
 
-	err := fakeReconciler.Reconcile(context.Background(), inputImage)
+	err := mockReconciler.Reconcile(context.Background(), inputImage)
 
 	assert.Error(t, err)
 	mockIndexService.AssertExpectations(t)
@@ -117,7 +117,7 @@ func TestReconcilerSuccess(t *testing.T) {
 	mockRepoService := new(MockRepoService)
 	mockIndexService := new(MockIndexerService)
 
-	fakeReconciler := NewReconciler("foo/bar/resources", mockRepoService, mockIndexService)
+	mockReconciler := NewReconciler(mockRepoService, mockIndexService)
 
 	inputImage := &internal.Image{
 		Registry:   "723255503624.dkr.ecr.us-east-1.amazonaws.com",
@@ -132,9 +132,9 @@ func TestReconcilerSuccess(t *testing.T) {
 		},
 	}, error(nil))
 
-	mockRepoService.On("UpdateAndReplace", mock.Anything, mock.Anything, inputImage, fmt.Sprintf("Image Tag updated to: %s", inputImage.Tag)).Return(error(nil))
+	mockRepoService.On("UpdateAndReplace", mock.Anything, mock.Anything, inputImage).Return(error(nil))
 
-	err := fakeReconciler.Reconcile(context.Background(), inputImage)
+	err := mockReconciler.Reconcile(context.Background(), inputImage)
 
 	assert.NoError(t, err)
 	mockIndexService.AssertExpectations(t)

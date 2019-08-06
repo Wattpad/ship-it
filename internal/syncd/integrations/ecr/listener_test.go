@@ -57,15 +57,15 @@ func TestECRHandler(t *testing.T) {
 		URL:    &fakeURL,
 		Logger: func(format string, args ...interface{}) {},
 	}
-	fakeListener := &ImageListener{
+	testListener := &ImageListener{
 		logger:  log.NewNopLogger(),
 		service: mockSQSService,
 		timer:   discard.NewHistogram(),
 	}
 
-	fakeReconciler := new(MockReconciler)
+	mockReconciler := new(MockReconciler)
 
-	err := fakeListener.handler(fakeReconciler)(context.Background(), `some bad message`)
+	err := testListener.handler(mockReconciler)(context.Background(), `some bad message`)
 	assert.Error(t, err)
 
 	inputJSON := `
@@ -76,10 +76,10 @@ func TestECRHandler(t *testing.T) {
 	"registryId": "723255503624"
 }
 `
-	err = fakeListener.handler(fakeReconciler)(context.Background(), inputJSON)
+	err = testListener.handler(mockReconciler)(context.Background(), inputJSON)
 	assert.Error(t, err)
 
-	fakeReconciler.On("Reconcile", mock.Anything, &internal.Image{
+	mockReconciler.On("Reconcile", mock.Anything, &internal.Image{
 		Registry:   "723255503624.dkr.ecr.us-east-1.amazonaws.com",
 		Repository: "monolith-php",
 		Tag:        "78bc9ccf64eb838c6a0e0492ded722274925e2bd",
@@ -93,7 +93,7 @@ func TestECRHandler(t *testing.T) {
 	"registryId": "723255503624"
 }
 `
-	err = fakeListener.handler(fakeReconciler)(context.Background(), inputJSON)
+	err = testListener.handler(mockReconciler)(context.Background(), inputJSON)
 	assert.NoError(t, err)
-	fakeReconciler.AssertExpectations(t)
+	mockReconciler.AssertExpectations(t)
 }

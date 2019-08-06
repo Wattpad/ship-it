@@ -9,14 +9,6 @@ type MockSQS struct {
 	mock.Mock
 }
 
-type SQSAPI interface {
-	ChangeMessageVisibilityBatch(input *sqs.ChangeMessageVisibilityBatchInput) (*sqs.ChangeMessageVisibilityBatchOutput, error)
-	CreateQueue(input *sqs.CreateQueueInput) (*sqs.CreateQueueOutput, error)
-	DeleteMessageBatch(input *sqs.DeleteMessageBatchInput) (*sqs.DeleteMessageBatchOutput, error)
-	GetQueueUrl(input *sqs.GetQueueUrlInput) (*sqs.GetQueueUrlOutput, error)
-	ReceiveMessage(input *sqs.ReceiveMessageInput) (*sqs.ReceiveMessageOutput, error)
-}
-
 func (m *MockSQS) ChangeMessageVisibilityBatch(input *sqs.ChangeMessageVisibilityBatchInput) (*sqs.ChangeMessageVisibilityBatchOutput, error) {
 	args := m.Called(input)
 	return args.Get(0).(*sqs.ChangeMessageVisibilityBatchOutput), args.Error(1)

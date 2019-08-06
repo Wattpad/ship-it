@@ -3,6 +3,7 @@ package ecr
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 	"ship-it/internal"
 
 	"github.com/google/go-github/v26/github"
@@ -12,22 +13,24 @@ import (
 )
 
 type GitHub struct {
-	client       *github.Client
-	Organization string
-	Branch       string
-	Repository   string
+	client            *github.Client
+	Organization      string
+	Branch            string
+	Repository        string
+	RegistryChartPath string
 }
 
-func NewGitHub(ctx context.Context, token string, org string, repo string, branch string) GitHub {
+func NewGitHub(ctx context.Context, token string, org string, repo string, branch string, registryPath string) GitHub {
 	tokenSource := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
 
 	return GitHub{
-		client:       github.NewClient(oauth2.NewClient(ctx, tokenSource)),
-		Organization: org,
-		Branch:       branch,
-		Repository:   repo,
+		client:            github.NewClient(oauth2.NewClient(ctx, tokenSource)),
+		Organization:      org,
+		Branch:            branch,
+		Repository:        repo,
+		RegistryChartPath: registryPath,
 	}
 }
 
@@ -61,7 +64,8 @@ func (c GitHub) updateFile(ctx context.Context, path string, fileContent []byte,
 	return err
 }
 
-func (c GitHub) UpdateAndReplace(ctx context.Context, path string, image *internal.Image, msg string) error {
+func (c GitHub) UpdateAndReplace(ctx context.Context, releaseName string, image *internal.Image) error {
+	path := filepath.Join(c.RegistryChartPath, releaseName+".yaml")
 	contents, err := c.getFile(ctx, path)
 	if err != nil {
 		return err
