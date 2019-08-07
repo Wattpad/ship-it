@@ -17,6 +17,8 @@ func health(w http.ResponseWriter, _ *http.Request) {
 
 type Service interface {
 	ListReleases(context.Context) ([]models.Release, error)
+	GetRelease(context.Context, string) (*models.Release, error)
+	GetReleaseResources(context.Context, string) (*models.ReleaseResources, error)
 }
 
 // New returns an 'http.Handler' that serves the ship-it API.
@@ -30,6 +32,8 @@ func New(s Service, t metrics.Histogram) http.Handler {
 
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/releases", c.ListReleases)
+		r.Get("/releases/{name}", c.GetRelease)
+		r.Get("/releases/{name}/resources", c.GetReleaseResources)
 	})
 
 	r.Mount("/", http.FileServer(http.Dir("dashboard")))

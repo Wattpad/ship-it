@@ -244,6 +244,7 @@ k8s.io/api/storage/v1alpha1
 k8s.io/api/storage/v1beta1
 # k8s.io/apimachinery v0.0.0-20190717022731-0bb8574e0887 => k8s.io/apimachinery v0.0.0-20190404173353-6a84e37a896d
 k8s.io/apimachinery/pkg/runtime
+k8s.io/apimachinery/pkg/types
 k8s.io/apimachinery/pkg/conversion
 k8s.io/apimachinery/pkg/conversion/queryparams
 k8s.io/apimachinery/pkg/runtime/schema
@@ -255,7 +256,6 @@ k8s.io/apimachinery/pkg/util/sets
 k8s.io/apimachinery/pkg/api/errors
 k8s.io/apimachinery/pkg/apis/meta/v1
 k8s.io/apimachinery/pkg/runtime/serializer/streaming
-k8s.io/apimachinery/pkg/types
 k8s.io/apimachinery/pkg/util/net
 k8s.io/apimachinery/pkg/watch
 k8s.io/apimachinery/pkg/api/meta
@@ -301,13 +301,15 @@ k8s.io/client-go/util/keyutil
 k8s.io/client-go/discovery
 k8s.io/client-go/restmapper
 k8s.io/client-go/testing
-# k8s.io/helm v2.14.1+incompatible
+# k8s.io/helm v2.14.3+incompatible
 k8s.io/helm/pkg/helm
+k8s.io/helm/pkg/proto/hapi/services
 k8s.io/helm/pkg/proto/hapi/release
 k8s.io/helm/pkg/chartutil
 k8s.io/helm/pkg/proto/hapi/chart
 k8s.io/helm/pkg/proto/hapi/services
 k8s.io/helm/pkg/manifest
+k8s.io/helm/pkg/proto/hapi/release
 k8s.io/helm/pkg/proto/hapi/version
 k8s.io/helm/pkg/renderutil
 k8s.io/helm/pkg/storage/errors

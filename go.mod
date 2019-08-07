@@ -41,7 +41,7 @@ require (
 	k8s.io/api v0.0.0-20190620084959-7cf5895f2711
 	k8s.io/apimachinery v0.0.0-20190717022731-0bb8574e0887
 	k8s.io/client-go v11.0.1-0.20190409021438-1a26190bd76a+incompatible
-	k8s.io/helm v2.14.1+incompatible
+	k8s.io/helm v2.14.3+incompatible
 	k8s.io/klog v0.3.3 // indirect
 	k8s.io/utils v0.0.0-20190607212802-c55fbcfc754a // indirect
 	ship-it-operator v0.0.0-00010101000000-000000000000

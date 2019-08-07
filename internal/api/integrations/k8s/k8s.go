@@ -2,12 +2,12 @@ package k8s
 
 import (
 	"context"
-
 	shipitv1beta1 "ship-it-operator/api/v1beta1"
 	"ship-it/internal/api/models"
 	"ship-it/internal/unstructured"
 
 	runtime "k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/rest"
 	client "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -39,11 +39,27 @@ func New() (*K8sClient, error) {
 	}, nil
 }
 
-func (k *K8sClient) ListAll(ctx context.Context, namespace string) ([]models.Release, error) {
+func (k *K8sClient) Get(ctx context.Context, namespace, name string) (*models.Release, error) {
+	var release shipitv1beta1.HelmRelease
+
+	key := types.NamespacedName{
+		Name:      name,
+		Namespace: namespace,
+	}
+
+	err := k.client.Get(ctx, key, &release)
+	if err != nil {
+		return nil, err
+	}
+
+	modelRelease := transform(release)
+	return &modelRelease, nil
+}
+
+func (k *K8sClient) List(ctx context.Context, namespace string) ([]models.Release, error) {
 	var releaseList shipitv1beta1.HelmReleaseList
 
 	err := k.client.List(ctx, &releaseList, client.InNamespace(namespace))
-
 	if err != nil {
 		return nil, err
 	}
@@ -51,37 +67,42 @@ func (k *K8sClient) ListAll(ctx context.Context, namespace string) ([]models.Rel
 	releases := make([]models.Release, 0, len(releaseList.Items))
 
 	for _, r := range releaseList.Items {
-		annotations := helmReleaseAnnotations(r.GetAnnotations())
-
-		releases = append(releases, models.Release{
-			Name:       r.ObjectMeta.GetName(),
-			Created:    r.ObjectMeta.GetCreationTimestamp().Time,
-			AutoDeploy: annotations.AutoDeploy(),
-			Owner: models.Owner{
-				Squad: annotations.Squad(),
-				Slack: annotations.Slack(),
-			},
-			Monitoring: models.Monitoring{
-				Datadog: models.Datadog{
-					Dashboard: annotations.Datadog(),
-				},
-				Sumologic: annotations.Sumologic(),
-			},
-			Code: models.SourceCode{
-				Github: annotations.Code(),
-			},
-			Artifacts: models.Artifacts{
-				Chart: models.HelmArtifact{
-					Path:       r.Spec.Chart.Path,
-					Repository: r.Spec.Chart.Repository,
-					Version:    r.Spec.Chart.Revision,
-				},
-				Docker: dockerArtifacts(r),
-			},
-		})
+		releases = append(releases, transform(r))
 	}
 
 	return releases, nil
+}
+
+func transform(r shipitv1beta1.HelmRelease) models.Release {
+	annotations := helmReleaseAnnotations(r.GetAnnotations())
+
+	return models.Release{
+		Name:       r.ObjectMeta.GetName(),
+		Created:    r.ObjectMeta.GetCreationTimestamp().Time,
+		AutoDeploy: annotations.AutoDeploy(),
+		Owner: models.Owner{
+			Squad: annotations.Squad(),
+			Slack: annotations.Slack(),
+		},
+		Monitoring: models.Monitoring{
+			Datadog: models.Datadog{
+				Dashboard: annotations.Datadog(),
+			},
+			Sumologic: annotations.Sumologic(),
+		},
+		Code: models.SourceCode{
+			Github: annotations.Code(),
+		},
+		Artifacts: models.Artifacts{
+			Chart: models.HelmArtifact{
+				Path:       r.Spec.Chart.Path,
+				Repository: r.Spec.Chart.Repository,
+				Version:    r.Spec.Chart.Revision,
+			},
+			Docker: dockerArtifacts(r),
+		},
+		Status: r.Status.Code.String(),
+	}
 }
 
 func dockerArtifacts(hr shipitv1beta1.HelmRelease) []models.DockerArtifact {
