@@ -24,6 +24,7 @@ import (
 	"ship-it-operator/controllers"
 
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/helm/pkg/helm"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	// +kubebuilder:scaffold:imports
@@ -60,11 +61,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = (&controllers.HelmReleaseReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("HelmRelease"),
-	}).SetupWithManager(mgr)
-	if err != nil {
+	reconciler := controllers.NewHelmReleaseReconciler(ctrl.Log, mgr.GetClient(), helm.NewClient())
+
+	setupLog.Info("setting up HelmRelease controller")
+	if err := reconciler.SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "HelmRelease")
 		os.Exit(1)
 	}
