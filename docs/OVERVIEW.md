@@ -27,7 +27,7 @@ This section follows the architecture diagram above. Below is a list of each ste
 
 1. Microservices containing code changes get built into new Docker images by Travis CI. The built images are then pushed to a docker registry in ECR.
 
-2. Ship-it's CloudWatch Rule picks up the push event and loads the information into an SQS queue.
+2. A CloudWatch Rule picks up the push event and drops some metadata about the event into an SQS queue.
 
 3. Ship-it's SQS consumer takes the image push event and parses out the  image tag. The tag is then used to update the custom resource YAML file with the latest running version of the service.
 
