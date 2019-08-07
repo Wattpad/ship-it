@@ -4,6 +4,8 @@ IMG ?= 723255503624.dkr.ecr.us-east-1.amazonaws.com/ship-it-operator:$(shell git
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=true"
 
+CHART_PATH ?= "../deploy/ship-it"
+
 all: manager
 
 # Run tests
@@ -25,6 +27,7 @@ install: manifests
 # Generate manifests e.g. CRD, RBAC etc.
 manifests: controller-gen
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+	cp config/crd/bases/*.yaml $(CHART_PATH)/templates
 
 # Run go fmt against code
 fmt:
