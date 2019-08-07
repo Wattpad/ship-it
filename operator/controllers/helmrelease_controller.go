@@ -23,6 +23,8 @@ import (
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/helm/pkg/helm"
+	"k8s.io/helm/pkg/proto/hapi/chart"
+	rls "k8s.io/helm/pkg/proto/hapi/services"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -31,15 +33,22 @@ import (
 
 var errNotImplemented = errors.New("not implemented")
 
+type HelmClient interface {
+	DeleteRelease(rlsName string, opts ...helm.DeleteOption) (*rls.UninstallReleaseResponse, error)
+	InstallReleaseFromChart(chart *chart.Chart, ns string, opts ...helm.InstallOption) (*rls.InstallReleaseResponse, error)
+	RollbackRelease(rlsName string, opts ...helm.RollbackOption) (*rls.RollbackReleaseResponse, error)
+	UpdateReleaseFromChart(rlsName string, chart *chart.Chart, opts ...helm.UpdateOption) (*rls.UpdateReleaseResponse, error)
+}
+
 // HelmReleaseReconciler reconciles a HelmRelease object
 type HelmReleaseReconciler struct {
 	client.Client
 	Log logr.Logger
 
-	helm *helm.Client
+	helm HelmClient
 }
 
-func NewHelmReleaseReconciler(l logr.Logger, client client.Client, helm *helm.Client) *HelmReleaseReconciler {
+func NewHelmReleaseReconciler(l logr.Logger, client client.Client, helm HelmClient) *HelmReleaseReconciler {
 	return &HelmReleaseReconciler{
 		Client: client,
 		Log:    l.WithName("controllers").WithName("HelmRelease"),
