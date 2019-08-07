@@ -71,4 +71,25 @@ The deployment of the service can be observed using the Ship-it dashboard.
 
 To double check the status of the deployment, you can use the `helm` CLI tool.  
 
-Running `helm get rls SERVICE_NAME` will list out all the pods associated with the release and their state.
+Running `helm status SERVICE_NAME` will list out all the pods associated with the release and their state. The output should be similar to the following:
+
+```shell
+$ helm status word-counts
+LAST DEPLOYED: Thu Aug  1 09:59:52 2019
+NAMESPACE: default
+STATUS: DEPLOYED
+
+RESOURCES:
+==> v1/Pod(related)
+NAME                                     READY  STATUS   RESTARTS  AGE
+word-counts-autoscaler-5dc645b86c-w46j8  1/1    Running  0         22d
+word-counts-b4f5f45b7-drbzp              1/1    Running  2         5d23h
+
+==> v1beta1/Deployment
+NAME                    DESIRED  CURRENT  UP-TO-DATE  AVAILABLE  AGE
+word-counts-autoscaler  1        1        1           1          56d
+
+==> v1/Deployment
+NAME         DESIRED  CURRENT  UP-TO-DATE  AVAILABLE  AGE
+word-counts  1        1        1           1          56d
+```
