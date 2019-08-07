@@ -72,6 +72,7 @@ github.com/go-kit/kit/metrics/generic
 github.com/go-kit/kit/metrics/internal/lv
 github.com/go-kit/kit/metrics/internal/ratemap
 github.com/go-kit/kit/util/conn
+github.com/go-kit/kit/metrics/discard
 # github.com/go-logfmt/logfmt v0.4.0
 github.com/go-logfmt/logfmt
 # github.com/gobwas/glob v0.2.3
@@ -86,14 +87,12 @@ github.com/gobwas/glob/util/strings
 # github.com/gogo/protobuf v1.2.1
 github.com/gogo/protobuf/proto
 github.com/gogo/protobuf/sortkeys
-# github.com/golang/protobuf v1.2.0
+# github.com/golang/protobuf v1.3.1
 github.com/golang/protobuf/proto
 github.com/golang/protobuf/ptypes/timestamp
 github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/duration
-# github.com/google/go-github v17.0.0+incompatible
-github.com/google/go-github/github
 # github.com/google/go-github/v26 v26.0.4
 github.com/google/go-github/v26/github
 # github.com/google/go-querystring v1.0.0
@@ -129,8 +128,8 @@ github.com/pmezard/go-difflib/difflib
 # github.com/stretchr/objx v0.2.0
 github.com/stretchr/objx
 # github.com/stretchr/testify v1.3.0
-github.com/stretchr/testify/assert
 github.com/stretchr/testify/mock
+github.com/stretchr/testify/assert
 # golang.org/x/crypto v0.0.0-20190621222207-cc06ce4a13d4
 golang.org/x/crypto/ssh/terminal
 golang.org/x/crypto/scrypt
@@ -167,7 +166,7 @@ google.golang.org/appengine/internal/log
 google.golang.org/appengine/internal/remote_api
 # google.golang.org/genproto v0.0.0-20180817151627-c66870c02cf8
 google.golang.org/genproto/googleapis/rpc/status
-# google.golang.org/grpc v1.21.1
+# google.golang.org/grpc v1.22.1
 google.golang.org/grpc
 google.golang.org/grpc/credentials
 google.golang.org/grpc/health/grpc_health_v1
@@ -194,6 +193,7 @@ google.golang.org/grpc/peer
 google.golang.org/grpc/resolver
 google.golang.org/grpc/resolver/dns
 google.golang.org/grpc/resolver/passthrough
+google.golang.org/grpc/serviceconfig
 google.golang.org/grpc/stats
 google.golang.org/grpc/status
 google.golang.org/grpc/tap
@@ -243,8 +243,8 @@ k8s.io/api/storage/v1
 k8s.io/api/storage/v1alpha1
 k8s.io/api/storage/v1beta1
 # k8s.io/apimachinery v0.0.0-20190717022731-0bb8574e0887 => k8s.io/apimachinery v0.0.0-20190404173353-6a84e37a896d
-k8s.io/apimachinery/pkg/runtime
 k8s.io/apimachinery/pkg/types
+k8s.io/apimachinery/pkg/runtime
 k8s.io/apimachinery/pkg/conversion
 k8s.io/apimachinery/pkg/conversion/queryparams
 k8s.io/apimachinery/pkg/runtime/schema
@@ -304,10 +304,8 @@ k8s.io/client-go/testing
 # k8s.io/helm v2.14.3+incompatible
 k8s.io/helm/pkg/helm
 k8s.io/helm/pkg/proto/hapi/services
-k8s.io/helm/pkg/proto/hapi/release
 k8s.io/helm/pkg/chartutil
 k8s.io/helm/pkg/proto/hapi/chart
-k8s.io/helm/pkg/proto/hapi/services
 k8s.io/helm/pkg/manifest
 k8s.io/helm/pkg/proto/hapi/release
 k8s.io/helm/pkg/proto/hapi/version

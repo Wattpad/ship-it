@@ -2,7 +2,12 @@ package ecr
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"regexp"
+	"time"
 
+	"ship-it/internal"
 	"ship-it/internal/syncd"
 	"ship-it/internal/syncd/middleware"
 
@@ -10,12 +15,30 @@ import (
 	sqsmiddleware "github.com/Wattpad/sqsconsumer/middleware"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics"
+	"github.com/pkg/errors"
 )
 
 type ImageListener struct {
 	logger  log.Logger
 	service *sqsconsumer.SQSService
 	timer   metrics.Histogram
+}
+
+type ecrPushEvent struct {
+	EventTime      time.Time `json:"eventTime"`
+	RepositoryName string    `json:"repositoryName"`
+	Tag            string    `json:"tag"`
+	RegistryId     string    `json:"registryId"`
+}
+
+var validImageTagRegex = regexp.MustCompile("^[0-9a-f]{40}$")
+
+func (e ecrPushEvent) Image() *internal.Image {
+	return &internal.Image{
+		Registry:   e.RegistryId + ".dkr.ecr.us-east-1.amazonaws.com",
+		Repository: e.RepositoryName,
+		Tag:        e.Tag,
+	}
 }
 
 func NewListener(l log.Logger, h metrics.Histogram, queue string, sqs sqsconsumer.SQSAPI) (*ImageListener, error) {
@@ -41,5 +64,17 @@ func (l *ImageListener) Listen(ctx context.Context, r syncd.ImageReconciler) err
 }
 
 func (l *ImageListener) handler(r syncd.ImageReconciler) sqsconsumer.MessageHandlerFunc {
-	return nil
+	return func(ctx context.Context, msg string) error {
+		var ecrEvent ecrPushEvent
+		err := json.Unmarshal([]byte(msg), &ecrEvent)
+		if err != nil {
+			return errors.Wrap(err, "failure to parse ecr push event")
+		}
+
+		if !validImageTagRegex.MatchString(ecrEvent.Tag) {
+			return fmt.Errorf("malformed image tag")
+		}
+
+		return r.Reconcile(ctx, ecrEvent.Image())
+	}
 }
