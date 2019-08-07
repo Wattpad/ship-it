@@ -7,13 +7,14 @@ replace ship-it-operator => ./operator
 replace k8s.io/apimachinery => k8s.io/apimachinery v0.0.0-20190404173353-6a84e37a896d
 
 require (
+	github.com/Masterminds/goutils v1.1.0 // indirect
 	github.com/Masterminds/semver v1.4.2 // indirect
+	github.com/Masterminds/sprig v2.20.0+incompatible // indirect
 	github.com/VividCortex/gohistogram v1.0.0 // indirect
 	github.com/Wattpad/sqsconsumer v0.0.0-20190611184259-511082fa45b3
 	github.com/alecthomas/jsonschema v0.0.0-20190530235721-fd8d96416671
 	github.com/aws/aws-sdk-go v1.19.47
 	github.com/cyphar/filepath-securejoin v0.2.2 // indirect
-	github.com/evanphx/json-patch v4.5.0+incompatible // indirect
 	github.com/go-chi/chi v4.0.2+incompatible
 	github.com/go-kit/kit v0.8.0
 	github.com/go-logfmt/logfmt v0.4.0 // indirect
@@ -25,6 +26,7 @@ require (
 	github.com/google/uuid v1.1.1 // indirect
 	github.com/googleapis/gnostic v0.3.0 // indirect
 	github.com/huandu/xstrings v1.2.0 // indirect
+	github.com/imdario/mergo v0.3.7 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/pkg/errors v0.8.1
 	github.com/stretchr/objx v0.2.0 // indirect
@@ -40,7 +42,7 @@ require (
 	k8s.io/api v0.0.0-20190620084959-7cf5895f2711
 	k8s.io/apimachinery v0.0.0-20190717022731-0bb8574e0887
 	k8s.io/client-go v11.0.1-0.20190409021438-1a26190bd76a+incompatible
-	k8s.io/helm v2.14.1+incompatible
+	k8s.io/helm v2.14.3+incompatible
 	k8s.io/klog v0.3.3 // indirect
 	k8s.io/utils v0.0.0-20190607212802-c55fbcfc754a // indirect
 	ship-it-operator v0.0.0-00010101000000-000000000000

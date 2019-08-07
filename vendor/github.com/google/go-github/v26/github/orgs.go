@@ -56,10 +56,6 @@ type Organization struct {
 	// MembersCanCreateRepos default value is true and is only used in Organizations.Edit.
 	MembersCanCreateRepos *bool `json:"members_can_create_repositories,omitempty"`
 
-	// MembersAllowedRepositoryCreationType denotes if organization members can create repositories
-	// and the type of repositories they can create. Possible values are: "all", "private", or "none".
-	MembersAllowedRepositoryCreationType *string `json:"members_allowed_repository_creation_type,omitempty"`
-
 	// API URLs
 	URL              *string `json:"url,omitempty"`
 	EventsURL        *string `json:"events_url,omitempty"`
@@ -163,9 +159,6 @@ func (s *OrganizationsService) Get(ctx context.Context, org string) (*Organizati
 	if err != nil {
 		return nil, nil, err
 	}
-
-	// TODO: remove custom Accept header when this API fully launches.
-	req.Header.Set("Accept", mediaTypeMemberAllowedRepoCreationTypePreview)
 
 	organization := new(Organization)
 	resp, err := s.client.Do(ctx, req, organization)
