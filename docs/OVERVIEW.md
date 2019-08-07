@@ -35,9 +35,9 @@ This section follows the architecture diagram above. Below is a list of each ste
 
 5. The `HelmRelease` custom resource is updated using the Kubernetes operator within ship-it to change the state of the release.
 
-6. The operator will update the CRD each time the release state changes.
+6. The operator will update the `HelmRelease` each time the release state changes.
 
-7. The API server reads off the CRD to get the state of each Helm Release and exposes a REST API to read information about the releases.
+7. The API server reads off the `HelmRelease` to get the state of each Helm Release and exposes a REST API to read information about the releases.
 
 8. The Web UI consumes this API to present engineers with key deployment information.
 
