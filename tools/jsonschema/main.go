@@ -28,7 +28,8 @@ func main() {
 	// NOTE: After creating a new JSON model type, it must be added to this
 	// map in order to auto-generate JSON schema documents.
 	types := map[string]interface{}{
-		"release": models.Release{},
+		"release":           models.Release{},
+		"release_resources": models.ReleaseResources{},
 	}
 
 	for name, typ := range types {

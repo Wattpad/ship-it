@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$ref": "#/definitions/ReleaseResources",
+  "definitions": {
+    "ReleaseResources": {
+      "required": [
+        "name",
+        "status"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the release"
+        },
+        "status": {
+          "type": "string",
+          "description": "The kubernetes resources belonging to the release"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    }
+  }
+}

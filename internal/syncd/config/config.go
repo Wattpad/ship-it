@@ -20,6 +20,9 @@ type Config struct {
 	Namespace          string `split_words:"true" required:"true"`
 	ReleaseName        string `split_words:"true" required:"true"`
 	HelmTimeoutSeconds int64  `split_words:"true" default:"10"`
+	RegistryChartPath  string `split_words:"true" required:"true"`
+	ReleaseBranch      string `split_words:"true" default:"master"`
+	OperationsRepoName string `split_words:"true" required:"true"`
 }
 
 // DataDogAddress returns the local address of the datadog agent.
