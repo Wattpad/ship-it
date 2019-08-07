@@ -31,7 +31,7 @@ This section follows the architecture diagram above. Below is a list of each ste
 
 3. Ship-it's SQS consumer takes the image push event and parses out the  image tag. The tag is then used to update the custom resource YAML file with the latest running version of the service.
 
-4. To deploy the service, Ship-it downloads the Helm chart for the service. Using the chart, Ship-it executes the deployment with the Helm API.
+4. To deploy the service, the Ship-it operator downloads the Helm chart for the service. Using the chart, Ship-it executes the deployment with the tiller client.
 
 5. The `HelmRelease` custom resource is updated using the Kubernetes operator within ship-it to change the state of the release.
 
