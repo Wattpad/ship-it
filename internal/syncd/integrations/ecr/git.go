@@ -81,5 +81,5 @@ func (c GitHub) UpdateAndReplace(ctx context.Context, releaseName string, image 
 		return errors.Wrap(err, "failed to update the image tag in file")
 	}
 
-	return c.updateFile(ctx, path, fileContent, contents.GetSHA(), fmt.Sprintf("Image Tag updated to %s", image.Tag))
+	return c.updateFile(ctx, path, fileContent, contents.GetSHA(), fmt.Sprintf("%s image tag updated to: %s", releaseName, image.Tag))
 }
