@@ -1,17 +1,28 @@
 package api
 
 import (
+	"context"
 	"net/http"
+
+	"ship-it/internal/api/models"
 )
+
+type Service interface {
+	ListReleases(context.Context) ([]models.Release, error)
+}
 
 type controller struct {
 	svc Service
 }
 
-func newController(s Service) *controller {
+func NewController(s Service) Controller {
 	return &controller{
 		svc: s,
 	}
+}
+
+func (c *controller) Health(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
 }
 
 func (c *controller) ListReleases(w http.ResponseWriter, r *http.Request) {

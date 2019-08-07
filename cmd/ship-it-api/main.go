@@ -50,9 +50,14 @@ func main() {
 	}
 
 	svc := service.New(k8s)
+	ctrl := api.NewController(svc)
 	srv := http.Server{
-		Addr:    ":" + cfg.ServicePort,
-		Handler: api.New(svc, dd.NewTiming("api.time", 1.0)),
+		Addr: ":" + cfg.ServicePort,
+		Handler: api.NewRouter(
+			http.FileServer(http.Dir("dashboard")),
+			ctrl,
+			dd.NewTiming("api.time", 1.0),
+		),
 	}
 
 	exit := make(chan error)

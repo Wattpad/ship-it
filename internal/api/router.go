@@ -1,38 +1,31 @@
 package api
 
 import (
-	"context"
 	"net/http"
 
 	"ship-it/internal/api/middleware"
-	"ship-it/internal/api/models"
 
 	"github.com/go-chi/chi"
 	"github.com/go-kit/kit/metrics"
 )
 
-func health(w http.ResponseWriter, _ *http.Request) {
-	w.WriteHeader(http.StatusOK)
-}
-
-type Service interface {
-	ListReleases(context.Context) ([]models.Release, error)
+type Controller interface {
+	Health(http.ResponseWriter, *http.Request)
+	ListReleases(http.ResponseWriter, *http.Request)
 }
 
 // New returns an 'http.Handler' that serves the ship-it API.
-func New(s Service, t metrics.Histogram) http.Handler {
-	c := newController(s)
-
+func NewRouter(root http.Handler, c Controller, t metrics.Histogram) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.Timer(t))
 
-	r.Get("/health", health)
+	r.Get("/health", c.Health)
 
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/releases", c.ListReleases)
 	})
 
-	r.Mount("/", http.FileServer(http.Dir("dashboard")))
+	r.Mount("/", root)
 
 	return r
 }
