@@ -17,13 +17,13 @@ type IndexerService interface {
 }
 
 type ImageReconciler struct {
-	RepoService  HelmReleaseEditor
+	Editor       HelmReleaseEditor
 	IndexService IndexerService
 }
 
 func NewReconciler(r HelmReleaseEditor, i IndexerService) *ImageReconciler {
 	return &ImageReconciler{
-		RepoService:  r,
+		Editor:       r,
 		IndexService: i,
 	}
 }
@@ -34,7 +34,7 @@ func (r *ImageReconciler) Reconcile(ctx context.Context, image *internal.Image) 
 		return errors.Wrapf(err, "failed to obtain the releases corresponding to the repository: %s", image.Repository)
 	}
 	for _, release := range releases {
-		err := r.RepoService.UpdateAndReplace(ctx, release.Name, image)
+		err := r.Editor.UpdateAndReplace(ctx, release.Name, image)
 		if err != nil {
 			return err
 		}
