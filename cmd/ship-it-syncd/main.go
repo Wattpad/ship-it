@@ -55,24 +55,6 @@ func main() {
 	dd := dogstatsd.New("wattpad.ship-it.", logger)
 	go dd.SendLoop(time.Tick(time.Second), "udp", cfg.DataDogAddress())
 
-	awsSession, err := session.NewSession(cfg.AWS())
-	if err != nil {
-		logger.Log("error", err)
-		os.Exit(1)
-	}
-
-	imageListener, err := ecr.NewListener(logger, dd.NewTiming("syncd.time", 1.0), cfg.EcrQueue, sqs.New(awsSession))
-	if err != nil {
-		logger.Log("error", err)
-		os.Exit(1)
-	}
-
-	chartListener, err := initRegistryChartListener(logger, dd, cfg, awsSession)
-	if err != nil {
-		logger.Log("error", err)
-		os.Exit(1)
-	}
-
 	gitClient := ecr.NewGitHub(ctx, cfg.GithubToken, cfg.GithubOrg, cfg.OperationsRepoName, cfg.ReleaseBranch, cfg.RegistryChartPath)
 	imageReconciler := ecr.NewReconciler(gitClient, NOPIndexer{})
 
@@ -83,6 +65,12 @@ func main() {
 		cfg.HelmTimeout(),
 	)
 
+	imageListener, chartListener, err := initListeners(logger, dd, cfg)
+	if err != nil {
+		logger.Log("error", err)
+		os.Exit(1)
+	}
+
 	// TODO: Allow configurable image/chart sync implementations. For now
 	// we'll just use our specific ecr+sqs/github+sqs implmentations.
 	syncd := syncd.New(chartListener, chartReconciler, imageListener, imageReconciler)
@@ -92,8 +80,13 @@ func main() {
 	}
 }
 
-func initRegistryChartListener(l log.Logger, dd *dogstatsd.Dogstatsd, cfg *config.Config, awsSession *session.Session) (syncd.RegistryChartListener, error) {
-	workerTime := dd.NewTiming("worker.time", 1)
+func initListeners(l log.Logger, dd *dogstatsd.Dogstatsd, cfg *config.Config) (syncd.ImageListener, syncd.RegistryChartListener, error) {
+	syncHist := dd.NewTiming("syncd.time", 1.0)
+
+	awsSession, err := session.NewSession(cfg.AWS())
+	if err != nil {
+		return nil, nil, err
+	}
 
 	sqsClient := sqs.New(awsSession)
 
@@ -106,12 +99,12 @@ func initRegistryChartListener(l log.Logger, dd *dogstatsd.Dogstatsd, cfg *confi
 	oauthClient := oauth2.NewClient(context.Background(), ts)
 	githubClient := gogithub.NewClient(oauthClient)
 
-	return github.NewListener(
-		l,
-		workerTime,
-		cfg.GithubOrg,
-		githubClient.Repositories,
-		cfg.GithubQueue,
-		sqsClient,
-	)
+	imageListener, err := ecr.NewListener(l, syncHist, cfg.EcrQueue, sqs.New(awsSession))
+	if err != nil {
+		return nil, nil, err
+	}
+
+	chartListener, err := github.NewListener(l, syncHist, cfg.GithubOrg, githubClient.Repositories, cfg.GithubQueue, sqsClient)
+
+	return imageListener, chartListener, err
 }
