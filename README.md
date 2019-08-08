@@ -2,6 +2,8 @@
 
 <img src="https://media.giphy.com/media/143vPc6b08locw/giphy.gif" width="300">
 
+The technical background and architecture of Ship-it can be found in the overview documentation [here](./docs/OVERVIEW.md)
+
 _Ship it!_ is Wattpad's tool for continuous deployment to Kubernetes.
 
 ## Local Development

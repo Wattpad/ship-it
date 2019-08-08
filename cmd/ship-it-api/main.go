@@ -10,6 +10,7 @@ import (
 
 	"ship-it/internal/api"
 	"ship-it/internal/api/config"
+	"ship-it/internal/api/integrations/helm"
 	"ship-it/internal/api/integrations/k8s"
 	"ship-it/internal/api/service"
 
@@ -49,8 +50,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	svc := service.New(k8s)
+	svc := service.New(k8s, helm.New())
 	ctrl := api.NewController(svc)
+
 	srv := http.Server{
 		Addr: ":" + cfg.ServicePort,
 		Handler: api.NewRouter(

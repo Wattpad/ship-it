@@ -26,6 +26,14 @@ func (m *mockController) ListReleases(http.ResponseWriter, *http.Request) {
 	m.Called()
 }
 
+func (m *mockController) GetRelease(http.ResponseWriter, *http.Request) {
+	m.Called()
+}
+
+func (m *mockController) GetReleaseResources(http.ResponseWriter, *http.Request) {
+	m.Called()
+}
+
 func (m *mockController) Health(http.ResponseWriter, *http.Request) {
 	m.Called()
 }
@@ -57,10 +65,10 @@ func TestRootRoute(t *testing.T) {
 
 			rec := httptest.NewRecorder()
 
-			handler := newRouter(&m, new(mockController), discard.NewHistogram())
+			handler := NewRouter(&m, new(mockController), discard.NewHistogram())
 			handler.ServeHTTP(rec, tc.request)
 
-			assert.Equal(t, rec.Code, http.StatusOK)
+			assert.Equal(t, tc.statusCode, rec.Code)
 
 			m.AssertExpectations(t)
 		})
@@ -70,21 +78,26 @@ func TestRootRoute(t *testing.T) {
 
 func TestControllerRoutes(t *testing.T) {
 	type testCase struct {
-		expect     func(*mock.Mock)
-		statusCode int
-		request    *http.Request
+		expect  func(*mock.Mock)
+		request *http.Request
 	}
 
 	testCases := []testCase{
 		{
-			expect:     func(m *mock.Mock) { m.On("Health") },
-			statusCode: http.StatusOK,
-			request:    httptest.NewRequest(http.MethodGet, "/health", nil),
+			expect:  func(m *mock.Mock) { m.On("Health") },
+			request: httptest.NewRequest(http.MethodGet, "/health", nil),
 		},
 		{
-			expect:     func(m *mock.Mock) { m.On("ListReleases") },
-			statusCode: http.StatusOK,
-			request:    httptest.NewRequest(http.MethodGet, "/api/releases", nil),
+			expect:  func(m *mock.Mock) { m.On("ListReleases") },
+			request: httptest.NewRequest(http.MethodGet, "/api/releases", nil),
+		},
+		{
+			expect:  func(m *mock.Mock) { m.On("GetRelease") },
+			request: httptest.NewRequest(http.MethodGet, "/api/releases/foo", nil),
+		},
+		{
+			expect:  func(m *mock.Mock) { m.On("GetReleaseResources") },
+			request: httptest.NewRequest(http.MethodGet, "/api/releases/foo/resources", nil),
 		},
 	}
 
@@ -95,11 +108,10 @@ func TestControllerRoutes(t *testing.T) {
 
 			rec := httptest.NewRecorder()
 
-			handler := newRouter(new(mockHandler), &m, discard.NewHistogram())
+			handler := NewRouter(new(mockHandler), &m, discard.NewHistogram())
 			handler.ServeHTTP(rec, tc.request)
 
 			m.AssertExpectations(t)
-			assert.Equal(t, rec.Code, tc.statusCode)
 		})
 	}
 }

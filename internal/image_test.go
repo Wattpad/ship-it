@@ -37,3 +37,237 @@ func TestParseImage(t *testing.T) {
 		})
 	}
 }
+
+func TestGetImagePath(t *testing.T) {
+	type testCase struct {
+		serviceName string
+		inputMap    map[string]interface{}
+		expected    []string
+	}
+
+	testCases := map[string]testCase{
+		"nested image found": {
+			"bar",
+			map[string]interface{}{
+				"apples": "delicious",
+				"oranges": map[string]interface{}{
+					"taste": "delicious",
+					"image": map[string]interface{}{
+						"repository": "foo/bar",
+						"tag":        "baz",
+					},
+				},
+			},
+			[]string{"oranges", "image"},
+		},
+		"un-nested image found": {
+			"bar",
+			map[string]interface{}{
+				"apples": "delicious",
+				"image": map[string]interface{}{
+					"repository": "foo/bar",
+					"tag":        "baz",
+				},
+			},
+			[]string{"image"},
+		},
+		"matches desired nested image": {
+			"bar",
+			map[string]interface{}{
+				"apples": "delicious",
+				"oranges": map[string]interface{}{
+					"taste": "delicious",
+					"image": map[string]interface{}{
+						"repository": "foo/bar",
+						"tag":        "baz",
+					},
+				},
+				"image": map[string]interface{}{
+					"repository": "foo/not-the-desired-image",
+					"tag":        "baz",
+				},
+			},
+			[]string{"oranges", "image"},
+		},
+		"matches desired un-nested image": {
+			"bar",
+			map[string]interface{}{
+				"apples": "delicious",
+				"oranges": map[string]interface{}{
+					"taste": "delicious",
+					"image": map[string]interface{}{
+						"repository": "foo/not-the-desired-image",
+						"tag":        "baz",
+					},
+				},
+				"image": map[string]interface{}{
+					"repository": "foo/bar",
+					"tag":        "baz",
+				},
+			},
+			[]string{"image"},
+		},
+		"desired image repo not found": {
+			"bar",
+			map[string]interface{}{
+				"apples": "delicious",
+				"oranges": map[string]interface{}{
+					"taste": "delicious",
+					"image": map[string]interface{}{
+						"repository": "foo/not-the-desired-image",
+						"tag":        "baz",
+					},
+				},
+			},
+			[]string{},
+		},
+	}
+
+	for name, test := range testCases {
+		t.Run(name, func(t *testing.T) {
+			output := getImagePath(test.inputMap, test.serviceName)
+			assert.Equal(t, test.expected, output)
+		})
+	}
+}
+
+func TestTable(t *testing.T) {
+	type testCase struct {
+		inputMap map[string]interface{}
+		path     []string
+		expected map[string]interface{}
+	}
+
+	testCases := map[string]testCase{
+		"tabling a nested map level": {
+			map[string]interface{}{
+				"apples": "delicious",
+				"oranges": map[string]interface{}{
+					"taste": "delicious",
+					"image": map[string]interface{}{
+						"repository": "foo/not-the-desired-image",
+						"tag":        "baz",
+					},
+				},
+			},
+			[]string{"oranges", "image"},
+			map[string]interface{}{
+				"repository": "foo/not-the-desired-image",
+				"tag":        "baz",
+			},
+		},
+		"tabling the top level of the map": {
+			map[string]interface{}{
+				"apples": "delicious",
+				"oranges": map[string]interface{}{
+					"taste": "delicious",
+					"image": map[string]interface{}{
+						"repository": "foo/not-the-desired-image",
+						"tag":        "baz",
+					},
+				},
+			},
+			[]string{"oranges"},
+			map[string]interface{}{
+				"taste": "delicious",
+				"image": map[string]interface{}{
+					"repository": "foo/not-the-desired-image",
+					"tag":        "baz",
+				},
+			},
+		},
+	}
+	for name, test := range testCases {
+		t.Run(name, func(t *testing.T) {
+			assert.Equal(t, test.expected, table(test.inputMap, test.path))
+		})
+	}
+}
+
+func TestWithImage(t *testing.T) {
+	type testCase struct {
+		inputMap    map[string]interface{}
+		inputImage  Image
+		expectedMap map[string]interface{}
+	}
+
+	testCases := map[string]testCase{
+		"matching image found": {
+			inputMap: map[string]interface{}{
+				"image": map[string]interface{}{
+					"repository": "foo/bar",
+					"tag":        "baz",
+				},
+			},
+			inputImage: Image{
+				Registry:   "foo",
+				Repository: "bar",
+				Tag:        "a-new-tag",
+			},
+			expectedMap: map[string]interface{}{
+				"image": map[string]interface{}{
+					"repository": "foo/bar",
+					"tag":        "a-new-tag",
+				},
+			},
+		},
+		"no matching image found": {
+			inputMap: map[string]interface{}{
+				"image": map[string]interface{}{
+					"repository": "foo/bar",
+					"tag":        "baz",
+				},
+			},
+			inputImage: Image{
+				Registry:   "foo",
+				Repository: "oof",
+				Tag:        "a-new-tag",
+			},
+			expectedMap: map[string]interface{}{
+				"image": map[string]interface{}{
+					"repository": "foo/bar",
+					"tag":        "baz",
+				},
+			},
+		},
+	}
+
+	for name, test := range testCases {
+		t.Run(name, func(t *testing.T) {
+			WithImage(test.inputImage, test.inputMap)
+			assert.Equal(t, test.expectedMap, test.inputMap)
+		})
+	}
+}
+
+func TestStringMapCleanup(t *testing.T) {
+	inputMap := map[string]interface{}{
+		"foo": map[interface{}]interface{}{
+			"bar": "baz",
+		},
+	}
+	expectedMap := map[string]interface{}{
+		"foo": map[string]interface{}{
+			"bar": "baz",
+		},
+	}
+	assert.Equal(t, expectedMap, cleanUpStringMap(inputMap))
+}
+
+func TestDeepCopyMap(t *testing.T) {
+	inputMap := map[string]interface{}{
+		"a": map[string]interface{}{
+			"b": "a-fake-value",
+		},
+		"c": "fake",
+	}
+
+	copiedMap := DeepCopyMap(inputMap)
+	assert.Equal(t, inputMap, copiedMap)
+
+	// Modify the input map and check that the copy does not change
+	inputMap["c"] = "some new value"
+	inputMap["a"].(map[string]interface{})["b"] = "some new value"
+
+	assert.NotEqual(t, inputMap, copiedMap)
+}

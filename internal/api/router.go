@@ -10,6 +10,8 @@ import (
 )
 
 type Controller interface {
+	GetRelease(http.ResponseWriter, *http.Request)
+	GetReleaseResources(http.ResponseWriter, *http.Request)
 	Health(http.ResponseWriter, *http.Request)
 	ListReleases(http.ResponseWriter, *http.Request)
 }
@@ -23,6 +25,8 @@ func NewRouter(root http.Handler, c Controller, t metrics.Histogram) http.Handle
 
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/releases", c.ListReleases)
+		r.Get("/releases/{name}", c.GetRelease)
+		r.Get("/releases/{name}/resources", c.GetReleaseResources)
 	})
 
 	r.Mount("/", root)
