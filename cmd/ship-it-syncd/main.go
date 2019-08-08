@@ -55,13 +55,19 @@ func main() {
 	dd := dogstatsd.New("wattpad.ship-it.", logger)
 	go dd.SendLoop(time.Tick(time.Second), "udp", cfg.DataDogAddress())
 
-	imageListener, err := ecr.NewListener(logger, dd.NewTiming("syncd.time", 1.0), cfg.EcrQueue, sqs.New(session.Must(session.NewSession())))
+	awsSession, err := session.NewSession(cfg.AWS())
 	if err != nil {
 		logger.Log("error", err)
 		os.Exit(1)
 	}
 
-	chartListener, err := initRegistryChartListener(logger, dd, cfg)
+	imageListener, err := ecr.NewListener(logger, dd.NewTiming("syncd.time", 1.0), cfg.EcrQueue, sqs.New(awsSession))
+	if err != nil {
+		logger.Log("error", err)
+		os.Exit(1)
+	}
+
+	chartListener, err := initRegistryChartListener(logger, dd, cfg, awsSession)
 	if err != nil {
 		logger.Log("error", err)
 		os.Exit(1)
@@ -86,13 +92,8 @@ func main() {
 	}
 }
 
-func initRegistryChartListener(l log.Logger, dd *dogstatsd.Dogstatsd, cfg *config.Config) (syncd.RegistryChartListener, error) {
+func initRegistryChartListener(l log.Logger, dd *dogstatsd.Dogstatsd, cfg *config.Config, awsSession *session.Session) (syncd.RegistryChartListener, error) {
 	workerTime := dd.NewTiming("worker.time", 1)
-
-	awsSession, err := session.NewSession(cfg.AWS())
-	if err != nil {
-		return nil, err
-	}
 
 	sqsClient := sqs.New(awsSession)
 
