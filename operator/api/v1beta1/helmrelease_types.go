@@ -26,6 +26,20 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
+type HelmReleaseStatusReason string
+
+const (
+	ReasonDeleteError     HelmReleaseStatusReason = "DeleteError"
+	ReasonDeleteSuccess   HelmReleaseStatusReason = "DeleteSuccess"
+	ReasonInstallError    HelmReleaseStatusReason = "InstallError"
+	ReasonInstallSuccess  HelmReleaseStatusReason = "InstallSuccess"
+	ReasonReconcileError  HelmReleaseStatusReason = "ReconcileError"
+	ReasonRollbackError   HelmReleaseStatusReason = "RollbackError"
+	ReasonRollbackSuccess HelmReleaseStatusReason = "RollbackSuccess"
+	ReasonUpdateError     HelmReleaseStatusReason = "UpdateError"
+	ReasonUpdateSuccess   HelmReleaseStatusReason = "UpdateSuccess"
+)
+
 // HelmReleaseSpec defines the desired state of HelmRelease
 type HelmReleaseSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
@@ -40,7 +54,11 @@ type HelmReleaseSpec struct {
 type HelmReleaseStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	Code release.Status_Code `json:"code"`
+
+	Code               release.Status_Code     `json:"code"`
+	LastTransitionTime metav1.Time             `json:"lastTransitionTime,omitempty"`
+	Message            string                  `json:"message,omitempty"`
+	Reason             HelmReleaseStatusReason `json:"reason,omitempty"`
 }
 
 // ChartSpec defines the desired Helm chart
@@ -71,6 +89,20 @@ func (hr HelmRelease) HelmValues() map[string]interface{} {
 	}
 
 	return obj
+}
+
+func (hr *HelmRelease) WithStatus(s HelmReleaseStatus) *HelmRelease {
+	var out HelmRelease
+	hr.DeepCopyInto(&out)
+
+	if out.Status.Code == s.Code && out.Status.Reason == s.Reason {
+		s.LastTransitionTime = out.Status.LastTransitionTime
+	} else {
+		s.LastTransitionTime = metav1.Now()
+	}
+
+	out.Status = s
+	return &out
 }
 
 // +kubebuilder:object:root=true
