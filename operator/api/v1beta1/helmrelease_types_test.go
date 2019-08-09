@@ -72,6 +72,11 @@ var _ = Describe("HelmRelease", func() {
 						Raw: []byte(`{"test":1}`),
 					},
 				},
+				Status: HelmReleaseStatus{
+					Code:               0,
+					Reason:             "foo",
+					LastTransitionTime: metav1.Now(),
+				},
 			}
 
 			By("creating an API obj")
