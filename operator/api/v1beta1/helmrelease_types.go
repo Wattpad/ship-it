@@ -86,8 +86,8 @@ type HelmReleaseList struct {
 
 type helmReleaseAnnotations map[string]string
 
-// GetAnnotations returns a map of annotations
-func (hr HelmRelease) GetAnnotations() helmReleaseAnnotations {
+// Annotations returns a map of annotations
+func (hr HelmRelease) Annotations() helmReleaseAnnotations {
 	return hr.ObjectMeta.GetAnnotations()
 }
 

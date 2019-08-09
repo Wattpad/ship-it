@@ -122,7 +122,7 @@ var _ = Describe("HelmRelease", func() {
 				Spec: HelmReleaseSpec{},
 			}
 
-			annotations := hr.GetAnnotations()
+			annotations := hr.Annotations()
 
 			By("calling AutoDeploy")
 			Expect(annotations.AutoDeploy()).To(BeTrue())
