@@ -73,6 +73,9 @@ var _ = Describe("HelmRelease", func() {
 						Raw: []byte(`{"test":1}`),
 					},
 				},
+				Status: HelmReleaseStatus{
+					Conditions: []HelmReleaseCondition{},
+				},
 			}
 
 			By("creating an API obj")
