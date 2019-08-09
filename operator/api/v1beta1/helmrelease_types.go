@@ -82,6 +82,48 @@ type HelmReleaseList struct {
 	Items           []HelmRelease `json:"items"`
 }
 
+type helmReleaseAnnotations map[string]string
+
+// GetAnnotations returns a map of annotations
+func (hr HelmRelease) GetAnnotations() helmReleaseAnnotations {
+	return hr.ObjectMeta.GetAnnotations()
+}
+
+// Get returns an annotation
+func (a helmReleaseAnnotations) Get(k string) string {
+	return a[k]
+}
+
+// GetNamespaced returns the value of the annotation prefixed with the shipit API namespace
+func (a helmReleaseAnnotations) GetNamespaced(k string) string {
+	k = Resource("helmreleases").String() + "/" + k
+	return a.Get(k)
+}
+
+func (a helmReleaseAnnotations) AutoDeploy() bool {
+	return a.GetNamespaced("autodeploy") == "true"
+}
+
+func (a helmReleaseAnnotations) Code() string {
+	return a.GetNamespaced("code")
+}
+
+func (a helmReleaseAnnotations) Datadog() string {
+	return a.GetNamespaced("datadog")
+}
+
+func (a helmReleaseAnnotations) Squad() string {
+	return a.GetNamespaced("squad")
+}
+
+func (a helmReleaseAnnotations) Slack() string {
+	return a.GetNamespaced("slack")
+}
+
+func (a helmReleaseAnnotations) Sumologic() string {
+	return a.GetNamespaced("sumologic")
+}
+
 func init() {
 	SchemeBuilder.Register(&HelmRelease{}, &HelmReleaseList{})
 }

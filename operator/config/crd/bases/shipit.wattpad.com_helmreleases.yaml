@@ -410,6 +410,15 @@ spec:
           - values
           type: object
         status:
+          properties:
+            code:
+              description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
+                of cluster Important: Run "make" to regenerate code after modifying
+                this file'
+              format: int32
+              type: integer
+          required:
+          - code
           type: object
       type: object
   versions:

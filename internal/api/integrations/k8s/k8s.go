@@ -74,7 +74,7 @@ func (k *K8sClient) List(ctx context.Context, namespace string) ([]models.Releas
 }
 
 func transform(r shipitv1beta1.HelmRelease) models.Release {
-	annotations := helmReleaseAnnotations(r.GetAnnotations())
+	annotations := r.GetAnnotations()
 
 	return models.Release{
 		Name:       r.ObjectMeta.GetName(),

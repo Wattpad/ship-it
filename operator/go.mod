@@ -3,11 +3,19 @@ module ship-it-operator
 go 1.12
 
 require (
+	github.com/Masterminds/goutils v1.1.0 // indirect
+	github.com/Masterminds/semver v1.4.2 // indirect
+	github.com/Masterminds/sprig v2.20.0+incompatible // indirect
+	github.com/cyphar/filepath-securejoin v0.2.2 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-logr/logr v0.1.0
+	github.com/gobwas/glob v0.2.3 // indirect
+	github.com/google/uuid v1.1.1 // indirect
+	github.com/huandu/xstrings v1.2.0 // indirect
 	github.com/onsi/ginkgo v1.8.0
 	github.com/onsi/gomega v1.5.0
 	golang.org/x/net v0.0.0-20190501004415-9ce7a6920f09
+	google.golang.org/grpc v1.22.1 // indirect
 	gopkg.in/yaml.v2 v2.2.2
 	k8s.io/apiextensions-apiserver v0.0.0-20190409022649-727a075fdec8
 	k8s.io/apimachinery v0.0.0-20190404173353-6a84e37a896d
