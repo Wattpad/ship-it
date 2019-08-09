@@ -25,6 +25,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/helm/pkg/proto/hapi/release"
 )
 
 // These tests are written in BDD-style using Ginkgo framework. Refer to
@@ -72,11 +73,6 @@ var _ = Describe("HelmRelease", func() {
 						Raw: []byte(`{"test":1}`),
 					},
 				},
-				Status: HelmReleaseStatus{
-					Code:               0,
-					Reason:             "foo",
-					LastTransitionTime: metav1.Now(),
-				},
 			}
 
 			By("creating an API obj")
@@ -112,4 +108,61 @@ var _ = Describe("HelmRelease", func() {
 		})
 	})
 
+	Context("Release status conditions", func() {
+		It("should set and remove conditions", func() {
+			var s HelmReleaseStatus
+
+			code := release.Status_DEPLOYED
+			cond := HelmReleaseCondition{
+				Code:    code,
+				Reason:  ReasonInstallSuccess,
+				Message: "foo",
+			}
+
+			By("getting a condition that doesn't exist")
+			gottenCond := s.GetCondition()
+			Expect(gottenCond).To(BeZero())
+
+			By("setting a condition")
+			s.SetCondition(cond)
+			Expect(s.Conditions).To(HaveLen(1))
+
+			By("getting a condition that exists")
+			gottenCond = s.GetCondition()
+
+			// the conds should be equal, except for their
+			// 'LastTransitionTime' field which is set implicitly by 'SetCondition'
+			Expect(gottenCond.Code).To(Equal(cond.Code))
+			Expect(gottenCond.Reason).To(Equal(cond.Reason))
+			Expect(gottenCond.Message).To(Equal(cond.Message))
+		})
+
+		It("should update the transition time of existing conditions", func() {
+			var s HelmReleaseStatus
+
+			code := release.Status_FAILED
+			cond := HelmReleaseCondition{
+				Code:    code,
+				Reason:  ReasonUpdateError,
+				Message: "foo",
+			}
+
+			s.SetCondition(cond)
+			t0 := s.GetCondition().LastTransitionTime
+
+			By("re-setting an existing condition")
+			s.SetCondition(cond)
+
+			t1 := s.GetCondition().LastTransitionTime
+			Expect(t0).To(Equal(t1))
+
+			cond.Reason = ReasonRollbackError
+			s.SetCondition(cond)
+
+			t2 := s.GetCondition().LastTransitionTime
+
+			By("setting an existing condition with a new reason")
+			Expect(t0).To(Not(Equal(t2)))
+		})
+	})
 })

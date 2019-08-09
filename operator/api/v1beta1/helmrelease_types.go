@@ -55,6 +55,10 @@ type HelmReleaseStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
+	Conditions []HelmReleaseCondition `json:"conditions"`
+}
+
+type HelmReleaseCondition struct {
 	Code               release.Status_Code     `json:"code"`
 	LastTransitionTime metav1.Time             `json:"lastTransitionTime,omitempty"`
 	Message            string                  `json:"message,omitempty"`
@@ -91,18 +95,32 @@ func (hr HelmRelease) HelmValues() map[string]interface{} {
 	return obj
 }
 
-func (hr *HelmRelease) WithStatus(s HelmReleaseStatus) *HelmRelease {
-	var out HelmRelease
-	hr.DeepCopyInto(&out)
+func (s *HelmReleaseStatus) SetCondition(condition HelmReleaseCondition) *HelmReleaseStatus {
+	now := metav1.Now()
 
-	if out.Status.Code == s.Code && out.Status.Reason == s.Reason {
-		s.LastTransitionTime = out.Status.LastTransitionTime
-	} else {
-		s.LastTransitionTime = metav1.Now()
+	// if there's a matching condition, use the previous transition time
+	for i, c := range s.Conditions {
+		if c.Code == condition.Code && c.Reason == condition.Reason {
+			condition.LastTransitionTime = c.LastTransitionTime
+		} else {
+			condition.LastTransitionTime = now
+		}
+
+		s.Conditions[i] = condition
+		return s
 	}
 
-	out.Status = s
-	return &out
+	// otherwise add the new condition
+	condition.LastTransitionTime = now
+	s.Conditions = append(s.Conditions, condition)
+	return s
+}
+
+func (s *HelmReleaseStatus) GetCondition() HelmReleaseCondition {
+	for _, c := range s.Conditions {
+		return c
+	}
+	return HelmReleaseCondition{}
 }
 
 // +kubebuilder:object:root=true
