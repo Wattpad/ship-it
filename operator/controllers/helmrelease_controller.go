@@ -78,6 +78,11 @@ func (r *HelmReleaseReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 		return ctrl.Result{}, err
 	}
 
+	if !helmRelease.Annotations().AutoDeploy() {
+		log.Info("AutoDeploy is disabled for this HelmRelease")
+		return ctrl.Result{}, nil
+	}
+
 	if helmRelease.DeletionTimestamp != nil {
 		return ctrl.Result{}, r.onDelete(ctx, helmRelease)
 	}

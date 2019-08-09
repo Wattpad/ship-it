@@ -7,6 +7,7 @@ import (
 
 	"ship-it/internal"
 
+	"github.com/go-kit/kit/log"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/types"
@@ -33,7 +34,7 @@ func (m *MockIndexerService) Lookup(repo string) ([]types.NamespacedName, error)
 func TestReconcileLookupFailure(t *testing.T) {
 	mockEditor := new(MockEditor)
 	mockIndexService := new(MockIndexerService)
-	reconciler := NewReconciler(mockEditor, mockIndexService)
+	reconciler := NewReconciler(mockEditor, mockIndexService, log.NewNopLogger())
 	inputImage := &internal.Image{
 		Registry:   "723255503624.dkr.ecr.us-east-1.amazonaws.com",
 		Repository: "bar",
@@ -53,7 +54,7 @@ func TestReconcilerUpdateFailure(t *testing.T) {
 	mockEditor := new(MockEditor)
 	mockIndexService := new(MockIndexerService)
 
-	reconciler := NewReconciler(mockEditor, mockIndexService)
+	reconciler := NewReconciler(mockEditor, mockIndexService, log.NewNopLogger())
 
 	inputImage := &internal.Image{
 		Registry:   "723255503624.dkr.ecr.us-east-1.amazonaws.com",
@@ -72,7 +73,7 @@ func TestReconcilerUpdateFailure(t *testing.T) {
 
 	err := reconciler.Reconcile(context.Background(), inputImage)
 
-	assert.Error(t, err)
+	assert.NoError(t, err)
 	mockIndexService.AssertExpectations(t)
 	mockEditor.AssertExpectations(t)
 }
@@ -81,7 +82,7 @@ func TestReconcilerSuccess(t *testing.T) {
 	mockEditor := new(MockEditor)
 	mockIndexService := new(MockIndexerService)
 
-	reconciler := NewReconciler(mockEditor, mockIndexService)
+	reconciler := NewReconciler(mockEditor, mockIndexService, log.NewNopLogger())
 
 	inputImage := &internal.Image{
 		Registry:   "723255503624.dkr.ecr.us-east-1.amazonaws.com",

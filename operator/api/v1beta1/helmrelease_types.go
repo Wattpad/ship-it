@@ -17,6 +17,7 @@ package v1beta1
 
 import (
 	"encoding/json"
+	"strconv"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
@@ -131,6 +132,56 @@ type HelmReleaseList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []HelmRelease `json:"items"`
+}
+
+type helmReleaseAnnotations map[string]string
+
+// Annotations returns a map of annotations
+func (hr HelmRelease) Annotations() helmReleaseAnnotations {
+	return hr.ObjectMeta.GetAnnotations()
+}
+
+// Get returns an annotation
+func (a helmReleaseAnnotations) Get(k string) string {
+	return a[k]
+}
+
+// GetNamespaced returns the value of the annotation prefixed with the shipit API namespace
+func (a helmReleaseAnnotations) GetNamespaced(k string) string {
+	k = Resource("helmreleases").String() + "/" + k
+	return a.Get(k)
+}
+
+func (a helmReleaseAnnotations) AutoDeploy() bool {
+	autodeploy := a.GetNamespaced("autodeploy")
+
+	v, err := strconv.ParseBool(autodeploy)
+
+	if err != nil {
+		return false
+	}
+
+	return v
+}
+
+func (a helmReleaseAnnotations) Code() string {
+	return a.GetNamespaced("code")
+}
+
+func (a helmReleaseAnnotations) Datadog() string {
+	return a.GetNamespaced("datadog")
+}
+
+func (a helmReleaseAnnotations) Squad() string {
+	return a.GetNamespaced("squad")
+}
+
+func (a helmReleaseAnnotations) Slack() string {
+	return a.GetNamespaced("slack")
+}
+
+func (a helmReleaseAnnotations) Sumologic() string {
+	return a.GetNamespaced("sumologic")
 }
 
 func init() {

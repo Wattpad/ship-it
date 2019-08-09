@@ -165,4 +165,32 @@ var _ = Describe("HelmRelease", func() {
 			Expect(t0).To(Not(Equal(t2)))
 		})
 	})
+
+	Context("Getting annotations", func() {
+		It("should return the annotation", func() {
+			hr := &HelmRelease{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "foo",
+					Namespace: "default",
+					Annotations: map[string]string{
+						"test": "annotation",
+						"helmreleases.shipit.wattpad.com/autodeploy": "true",
+						"helmreleases.shipit.wattpad.com/code":       "code",
+					},
+				},
+				Spec: HelmReleaseSpec{},
+			}
+
+			annotations := hr.Annotations()
+
+			By("calling AutoDeploy")
+			Expect(annotations.AutoDeploy()).To(BeTrue())
+
+			By("calling Get")
+			Expect(annotations.Get("test")).To(Equal("annotation"))
+
+			By("calling GetNamespaced")
+			Expect(annotations.GetNamespaced("code")).To(Equal("code"))
+		})
+	})
 })
