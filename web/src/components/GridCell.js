@@ -13,6 +13,7 @@ import DockerIcon from '../assets/docker_icon.png'
 import StatusChip from './StatusChip';
 import SlackInfoDialog from './SlackInfoDialog';
 import ImageInfoDialog from './ImageInfoDialog';
+import ExpandedCard from './ExpandedCard'
 import urljoin from 'url-join'
 
 const imgAlt = "not found"
@@ -28,11 +29,17 @@ class SingleGridCell extends React.Component {
       repoSelector: false,
       slackInfo: false,
       imageInfo: false,
+      expanded: false,
     }
   }
 
   cellClick = (event) => {
-    this.props.handleCellClick(event)
+    // this.props.handleCellClick(event)
+    this.setState({expanded: true})
+  }
+
+  cellClosed = () => {
+    this.setState({expanded: false})
   }
 
   slackClicked = () => {
@@ -102,6 +109,7 @@ class SingleGridCell extends React.Component {
                 <IconButton onClick={this.cellClick}>
                   <ExpandIcon />
                 </IconButton>
+                {this.state.expanded ? <ExpandedCard open={this.state.expanded} data={this.props.SingleGridCellData} handleClose={this.cellClosed} /> : null} 
               </div>
             </CardContent>
           </Card>
