@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -12,6 +11,7 @@ import (
 	"ship-it/internal/syncd/config"
 	"ship-it/internal/syncd/integrations/ecr"
 	"ship-it/internal/syncd/integrations/github"
+	"ship-it/internal/syncd/integrations/k8s"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
@@ -19,15 +19,8 @@ import (
 	"github.com/go-kit/kit/metrics/dogstatsd"
 	gogithub "github.com/google/go-github/v26/github"
 	"golang.org/x/oauth2"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/helm/pkg/helm"
 )
-
-type NOPIndexer struct{}
-
-func (n NOPIndexer) Lookup(repo string) ([]types.NamespacedName, error) {
-	return nil, fmt.Errorf("error not implemented")
-}
 
 func main() {
 	logger := log.NewJSONLogger(log.NewSyncWriter(os.Stdout))
@@ -64,8 +57,14 @@ func main() {
 	oauthClient := oauth2.NewClient(context.Background(), ts)
 	githubClient := gogithub.NewClient(oauthClient)
 
+	informer, err := k8s.NewInformer(ctx)
+	if err != nil {
+		logger.Log("error", err)
+		os.Exit(1)
+	}
+
 	gitClient := ecr.NewGitHub(ctx, githubClient, cfg.GithubOrg, cfg.OperationsRepoName, cfg.ReleaseBranch, cfg.RegistryChartPath)
-	imageReconciler := ecr.NewReconciler(gitClient, NOPIndexer{})
+	imageReconciler := ecr.NewReconciler(gitClient, informer)
 
 	chartReconciler := github.NewReconciler(
 		helm.NewClient(),
