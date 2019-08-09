@@ -90,7 +90,7 @@ func main() {
 }
 
 func initListeners(l log.Logger, githubClient *gogithub.Client, dd *dogstatsd.Dogstatsd, cfg *config.Config) (syncd.ImageListener, syncd.RegistryChartListener, error) {
-	syncHist := dd.NewTiming("syncd.time", 1.0)
+	syncHist := dd.NewTiming("syncd.time", 1)
 
 	awsSession, err := session.NewSession(cfg.AWS())
 	if err != nil {
