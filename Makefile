@@ -29,7 +29,7 @@ api/*.json: internal/api/models/*.go
 
 jsonschema: api/*.json
 
-docs/operator-release-states.png:
+docs/operator-release-states.png: docs/operator-release-states.dot
 	dot -Tpng docs/operator-release-states.dot -o docs/operator-release-states.png
 
 docs: api/*.json docs/operator-release-states.png

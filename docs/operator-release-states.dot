@@ -11,20 +11,22 @@ digraph fsm {
 
     node [shape = doublecircle]; DEPLOYED;
     node [shape = doublecircle]; DELETED;
-    node [shape = doublecircle]; FAILED;
+    node [shape = doublecircle]; FAILED_UPDATE;
+    node [shape = doublecircle]; FAILED_INSTALL;
+    node [shape = doublecircle]; FAILED_ROLLBACK;
 
     start -> INSTALLING [label = "install"];
 
     INSTALLING -> DEPLOYED [color = "forestgreen"];
-    INSTALLING -> FAILED [color = "firebrick"];
+    INSTALLING -> FAILED_INSTALL [color = "firebrick"];
 
-    FAILED -> ROLLINGBACK [label = "rollback"];
-    ROLLINGBACK -> FAILED [color = "firebrick"];
+    FAILED_UPDATE -> ROLLINGBACK [label = "rollback"];
+    ROLLINGBACK -> FAILED_ROLLBACK [color = "firebrick"];
     ROLLINGBACK -> DEPLOYED [color = "forestgreen"];
 
     DEPLOYED -> UPDATING [label = "update"];
     UPDATING -> DEPLOYED [color = "forestgreen"];
-    UPDATING -> FAILED [color = "firebrick"];
+    UPDATING -> FAILED_UPDATE [color = "firebrick"];
 
     DEPLOYED -> DELETING [label = "delete"];
     DELETING -> DELETED [color = "forestgreen"];
