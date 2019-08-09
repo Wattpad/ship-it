@@ -17,6 +17,7 @@ package v1beta1
 
 import (
 	"encoding/json"
+	"strconv"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
@@ -101,7 +102,15 @@ func (a helmReleaseAnnotations) GetNamespaced(k string) string {
 }
 
 func (a helmReleaseAnnotations) AutoDeploy() bool {
-	return a.GetNamespaced("autodeploy") == "true"
+	autodeploy := a.GetNamespaced("autodeploy")
+
+	v, err := strconv.ParseBool(autodeploy)
+
+	if err != nil {
+		return false
+	}
+
+	return v
 }
 
 func (a helmReleaseAnnotations) Code() string {
