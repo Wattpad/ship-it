@@ -410,6 +410,12 @@ spec:
           - values
           type: object
         status:
+          properties:
+            code:
+              format: int32
+              type: integer
+          required:
+          - code
           type: object
       type: object
   versions:
