@@ -38,3 +38,7 @@ var (
 func Resource(resource string) schema.GroupResource {
 	return GroupVersion.WithResource(resource).GroupResource()
 }
+
+func Kind(kind string) schema.GroupVersionKind {
+	return GroupVersion.WithKind(kind)
+}

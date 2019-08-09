@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -12,6 +11,7 @@ import (
 	"ship-it/internal/syncd/config"
 	"ship-it/internal/syncd/integrations/ecr"
 	"ship-it/internal/syncd/integrations/github"
+	"ship-it/internal/syncd/integrations/k8s"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
@@ -19,15 +19,8 @@ import (
 	"github.com/go-kit/kit/metrics/dogstatsd"
 	gogithub "github.com/google/go-github/v26/github"
 	"golang.org/x/oauth2"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/helm/pkg/helm"
 )
-
-type NOPIndexer struct{}
-
-func (n NOPIndexer) Lookup(repo string) ([]types.NamespacedName, error) {
-	return nil, fmt.Errorf("error not implemented")
-}
 
 func main() {
 	logger := log.NewJSONLogger(log.NewSyncWriter(os.Stdout))
@@ -55,20 +48,23 @@ func main() {
 	dd := dogstatsd.New("wattpad.ship-it.", logger)
 	go dd.SendLoop(time.Tick(time.Second), "udp", cfg.DataDogAddress())
 
-	imageListener, err := ecr.NewListener(logger, dd.NewTiming("syncd.time", 1.0), cfg.EcrQueue, sqs.New(session.Must(session.NewSession())))
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{
+			AccessToken: cfg.GithubToken,
+		},
+	)
+
+	oauthClient := oauth2.NewClient(context.Background(), ts)
+	githubClient := gogithub.NewClient(oauthClient)
+
+	informer, err := k8s.NewInformer(ctx)
 	if err != nil {
 		logger.Log("error", err)
 		os.Exit(1)
 	}
 
-	chartListener, err := initRegistryChartListener(logger, dd, cfg)
-	if err != nil {
-		logger.Log("error", err)
-		os.Exit(1)
-	}
-
-	gitClient := ecr.NewGitHub(ctx, cfg.GithubToken, cfg.GithubOrg, cfg.OperationsRepoName, cfg.ReleaseBranch, cfg.RegistryChartPath)
-	imageReconciler := ecr.NewReconciler(gitClient, NOPIndexer{}, logger)
+	gitClient := ecr.NewGitHub(ctx, githubClient, cfg.GithubOrg, cfg.OperationsRepoName, cfg.ReleaseBranch, cfg.RegistryChartPath)
+	imageReconciler := ecr.NewReconciler(gitClient, informer, logger)
 
 	chartReconciler := github.NewReconciler(
 		helm.NewClient(),
@@ -76,6 +72,12 @@ func main() {
 		cfg.ReleaseName,
 		cfg.HelmTimeout(),
 	)
+
+	imageListener, chartListener, err := initListeners(logger, githubClient, dd, cfg)
+	if err != nil {
+		logger.Log("error", err)
+		os.Exit(1)
+	}
 
 	// TODO: Allow configurable image/chart sync implementations. For now
 	// we'll just use our specific ecr+sqs/github+sqs implmentations.
@@ -86,31 +88,22 @@ func main() {
 	}
 }
 
-func initRegistryChartListener(l log.Logger, dd *dogstatsd.Dogstatsd, cfg *config.Config) (syncd.RegistryChartListener, error) {
-	workerTime := dd.NewTiming("worker.time", 1)
+func initListeners(l log.Logger, githubClient *gogithub.Client, dd *dogstatsd.Dogstatsd, cfg *config.Config) (syncd.ImageListener, syncd.RegistryChartListener, error) {
+	syncHist := dd.NewTiming("syncd.time", 1)
 
 	awsSession, err := session.NewSession(cfg.AWS())
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	sqsClient := sqs.New(awsSession)
 
-	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{
-			AccessToken: cfg.GithubToken,
-		},
-	)
+	imageListener, err := ecr.NewListener(l, syncHist, cfg.EcrQueue, sqs.New(awsSession))
+	if err != nil {
+		return nil, nil, err
+	}
 
-	oauthClient := oauth2.NewClient(context.Background(), ts)
-	githubClient := gogithub.NewClient(oauthClient)
+	chartListener, err := github.NewListener(l, syncHist, cfg.GithubOrg, githubClient.Repositories, cfg.GithubQueue, sqsClient)
 
-	return github.NewListener(
-		l,
-		workerTime,
-		cfg.GithubOrg,
-		githubClient.Repositories,
-		cfg.GithubQueue,
-		sqsClient,
-	)
+	return imageListener, chartListener, err
 }
