@@ -1,4 +1,4 @@
-.PHONY: build push run jsonschema
+.PHONY: build push jsonschema
 
 REGISTRY := 723255503624.dkr.ecr.us-east-1.amazonaws.com
 VERSION := $(shell git rev-parse HEAD)

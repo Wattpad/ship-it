@@ -19,6 +19,8 @@ import (
 	"context"
 	"errors"
 
+	shipitv1beta1 "ship-it-operator/api/v1beta1"
+
 	"github.com/go-logr/logr"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/helm/pkg/helm"
@@ -26,10 +28,10 @@ import (
 	hapi "k8s.io/helm/pkg/proto/hapi/services"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	shipitv1beta1 "ship-it-operator/api/v1beta1"
 )
 
+// The HelmReleaseFinalizer allows the controller to clean up the associated
+// release before the HelmRelease resource is deleted.
 const HelmReleaseFinalizer = "HelmReleaseFinalizer"
 
 var errNotImplemented = errors.New("not implemented")

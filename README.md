@@ -4,6 +4,8 @@
 
 _Ship it!_ is Wattpad's tool for continuous deployment to Kubernetes.
 
+The technical background and architecture of Ship-it can be found in the overview documentation [here](./docs/OVERVIEW.md)
+
 ## Local Development
 
 This project uses skaffold for local development and testing. To get started,
