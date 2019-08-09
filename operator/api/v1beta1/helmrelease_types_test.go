@@ -112,9 +112,9 @@ var _ = Describe("HelmRelease", func() {
 		It("should set and remove conditions", func() {
 			var s HelmReleaseStatus
 
-			code := release.Status_DEPLOYED
+			typ := release.Status_DEPLOYED.String()
 			cond := HelmReleaseCondition{
-				Code:    code,
+				Type:    typ,
 				Reason:  ReasonInstallSuccess,
 				Message: "foo",
 			}
@@ -131,8 +131,8 @@ var _ = Describe("HelmRelease", func() {
 			gottenCond = s.GetCondition()
 
 			// the conds should be equal, except for their
-			// 'LastTransitionTime' field which is set implicitly by 'SetCondition'
-			Expect(gottenCond.Code).To(Equal(cond.Code))
+			// 'metav1.Time' fields which are set implicitly by 'SetCondition'
+			Expect(gottenCond.Type).To(Equal(cond.Type))
 			Expect(gottenCond.Reason).To(Equal(cond.Reason))
 			Expect(gottenCond.Message).To(Equal(cond.Message))
 		})
@@ -140,9 +140,9 @@ var _ = Describe("HelmRelease", func() {
 		It("should update the transition time of existing conditions", func() {
 			var s HelmReleaseStatus
 
-			code := release.Status_FAILED
+			typ := release.Status_FAILED.String()
 			cond := HelmReleaseCondition{
-				Code:    code,
+				Type:    typ,
 				Reason:  ReasonUpdateError,
 				Message: "foo",
 			}
