@@ -101,7 +101,7 @@ func transform(r shipitv1beta1.HelmRelease) models.Release {
 			},
 			Docker: dockerArtifacts(r),
 		},
-		Status: r.Status.Code.String(),
+		Status: r.Status.GetCondition().Type,
 	}
 }
 

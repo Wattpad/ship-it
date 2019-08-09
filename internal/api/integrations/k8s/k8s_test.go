@@ -126,7 +126,11 @@ func TestGetAndList(t *testing.T) {
 			},
 		},
 		Status: shipitv1beta1.HelmReleaseStatus{
-			Code: releaseStatus,
+			Conditions: []shipitv1beta1.HelmReleaseCondition{
+				{
+					Type: releaseStatus.String(),
+				},
+			},
 		},
 	}
 
