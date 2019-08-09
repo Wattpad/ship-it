@@ -4,6 +4,7 @@ import (
 	"context"
 	"ship-it/internal"
 
+	"github.com/go-kit/kit/log"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/types"
 )
@@ -19,12 +20,14 @@ type IndexerService interface {
 type ImageReconciler struct {
 	Editor       HelmReleaseEditor
 	IndexService IndexerService
+	l            log.Logger
 }
 
-func NewReconciler(r HelmReleaseEditor, i IndexerService) *ImageReconciler {
+func NewReconciler(r HelmReleaseEditor, i IndexerService, logger log.Logger) *ImageReconciler {
 	return &ImageReconciler{
 		Editor:       r,
 		IndexService: i,
+		l:            logger,
 	}
 }
 
@@ -36,7 +39,7 @@ func (r *ImageReconciler) Reconcile(ctx context.Context, image *internal.Image) 
 	for _, release := range releases {
 		err := r.Editor.UpdateAndReplace(ctx, release.Name, image)
 		if err != nil {
-			return err
+			r.l.Log("error", err)
 		}
 	}
 	return nil
