@@ -9,7 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-type HelmReleaseEditor interface {
+type HelmReleaseeditor interface {
 	UpdateAndReplace(ctx context.Context, releaseName string, image *internal.Image) error
 }
 
@@ -18,28 +18,28 @@ type IndexerService interface {
 }
 
 type ImageReconciler struct {
-	Editor       HelmReleaseEditor
-	IndexService IndexerService
-	l            log.Logger
+	editor       HelmReleaseeditor
+	indexService IndexerService
+	logger       log.Logger
 }
 
-func NewReconciler(r HelmReleaseEditor, i IndexerService, logger log.Logger) *ImageReconciler {
+func NewReconciler(r HelmReleaseeditor, i IndexerService, l log.Logger) *ImageReconciler {
 	return &ImageReconciler{
-		Editor:       r,
-		IndexService: i,
-		l:            logger,
+		editor:       r,
+		indexService: i,
+		logger:       l,
 	}
 }
 
 func (r *ImageReconciler) Reconcile(ctx context.Context, image *internal.Image) error {
-	releases, err := r.IndexService.Lookup(image.Repository)
+	releases, err := r.indexService.Lookup(image.Repository)
 	if err != nil {
 		return errors.Wrapf(err, "failed to obtain the releases corresponding to the repository: %s", image.Repository)
 	}
 	for _, release := range releases {
-		err := r.Editor.UpdateAndReplace(ctx, release.Name, image)
+		err := r.editor.UpdateAndReplace(ctx, release.Name, image)
 		if err != nil {
-			r.l.Log("error", err)
+			r.logger.Log("error", err)
 		}
 	}
 	return nil
