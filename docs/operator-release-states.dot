@@ -1,0 +1,31 @@
+digraph fsm {
+    rankdir=LR;
+    size="32,32"
+
+    node [shape = point ]; start;
+
+    node [shape = circle]; INSTALLING;
+    node [shape = circle]; UPDATING;
+    node [shape = circle]; DELETING;
+    node [shape = circle]; ROLLINGBACK;
+
+    node [shape = doublecircle]; DEPLOYED;
+    node [shape = doublecircle]; DELETED;
+    node [shape = doublecircle]; FAILED;
+
+    start -> INSTALLING [label = "install"];
+
+    INSTALLING -> DEPLOYED [color = "forestgreen"];
+    INSTALLING -> FAILED [color = "firebrick"];
+
+    FAILED -> ROLLINGBACK [label = "rollback"];
+    ROLLINGBACK -> FAILED [color = "firebrick"];
+    ROLLINGBACK -> DEPLOYED [color = "forestgreen"];
+
+    DEPLOYED -> UPDATING [label = "update"];
+    UPDATING -> DEPLOYED [color = "forestgreen"];
+    UPDATING -> FAILED [color = "firebrick"];
+
+    DEPLOYED -> DELETING [label = "delete"];
+    DELETING -> DELETED [color = "forestgreen"];
+}
