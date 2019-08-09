@@ -125,7 +125,7 @@ var _ = Describe("HelmRelease", func() {
 			annotations := hr.GetAnnotations()
 
 			By("calling AutoDeploy")
-			Expect(annotations.AutoDeploy()).To(Equal(true))
+			Expect(annotations.AutoDeploy()).To(BeTrue())
 
 			By("calling Get")
 			Expect(annotations.Get("test")).To(Equal("annotation"))
