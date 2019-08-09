@@ -8,7 +8,6 @@ import (
 
 	"github.com/google/go-github/v26/github"
 	"github.com/pkg/errors"
-	"golang.org/x/oauth2"
 	"gopkg.in/yaml.v2"
 )
 
@@ -20,13 +19,9 @@ type GitHub struct {
 	RegistryChartPath string
 }
 
-func NewGitHub(ctx context.Context, token string, org string, repo string, branch string, registryPath string) GitHub {
-	tokenSource := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: token},
-	)
-
+func NewGitHub(ctx context.Context, c *github.Client, org string, repo string, branch string, registryPath string) GitHub {
 	return GitHub{
-		client:            github.NewClient(oauth2.NewClient(ctx, tokenSource)),
+		client:            c,
 		Organization:      org,
 		Branch:            branch,
 		Repository:        repo,
