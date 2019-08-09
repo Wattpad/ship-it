@@ -29,6 +29,16 @@ spec:
           env:
             - name: AWS_REGION
               value: {{ .Values.awsRegion }}
+            - name: REGISTRY_CHART_PATH
+              value: {{ .Values.syncd.registryChartPath }}
+            - name: RELEASE_NAME
+              value: {{ .Values.syncd.releaseName }}
+            - name: OPERATIONS_REPOSITORY
+              value: {{ .Values.syncd.operationsRepository }}
+            - name: ECR_QUEUE
+              value: {{ .Values.syncd.ecrQueue }}
+            - name: GITHUB_QUEUE
+              value: {{ .Values.syncd.githubQueue }}
           {{ if .Values.github }}
             - name: GITHUB_ORG
               value: {{ .Values.github.org }}
