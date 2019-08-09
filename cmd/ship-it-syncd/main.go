@@ -63,7 +63,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	gitClient := ecr.NewGitHub(ctx, githubClient, cfg.GithubOrg, cfg.OperationsRepoName, cfg.ReleaseBranch, cfg.RegistryChartPath)
+	gitClient := ecr.NewGitHub(ctx, githubClient, cfg.GithubOrg, cfg.OperationsRepository, cfg.ReleaseBranch, cfg.RegistryChartPath)
 	imageReconciler := ecr.NewReconciler(gitClient, informer)
 
 	chartReconciler := github.NewReconciler(
