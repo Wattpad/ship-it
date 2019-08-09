@@ -27,6 +27,16 @@ syncd:
     tag: latest
     pullPolicy: IfNotPresent
 
+  ecrQueue: https://sqs.us-east-1.amazonaws.com/723255503624/ship-it-ecr.fifo
+  githubQueue: https://sqs.us-east-1.amazonaws.com/723255503624/ship-it-github.fifo
+
+  namespace: default
+
+  operationsRepository: miranda
+
+  releaseName: ship-it-registry
+  registryChartPath: k8s/charts/components/ship-it-registry
+
   resources:
     requests:
       cpu: 100m
