@@ -55,7 +55,16 @@ func main() {
 	dd := dogstatsd.New("wattpad.ship-it.", logger)
 	go dd.SendLoop(time.Tick(time.Second), "udp", cfg.DataDogAddress())
 
-	gitClient := ecr.NewGitHub(ctx, cfg.GithubToken, cfg.GithubOrg, cfg.OperationsRepoName, cfg.ReleaseBranch, cfg.RegistryChartPath)
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{
+			AccessToken: cfg.GithubToken,
+		},
+	)
+
+	oauthClient := oauth2.NewClient(context.Background(), ts)
+	githubClient := gogithub.NewClient(oauthClient)
+
+	gitClient := ecr.NewGitHub(ctx, githubClient, cfg.GithubOrg, cfg.OperationsRepoName, cfg.ReleaseBranch, cfg.RegistryChartPath)
 	imageReconciler := ecr.NewReconciler(gitClient, NOPIndexer{})
 
 	chartReconciler := github.NewReconciler(
@@ -65,7 +74,7 @@ func main() {
 		cfg.HelmTimeout(),
 	)
 
-	imageListener, chartListener, err := initListeners(logger, dd, cfg)
+	imageListener, chartListener, err := initListeners(logger, githubClient, dd, cfg)
 	if err != nil {
 		logger.Log("error", err)
 		os.Exit(1)
@@ -80,7 +89,7 @@ func main() {
 	}
 }
 
-func initListeners(l log.Logger, dd *dogstatsd.Dogstatsd, cfg *config.Config) (syncd.ImageListener, syncd.RegistryChartListener, error) {
+func initListeners(l log.Logger, githubClient *gogithub.Client, dd *dogstatsd.Dogstatsd, cfg *config.Config) (syncd.ImageListener, syncd.RegistryChartListener, error) {
 	syncHist := dd.NewTiming("syncd.time", 1.0)
 
 	awsSession, err := session.NewSession(cfg.AWS())
@@ -89,15 +98,6 @@ func initListeners(l log.Logger, dd *dogstatsd.Dogstatsd, cfg *config.Config) (s
 	}
 
 	sqsClient := sqs.New(awsSession)
-
-	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{
-			AccessToken: cfg.GithubToken,
-		},
-	)
-
-	oauthClient := oauth2.NewClient(context.Background(), ts)
-	githubClient := gogithub.NewClient(oauthClient)
 
 	imageListener, err := ecr.NewListener(l, syncHist, cfg.EcrQueue, sqs.New(awsSession))
 	if err != nil {
