@@ -21,11 +21,24 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/helm/pkg/proto/hapi/release"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+
+type HelmReleaseStatusReason string
+
+const (
+	ReasonDeleteError     HelmReleaseStatusReason = "DeleteError"
+	ReasonDeleteSuccess   HelmReleaseStatusReason = "DeleteSuccess"
+	ReasonInstallError    HelmReleaseStatusReason = "InstallError"
+	ReasonInstallSuccess  HelmReleaseStatusReason = "InstallSuccess"
+	ReasonReconcileError  HelmReleaseStatusReason = "ReconcileError"
+	ReasonRollbackError   HelmReleaseStatusReason = "RollbackError"
+	ReasonRollbackSuccess HelmReleaseStatusReason = "RollbackSuccess"
+	ReasonUpdateError     HelmReleaseStatusReason = "UpdateError"
+	ReasonUpdateSuccess   HelmReleaseStatusReason = "UpdateSuccess"
+)
 
 // HelmReleaseSpec defines the desired state of HelmRelease
 type HelmReleaseSpec struct {
@@ -42,7 +55,15 @@ type HelmReleaseStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	Code release.Status_Code `json:"code"`
+	Conditions []HelmReleaseCondition `json:"conditions"`
+}
+
+type HelmReleaseCondition struct {
+	Type               string                  `json:"type"`
+	LastTransitionTime metav1.Time             `json:"lastTransitionTime,omitempty"`
+	LastUpdateTime     metav1.Time             `json:"lastUpdateTime,omitempty"`
+	Message            string                  `json:"message,omitempty"`
+	Reason             HelmReleaseStatusReason `json:"reason,omitempty"`
 }
 
 // ChartSpec defines the desired Helm chart
@@ -73,6 +94,35 @@ func (hr HelmRelease) HelmValues() map[string]interface{} {
 	}
 
 	return obj
+}
+
+func (s *HelmReleaseStatus) SetCondition(condition HelmReleaseCondition) *HelmReleaseStatus {
+	now := metav1.Now()
+	condition.LastUpdateTime = now
+
+	// if there's a matching condition, use the previous transition time
+	for i, c := range s.Conditions {
+		if c.Type == condition.Type && c.Reason == condition.Reason {
+			condition.LastTransitionTime = c.LastTransitionTime
+		} else {
+			condition.LastTransitionTime = now
+		}
+
+		s.Conditions[i] = condition
+		return s
+	}
+
+	// otherwise add the new condition
+	condition.LastTransitionTime = now
+	s.Conditions = append(s.Conditions, condition)
+	return s
+}
+
+func (s *HelmReleaseStatus) GetCondition() HelmReleaseCondition {
+	for _, c := range s.Conditions {
+		return c
+	}
+	return HelmReleaseCondition{}
 }
 
 // +kubebuilder:object:root=true
