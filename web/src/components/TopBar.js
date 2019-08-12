@@ -1,6 +1,6 @@
 import React from 'react'
 import { AppBar, Toolbar, Typography } from '@material-ui/core'
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles'
+import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider'
 import IconButton from '@material-ui/core/IconButton'
 import ShipIcon from '../assets/passenger_ship.png'
 import * as constants from '../Constants'

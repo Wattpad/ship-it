@@ -29,7 +29,6 @@ class SingleGridCell extends React.Component {
       repoSelector: false,
       slackInfo: false,
       imageInfo: false,
-      expanded: false,
     }
   }
 
