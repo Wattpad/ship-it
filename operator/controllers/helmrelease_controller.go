@@ -19,25 +19,29 @@ import (
 	"context"
 	"errors"
 
+	shipitv1beta1 "ship-it-operator/api/v1beta1"
+
 	"github.com/go-logr/logr"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/proto/hapi/chart"
-	rls "k8s.io/helm/pkg/proto/hapi/services"
+	hapi "k8s.io/helm/pkg/proto/hapi/services"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	shipitv1beta1 "ship-it-operator/api/v1beta1"
 )
+
+// The HelmReleaseFinalizer allows the controller to clean up the associated
+// release before the HelmRelease resource is deleted.
+const HelmReleaseFinalizer = "HelmReleaseFinalizer"
 
 var errNotImplemented = errors.New("not implemented")
 
 type HelmClient interface {
-	DeleteRelease(rlsName string, opts ...helm.DeleteOption) (*rls.UninstallReleaseResponse, error)
-	InstallReleaseFromChart(chart *chart.Chart, ns string, opts ...helm.InstallOption) (*rls.InstallReleaseResponse, error)
-	RollbackRelease(rlsName string, opts ...helm.RollbackOption) (*rls.RollbackReleaseResponse, error)
-	UpdateReleaseFromChart(rlsName string, chart *chart.Chart, opts ...helm.UpdateOption) (*rls.UpdateReleaseResponse, error)
+	DeleteRelease(rlsName string, opts ...helm.DeleteOption) (*hapi.UninstallReleaseResponse, error)
+	InstallReleaseFromChart(chart *chart.Chart, ns string, opts ...helm.InstallOption) (*hapi.InstallReleaseResponse, error)
+	ReleaseStatus(rlsName string, opts ...helm.StatusOption) (*hapi.GetReleaseStatusResponse, error)
+	RollbackRelease(rlsName string, opts ...helm.RollbackOption) (*hapi.RollbackReleaseResponse, error)
+	UpdateReleaseFromChart(rlsName string, chart *chart.Chart, opts ...helm.UpdateOption) (*hapi.UpdateReleaseResponse, error)
 }
 
 // HelmReleaseReconciler reconciles a HelmRelease object
@@ -68,7 +72,7 @@ func (r *HelmReleaseReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 	if err := r.Get(ctx, req.NamespacedName, &helmRelease); err != nil {
 		if apierrs.IsNotFound(err) {
 			log.Info("HelmRelease doesn't exist")
-			return ctrl.Result{}, r.onDelete(ctx, req.NamespacedName)
+			return ctrl.Result{}, nil
 		}
 
 		return ctrl.Result{}, err
@@ -79,7 +83,17 @@ func (r *HelmReleaseReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 		return ctrl.Result{}, nil
 	}
 
-	return ctrl.Result{}, r.onUpdate(ctx, helmRelease)
+	if helmRelease.DeletionTimestamp != nil {
+		return ctrl.Result{}, r.onDelete(ctx, helmRelease)
+	}
+
+	if !contains(helmRelease.GetFinalizers(), HelmReleaseFinalizer) {
+		// setting the finalizer does not change the release's
+		// metadata.generation, so we have to requeue
+		return ctrl.Result{Requeue: true}, r.setFinalizer(ctx, helmRelease)
+	}
+
+	return r.onUpdate(ctx, helmRelease)
 }
 
 func (r *HelmReleaseReconciler) SetupWithManager(mgr ctrl.Manager) error {
@@ -88,19 +102,28 @@ func (r *HelmReleaseReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *HelmReleaseReconciler) onDelete(ctx context.Context, name types.NamespacedName) error {
-	// Update HelmRelease Status to 'PENDING_DELETE' -- but the HelmRelease doesn't exist anymore :(
+func (r *HelmReleaseReconciler) setFinalizer(ctx context.Context, rls shipitv1beta1.HelmRelease) error {
+	finalizers := rls.GetFinalizers()
+	rls.SetFinalizers(append(finalizers, HelmReleaseFinalizer))
+
+	return r.Update(ctx, &rls)
+}
+
+func (r *HelmReleaseReconciler) onDelete(ctx context.Context, rls shipitv1beta1.HelmRelease) error {
+	// Update HelmRelease Status to 'DELETING'
 	// Delete the release with helm
 	return errNotImplemented
 }
 
-func (r *HelmReleaseReconciler) onUpdate(ctx context.Context, rls shipitv1beta1.HelmRelease) error {
-	// Update HelmRelease Status to 'PENDING_INSTALL' or 'PENDING_UPGRADE'
-	// Attempt the install/upgrade with helm
-	// If it succeeded, set Status to 'DEPLOYED'
-	// Else, set Status to 'PENDING_ROLLBACK'
-	// Attempt the rollback with helm
-	// If it succeeded, set Status to 'DEPLOYED'
-	// Else, set Status to 'FAILED'
-	return errNotImplemented
+func (r *HelmReleaseReconciler) onUpdate(ctx context.Context, rls shipitv1beta1.HelmRelease) (ctrl.Result, error) {
+	return ctrl.Result{}, errNotImplemented
+}
+
+func contains(strs []string, x string) bool {
+	for _, s := range strs {
+		if s == x {
+			return true
+		}
+	}
+	return false
 }
