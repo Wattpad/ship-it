@@ -109,7 +109,7 @@ class SingleGridCell extends React.Component {
                 <IconButton onClick={this.cellClick}>
                   <ExpandIcon />
                 </IconButton>
-                {this.state.expanded ? <ExpandedCard open={this.state.expanded} data={this.props.SingleGridCellData} handleClose={this.cellClosed} /> : null} 
+                {this.state.expanded ? <ExpandedCard API_ADDRESS={this.props.API_ADDRESS} open={this.state.expanded} data={this.props.SingleGridCellData} handleClose={this.cellClosed} /> : null} 
               </div>
             </CardContent>
           </Card>

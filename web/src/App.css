@@ -60,6 +60,10 @@
   margin-right: 5px;
 }
 
+.center {
+  margin: auto;
+}
+
 .kube-resource-list {
   display: flex;
   align-items: center;

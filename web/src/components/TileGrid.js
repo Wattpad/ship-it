@@ -3,7 +3,6 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
-import ExpandedDetail from './ExpandedDetail'
 import SingleGridCell from './GridCell'
 
 let cardID = 0
@@ -107,7 +106,7 @@ class ReactExpandableGrid extends React.Component {
     for (var i in gridData) {
       idCounter = idCounter + 1
       let thisUniqueKey = 'grid_cell_' + idCounter.toString()
-      grid.push(<SingleGridCell handleCellClick={this.handleCellClick.bind(this)} key={thisUniqueKey} id={thisUniqueKey} cellMargin={this.props.cellMargin} SingleGridCellData={gridData[i]} cellSize={this.props.cellSize} />)
+      grid.push(<SingleGridCell API_ADDRESS={this.props.API_ADDRESS} handleCellClick={this.handleCellClick.bind(this)} key={thisUniqueKey} id={thisUniqueKey} cellMargin={this.props.cellMargin} SingleGridCellData={gridData[i]} cellSize={this.props.cellSize} />)
     }
 
     const cssforExpandedDetail = {
@@ -121,7 +120,7 @@ class ReactExpandableGrid extends React.Component {
 
     grid.push( // Expanded Detail here
       <li style={cssforExpandedDetail} key='expandedDetail' id='expandedDetail'>
-        <ExpandedDetail data={gridData[cardID]} API_ADDRESS={this.props.API_ADDRESS} />
+        {/* <ExpandedDetail data={gridData[cardID]} API_ADDRESS={this.props.API_ADDRESS} /> */}
       </li>
     )
 
