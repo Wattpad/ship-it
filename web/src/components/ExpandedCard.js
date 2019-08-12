@@ -4,7 +4,6 @@ import ExpandLess from '@material-ui/icons/ExpandLess'
 import ExpandMore from '@material-ui/icons/ExpandMore'
 import { Collapse } from '@material-ui/core'
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider'
-import createMuiTheme from '@material-ui/core/styles/createMuiTheme'
 import Typography from '@material-ui/core/Typography'
 import Link from '@material-ui/core/Link'
 import FormControlLabel from '@material-ui/core/FormControlLabel'
@@ -12,30 +11,11 @@ import Switch from '@material-ui/core/Switch'
 import axios from 'axios'
 import urljoin from 'url-join'
 
+import * as themes from '../Themes'
+import * as constants from '../Constants'
+
 import HelmIcon from '../assets/helm_icon.png'
 import DataDogIcon from '../assets/data_dog_icon.png'
-
-const theme = createMuiTheme({
-    palette: {
-        primary: {
-            main: '#FF6612'
-        },
-        secondary: {
-            main: '#FEAF0A'
-        }
-    }
-})
-
-const linkTheme = createMuiTheme({
-    palette: {
-        primary: {
-            main: '#000000'
-        },
-        secondary: {
-            main: '#FEAF0A'
-        }
-    }
-})
 
 class ExpandedCard extends React.Component {
     constructor(props) {
@@ -61,14 +41,14 @@ class ExpandedCard extends React.Component {
                     <div className="flex-container" style={{width:700}}>
                         <div className="helm-status">
                             <div className="right-padded">
-                                <img src={HelmIcon} width="32" height="32" />
+                                <img src={HelmIcon} width="32" height="32" alt={constants.imgAlt} />
                             </div>
                             <div className="center">
-                                <Typography variant="h7">ChartVersion</Typography>
+                                <Typography variant="h7">{this.props.data.artifacts.chart.path}@{this.props.data.artifacts.chart.version}</Typography>
                             </div>
                         </div>
 
-                        <MuiThemeProvider theme={theme}>
+                        <MuiThemeProvider theme={themes.standard}>
                             <div className="switch-status">
                                 <FormControlLabel
                                     control={
@@ -79,10 +59,10 @@ class ExpandedCard extends React.Component {
                             </div>
                         </MuiThemeProvider>
 
-                        <MuiThemeProvider theme={linkTheme}>
+                        <MuiThemeProvider theme={themes.link}>
                             <div className="dataDog-status">
                                 <div className="right-padded">
-                                    <img src={DataDogIcon} width="32" height="32"/>
+                                    <img src={DataDogIcon} width="32" height="32" alt={constants.imgAlt}/>
                                 </div>
                                 <div className="center">
                                     <Typography variant="h7">

@@ -16,7 +16,7 @@ import ImageInfoDialog from './ImageInfoDialog';
 import ExpandedCard from './ExpandedCard'
 import urljoin from 'url-join'
 
-const imgAlt = "not found"
+import * as constants from '../Constants'
 
 class SingleGridCell extends React.Component {
   constructor(props) {
@@ -86,20 +86,20 @@ class SingleGridCell extends React.Component {
               <StatusChip status={this.props.SingleGridCellData.status} />
               <div>
                 <IconButton>
-                  <img src={TimePassed} alt={imgAlt} />
+                  <img src={TimePassed} alt={constants.imgAlt} />
                 </IconButton>
                 {deployDate.toDateString()}
               </div>
               <div className='row-align'>
                 <SelectionDialog source={this.props.SingleGridCellData.code.github} chart={urljoin(this.props.SingleGridCellData.artifacts.chart.repository, this.props.SingleGridCellData.artifacts.chart.path)}/>
                 <IconButton onClick={this.slackClicked}>
-                  <img src={SlackIcon} width="32" height="32" alt={imgAlt} />
+                  <img src={SlackIcon} width="32" height="32" alt={constants.imgAlt} />
                 </IconButton>
                 {
                   this.state.slackInfo ? <SlackInfoDialog open={this.state.slackInfo} owner={this.props.SingleGridCellData.owner.squad} slack={this.props.SingleGridCellData.owner.slack} handleClose={this.slackClosed}/> : null
                 }
                 <IconButton onClick={this.dockerClicked}>
-                  <img src={DockerIcon} width="32" height="32" alt={imgAlt} />
+                  <img src={DockerIcon} width="32" height="32" alt={constants.imgAlt} />
                 </IconButton>
                 {
                   this.state.imageInfo ? <ImageInfoDialog open={this.state.imageInfo} handleClose={this.dockerClosed} docker={this.props.SingleGridCellData.artifacts.docker} /> : null

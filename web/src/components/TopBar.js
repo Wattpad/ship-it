@@ -3,19 +3,8 @@ import { AppBar, Toolbar, Typography } from '@material-ui/core'
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles'
 import IconButton from '@material-ui/core/IconButton'
 import ShipIcon from '../assets/passenger_ship.png'
-
-const imgAlt = "not found"
-
-const theme = createMuiTheme({
-  palette: {
-    primary: {
-      main: '#FF6612'
-    },
-    secondary: {
-      main: '#FEAF0A'
-    }
-  }
-})
+import * as constants from '../Constants'
+import * as themes from '../Themes'
 
 class TopBar extends React.Component {
   constructor(props) {
@@ -25,11 +14,11 @@ class TopBar extends React.Component {
 
   render() {
     return (
-      <MuiThemeProvider theme={theme}>
+      <MuiThemeProvider theme={themes.standard}>
         <AppBar position="static" color="primary">
           <Toolbar>
             <IconButton>
-              <img src={ShipIcon} width="32" height="32" alt={imgAlt} />
+              <img src={ShipIcon} width="32" height="32" alt={constants.imgAlt} />
             </IconButton>
             <Typography variant="h6">
               Ship-it!
