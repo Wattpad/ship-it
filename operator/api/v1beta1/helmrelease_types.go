@@ -33,7 +33,6 @@ const (
 	ReasonDeleteSuccess   HelmReleaseStatusReason = "DeleteSuccess"
 	ReasonInstallError    HelmReleaseStatusReason = "InstallError"
 	ReasonInstallSuccess  HelmReleaseStatusReason = "InstallSuccess"
-	ReasonReconcileError  HelmReleaseStatusReason = "ReconcileError"
 	ReasonRollbackError   HelmReleaseStatusReason = "RollbackError"
 	ReasonRollbackSuccess HelmReleaseStatusReason = "RollbackSuccess"
 	ReasonUpdateError     HelmReleaseStatusReason = "UpdateError"
