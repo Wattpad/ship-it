@@ -71,7 +71,7 @@ func NewInformerWithCache(ctx context.Context, c cache.Cache) (*ImageRepositoryI
 
 	informer.AddEventHandler(eventHandler(indexer))
 
-	c.Start(ctx.Done())
+	go c.Start(ctx.Done())
 
 	if !c.WaitForCacheSync(ctx.Done()) {
 		return nil, errors.New("repository informer: image repository cache sync failed")
