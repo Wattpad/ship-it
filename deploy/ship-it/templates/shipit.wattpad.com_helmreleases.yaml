@@ -411,11 +411,27 @@ spec:
           type: object
         status:
           properties:
-            code:
-              format: int32
-              type: integer
+            conditions:
+              items:
+                properties:
+                  lastTransitionTime:
+                    format: date-time
+                    type: string
+                  lastUpdateTime:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  reason:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - type
+                type: object
+              type: array
           required:
-          - code
+          - conditions
           type: object
       type: object
   versions:
