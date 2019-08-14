@@ -3,6 +3,7 @@ package ecr
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"regexp"
 	"time"
 
@@ -71,7 +72,7 @@ func (l *ImageListener) handler(r syncd.ImageReconciler) sqsconsumer.MessageHand
 		}
 
 		if !validImageTagRegex.MatchString(ecrEvent.Tag) {
-			l.logger.Log("error", "invalid image tag, the image will be ignored")
+			l.logger.Log("error", fmt.Sprintf(`ignoring event for invalid image tag "%s" found in repo "%s"`, ecrEvent.Tag, ecrEvent.RepositoryName))
 			return nil
 		}
 
