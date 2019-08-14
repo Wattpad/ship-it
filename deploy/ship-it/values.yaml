@@ -35,6 +35,7 @@ syncd:
   operationsRepository: miranda
 
   releaseName: ship-it-registry
+  releaseBranch: master
   registryChartPath: k8s/charts/components/ship-it-registry
 
   resources:
