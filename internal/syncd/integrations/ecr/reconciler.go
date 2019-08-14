@@ -32,7 +32,7 @@ func NewReconciler(r HelmReleaseEditor, i IndexerService, l log.Logger) *ImageRe
 }
 
 func (r *ImageReconciler) Reconcile(ctx context.Context, image *internal.Image) error {
-	releases, err := r.indexer.Lookup(image.Repository)
+	releases, err := r.indexer.Lookup(image.URI())
 	if err != nil {
 		return errors.Wrapf(err, "failed to obtain the releases corresponding to the repository: %s", image.Repository)
 	}
