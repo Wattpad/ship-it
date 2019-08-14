@@ -72,7 +72,8 @@ func (l *ImageListener) handler(r syncd.ImageReconciler) sqsconsumer.MessageHand
 		}
 
 		if !validImageTagRegex.MatchString(ecrEvent.Tag) {
-			return fmt.Errorf("malformed image tag")
+			l.logger.Log("error", fmt.Sprintf(`ignoring event for invalid image tag "%s" found in repo "%s"`, ecrEvent.Tag, ecrEvent.RepositoryName))
+			return nil
 		}
 
 		return r.Reconcile(ctx, ecrEvent.Image())

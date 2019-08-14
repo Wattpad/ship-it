@@ -68,24 +68,13 @@ func TestECRHandler(t *testing.T) {
 	err := testListener.handler(mockReconciler)(context.Background(), `some bad message`)
 	assert.Error(t, err)
 
-	inputJSON := `
-{
-	"eventTime": "2019-07-11T14:19:59Z", 
-	"repositoryName": "monolith-php", 
-	"tag": "some invalid tag",
-	"registryId": "723255503624"
-}
-`
-	err = testListener.handler(mockReconciler)(context.Background(), inputJSON)
-	assert.Error(t, err)
-
 	mockReconciler.On("Reconcile", mock.Anything, &internal.Image{
 		Registry:   "723255503624.dkr.ecr.us-east-1.amazonaws.com",
 		Repository: "monolith-php",
 		Tag:        "78bc9ccf64eb838c6a0e0492ded722274925e2bd",
 	}).Return(error(nil))
 
-	inputJSON = `
+	inputJSON := `
 {
 	"eventTime": "2019-07-11T14:19:59Z", 
 	"repositoryName": "monolith-php", 
