@@ -41,7 +41,7 @@ func TestReconcileLookupFailure(t *testing.T) {
 		Tag:        "78bc9ccf64eb838c6a0e0492ded722274925e2bd",
 	}
 
-	mockIndexService.On("Lookup", "bar").Return([]types.NamespacedName{}, fmt.Errorf("some error finding release"))
+	mockIndexService.On("Lookup", inputImage.URI()).Return([]types.NamespacedName{}, fmt.Errorf("some error finding release"))
 
 	err := reconciler.Reconcile(context.Background(), inputImage)
 
@@ -62,7 +62,7 @@ func TestReconcilerUpdateFailure(t *testing.T) {
 		Tag:        "78bc9ccf64eb838c6a0e0492ded722274925e2bd",
 	}
 
-	mockIndexService.On("Lookup", "bar").Return([]types.NamespacedName{
+	mockIndexService.On("Lookup", inputImage.URI()).Return([]types.NamespacedName{
 		{
 			Namespace: "default",
 			Name:      "bar",
@@ -90,7 +90,7 @@ func TestReconcilerSuccess(t *testing.T) {
 		Tag:        "78bc9ccf64eb838c6a0e0492ded722274925e2bd",
 	}
 
-	mockIndexService.On("Lookup", "bar").Return([]types.NamespacedName{
+	mockIndexService.On("Lookup", inputImage.URI()).Return([]types.NamespacedName{
 		{
 			Namespace: "default",
 			Name:      "bar",
