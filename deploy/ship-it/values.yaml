@@ -27,8 +27,8 @@ syncd:
     tag: latest
     pullPolicy: IfNotPresent
 
-  ecrQueue: https://sqs.us-east-1.amazonaws.com/723255503624/ship-it-ecr.fifo
-  githubQueue: https://sqs.us-east-1.amazonaws.com/723255503624/ship-it-github.fifo
+  ecrQueue: ship-it-ecr.fifo
+  githubQueue: ship-it-github.fifo
 
   namespace: default
 
