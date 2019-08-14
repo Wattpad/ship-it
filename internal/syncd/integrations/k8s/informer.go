@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	shipitv1beta1 "ship-it-operator/api/v1beta1"
+	"ship-it/internal"
 	"ship-it/internal/unstructured"
 
 	"github.com/pkg/errors"
@@ -81,11 +82,12 @@ func NewInformerWithCache(ctx context.Context, c cache.Cache) (*ImageRepositoryI
 }
 
 // Lookup returns the namespaced names of all releases that depend on the given
-// image repository.
-func (i *ImageRepositoryInformer) Lookup(repo string) ([]types.NamespacedName, error) {
-	objs, err := i.indexer.ByIndex(imageRepositoriesIndex, repo)
+// image repository URI.
+func (i *ImageRepositoryInformer) Lookup(image *internal.Image) ([]types.NamespacedName, error) {
+	URI := image.URI()
+	objs, err := i.indexer.ByIndex(imageRepositoriesIndex, URI)
 	if err != nil {
-		return nil, errors.Wrapf(err, "repository informer: failed to lookup releases for image repository \"%s\"", repo)
+		return nil, errors.Wrapf(err, "repository informer: failed to lookup releases for image repository \"%s\"", URI)
 	}
 
 	names := make([]types.NamespacedName, 0, len(objs))

@@ -26,8 +26,8 @@ type MockIndexerService struct {
 	mock.Mock
 }
 
-func (m *MockIndexerService) Lookup(repo string) ([]types.NamespacedName, error) {
-	args := m.Called(repo)
+func (m *MockIndexerService) Lookup(image *internal.Image) ([]types.NamespacedName, error) {
+	args := m.Called(image)
 	return args.Get(0).([]types.NamespacedName), args.Error(1)
 }
 
@@ -41,7 +41,7 @@ func TestReconcileLookupFailure(t *testing.T) {
 		Tag:        "78bc9ccf64eb838c6a0e0492ded722274925e2bd",
 	}
 
-	mockIndexService.On("Lookup", inputImage.URI()).Return([]types.NamespacedName{}, fmt.Errorf("some error finding release"))
+	mockIndexService.On("Lookup", inputImage).Return([]types.NamespacedName{}, fmt.Errorf("some error finding release"))
 
 	err := reconciler.Reconcile(context.Background(), inputImage)
 
@@ -62,7 +62,7 @@ func TestReconcilerUpdateFailure(t *testing.T) {
 		Tag:        "78bc9ccf64eb838c6a0e0492ded722274925e2bd",
 	}
 
-	mockIndexService.On("Lookup", inputImage.URI()).Return([]types.NamespacedName{
+	mockIndexService.On("Lookup", inputImage).Return([]types.NamespacedName{
 		{
 			Namespace: "default",
 			Name:      "bar",
@@ -90,7 +90,7 @@ func TestReconcilerSuccess(t *testing.T) {
 		Tag:        "78bc9ccf64eb838c6a0e0492ded722274925e2bd",
 	}
 
-	mockIndexService.On("Lookup", inputImage.URI()).Return([]types.NamespacedName{
+	mockIndexService.On("Lookup", inputImage).Return([]types.NamespacedName{
 		{
 			Namespace: "default",
 			Name:      "bar",
