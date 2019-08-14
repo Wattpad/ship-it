@@ -3,7 +3,6 @@ package ecr
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"regexp"
 	"time"
 
@@ -72,7 +71,8 @@ func (l *ImageListener) handler(r syncd.ImageReconciler) sqsconsumer.MessageHand
 		}
 
 		if !validImageTagRegex.MatchString(ecrEvent.Tag) {
-			return fmt.Errorf("malformed image tag")
+			l.logger.Log("error", "invalid image tag, the image will be ignored")
+			return nil
 		}
 
 		return r.Reconcile(ctx, ecrEvent.Image())
