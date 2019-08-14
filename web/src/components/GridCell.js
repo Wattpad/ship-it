@@ -33,7 +33,6 @@ class SingleGridCell extends React.Component {
   }
 
   cellClick = (event) => {
-    // this.props.handleCellClick(event)
     this.setState({expanded: true})
   }
 
