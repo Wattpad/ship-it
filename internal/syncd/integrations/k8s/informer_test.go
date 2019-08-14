@@ -31,7 +31,7 @@ func TestLookup(t *testing.T) {
 	wordCountsRelease := "word-counts-release"
 
 	testImage := &internal.Image{
-		Registry:   "",
+		Registry:   "foo",
 		Repository: "word-counts-repo",
 		Tag:        "",
 	}
