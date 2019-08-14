@@ -23,8 +23,8 @@ type S3Downloader struct {
 	d      downloaderAPI
 }
 
-func NewS3Downloader(bucketName string, dl downloaderAPI) S3Downloader {
-	return S3Downloader{
+func newS3Downloader(bucketName string, dl downloaderAPI) *S3Downloader {
+	return &S3Downloader{
 		Bucket: bucketName,
 		d:      dl,
 	}

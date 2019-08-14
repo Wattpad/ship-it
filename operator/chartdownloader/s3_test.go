@@ -31,7 +31,7 @@ func TestDownloadSuccess(t *testing.T) {
 	ctx := context.Background()
 
 	var mockD mockS3
-	dl := NewS3Downloader("foo", &mockD)
+	dl := newS3Downloader("foo", &mockD)
 
 	chartBytes, err := ioutil.ReadFile("../../testdata/foo-0.1.0.tgz")
 	require.NoError(t, err)
@@ -55,7 +55,7 @@ func TestDownloadFailure(t *testing.T) {
 	ctx := context.Background()
 
 	var mockD mockS3
-	dl := NewS3Downloader("foo", &mockD)
+	dl := newS3Downloader("foo", &mockD)
 
 	mockD.On("DownloadWithContext", ctx, mock.AnythingOfType("*aws.WriteAtBuffer"), &s3.GetObjectInput{
 		Bucket: aws.String(dl.Bucket),
@@ -72,7 +72,7 @@ func TestChartDownloadSuccess(t *testing.T) {
 	ctx := context.Background()
 
 	var mockD mockS3
-	dl := NewS3Downloader("foo", &mockD)
+	dl := newS3Downloader("foo", &mockD)
 
 	chartBytes, err := ioutil.ReadFile("../../testdata/foo-0.1.0.tgz")
 	require.NoError(t, err)
@@ -99,7 +99,7 @@ func TestChartDownloadFailure(t *testing.T) {
 	ctx := context.Background()
 
 	var mockD mockS3
-	dl := NewS3Downloader("foo", &mockD)
+	dl := newS3Downloader("foo", &mockD)
 
 	mockD.On("DownloadWithContext", ctx, mock.AnythingOfType("*aws.WriteAtBuffer"), &s3.GetObjectInput{
 		Bucket: aws.String(dl.Bucket),
@@ -115,7 +115,7 @@ func TestInvalidChartBytes(t *testing.T) {
 	ctx := context.Background()
 
 	var mockD mockS3
-	dl := NewS3Downloader("foo", &mockD)
+	dl := newS3Downloader("foo", &mockD)
 
 	chartBytes := []byte("some bad bytes")
 
