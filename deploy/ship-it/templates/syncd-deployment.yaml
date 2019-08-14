@@ -39,6 +39,8 @@ spec:
               value: {{ .Values.syncd.ecrQueue }}
             - name: GITHUB_QUEUE
               value: {{ .Values.syncd.githubQueue }}
+            - name: RELEASE_BRANCH
+              value: {{ .Values.syncd.releaseBranch }}
           {{ if .Values.github }}
             - name: GITHUB_ORG
               value: {{ .Values.github.org }}
