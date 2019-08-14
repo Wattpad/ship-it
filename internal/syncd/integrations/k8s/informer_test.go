@@ -3,11 +3,13 @@ package k8s
 import (
 	"context"
 	"encoding/json"
+	"ship-it/internal"
 	"testing"
 
 	shipitv1beta1 "ship-it-operator/api/v1beta1"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -27,31 +29,30 @@ func newFakeCache() *informertest.FakeInformers {
 func TestLookup(t *testing.T) {
 	helmReleaseKind := "HelmRelease"
 	wordCountsRelease := "word-counts-release"
-	wordCountsRepository := "word-counts-repo"
+
+	testImage := &internal.Image{
+		Registry:   "foo",
+		Repository: "word-counts-repo",
+		Tag:        "",
+	}
 
 	fakeCache := newFakeCache()
 
 	fakeInformer, err := fakeCache.FakeInformerForKind(shipitv1beta1.Kind(helmReleaseKind))
-	if !assert.NoError(t, err) {
-		t.FailNow()
-	}
+	require.NoError(t, err)
 
 	informer, err := NewInformerWithCache(context.Background(), fakeCache)
-	if !assert.NoError(t, err) {
-		t.FailNow()
-	}
+	require.NoError(t, err)
 
 	values := map[string]interface{}{
 		"image": map[string]interface{}{
-			"repository": wordCountsRepository,
+			"repository": testImage.URI(),
 			"tag":        "foo",
 		},
 	}
 
 	valuesRaw, err := json.Marshal(values)
-	if !assert.NoError(t, err) {
-		t.FailNow()
-	}
+	require.NoError(t, err)
 
 	originalHR := &shipitv1beta1.HelmRelease{
 		TypeMeta: metav1.TypeMeta{
@@ -76,7 +77,7 @@ func TestLookup(t *testing.T) {
 		Namespace: v1.NamespaceDefault,
 	}
 
-	names, err := informer.Lookup(wordCountsRepository)
+	names, err := informer.Lookup(testImage)
 	if assert.NoError(t, err) {
 		assert.Len(t, names, 1)
 		assert.Equal(t, names[0], expected)
@@ -92,7 +93,7 @@ func TestLookup(t *testing.T) {
 
 	fakeInformer.Update(originalHR, &updatedHR)
 
-	names, err = informer.Lookup(wordCountsRepository)
+	names, err = informer.Lookup(testImage)
 	if assert.NoError(t, err) {
 		assert.Len(t, names, 1)
 		assert.Equal(t, names[0], expected)
@@ -100,7 +101,7 @@ func TestLookup(t *testing.T) {
 
 	// delete the release
 	fakeInformer.Delete(&updatedHR)
-	names, err = informer.Lookup(wordCountsRepository)
+	names, err = informer.Lookup(testImage)
 	if assert.NoError(t, err) {
 		assert.Empty(t, names)
 	}
