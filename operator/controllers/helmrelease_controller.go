@@ -190,7 +190,7 @@ func (r *HelmReleaseReconciler) install(ctx context.Context, rls shipitv1beta1.H
 
 	rls.Status.SetCondition(shipitv1beta1.HelmReleaseCondition{
 		Type:    release.Status_PENDING_INSTALL.String(),
-		Message: fmt.Sprint("installing chart", chartURI),
+		Message: fmt.Sprintf("installing chart %s", chartURI),
 	})
 
 	if err := r.Update(ctx, &rls); err != nil {
