@@ -53,6 +53,7 @@ func main() {
 		gracePeriod          time.Duration
 		metricsAddr          string
 		namespace            string
+		tillerAddr           string
 		enableLeaderElection bool
 	)
 
@@ -60,6 +61,7 @@ func main() {
 	flag.StringVar(&chartRepository, "chart-repository", "", "The URI of the chart repository used by the operator")
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&namespace, "namespace", "default", "The cluster namespace where the operator will deploy releases")
+	flag.StringVar(&tillerAddr, "tiller-address", "", "The cluster address of the tiller service")
 	flag.DurationVar(&gracePeriod, "grace-period", 10*time.Second, "The duration the operator will wait before checking a release's status after reconciling")
 	flag.BoolVar(&enableLeaderElection, "enable-leader-election", false,
 		"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
@@ -100,7 +102,7 @@ func main() {
 	reconciler := controllers.NewHelmReleaseReconciler(
 		ctrl.Log,
 		mgr.GetClient(),
-		helm.NewClient(),
+		helm.NewClient(helm.Host(tillerAddr)),
 		downloader,
 		controllers.WithNamespace(namespace),
 		controllers.WithGracePeriod(gracePeriod),
