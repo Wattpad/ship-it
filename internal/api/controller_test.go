@@ -68,7 +68,7 @@ func TestListReleases(t *testing.T) {
 
 		rec := httptest.NewRecorder()
 
-		c := newController(&m)
+		c := NewController(&m)
 		c.ListReleases(rec, req)
 
 		m.AssertExpectations(t)
@@ -81,7 +81,7 @@ func TestListReleases(t *testing.T) {
 
 		rec := httptest.NewRecorder()
 
-		c := newController(&m)
+		c := NewController(&m)
 		c.ListReleases(rec, req)
 
 		m.AssertExpectations(t)
@@ -102,7 +102,7 @@ func TestGetRelease(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/releases/%s", testRelease), nil)
 		req = withRouteContext(req, "name", testRelease)
 
-		c := newController(&m)
+		c := NewController(&m)
 		c.GetRelease(rec, req)
 
 		m.AssertExpectations(t)
@@ -116,7 +116,7 @@ func TestGetRelease(t *testing.T) {
 		req = withRouteContext(req, "name", invalidRelease)
 
 		m := new(mockService)
-		c := newController(m)
+		c := NewController(m)
 
 		c.GetRelease(rec, req)
 
@@ -133,7 +133,7 @@ func TestGetRelease(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/releases/%s", testRelease), nil)
 		req = withRouteContext(req, "name", testRelease)
 
-		c := newController(&m)
+		c := NewController(&m)
 		c.GetRelease(rec, req)
 
 		m.AssertExpectations(t)
@@ -154,7 +154,7 @@ func TestGetReleaseResources(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/releases/%s/resources", testRelease), nil)
 		req = withRouteContext(req, "name", testRelease)
 
-		c := newController(&m)
+		c := NewController(&m)
 		c.GetReleaseResources(rec, req)
 
 		m.AssertExpectations(t)
@@ -169,7 +169,7 @@ func TestGetReleaseResources(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/releases/%s/resources", invalidRelease), nil)
 		req = withRouteContext(req, "name", invalidRelease)
 
-		c := newController(&m)
+		c := NewController(&m)
 		c.GetReleaseResources(rec, req)
 
 		m.AssertNotCalled(t, "GetReleaseResources")
@@ -185,7 +185,7 @@ func TestGetReleaseResources(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/releases/%s/resources", testRelease), nil)
 		req = withRouteContext(req, "name", testRelease)
 
-		c := newController(&m)
+		c := NewController(&m)
 		c.GetReleaseResources(rec, req)
 
 		m.AssertExpectations(t)

@@ -1,12 +1,21 @@
 package api
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"regexp"
 
+	"ship-it/internal/api/models"
+
 	"github.com/go-chi/chi"
 )
+
+type Service interface {
+	GetRelease(context.Context, string) (*models.Release, error)
+	GetReleaseResources(context.Context, string) (*models.ReleaseResources, error)
+	ListReleases(context.Context) ([]models.Release, error)
+}
 
 // importing "k8s.io/helm/pkg/tiller" (specifically its transitive dependency
 // on 'k8s.io/kubernetes' pkgs) breaks the build horribly.
@@ -17,10 +26,14 @@ type controller struct {
 	svc Service
 }
 
-func newController(s Service) *controller {
+func NewController(s Service) Controller {
 	return &controller{
 		svc: s,
 	}
+}
+
+func (c *controller) Health(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
 }
 
 func (c *controller) ListReleases(w http.ResponseWriter, r *http.Request) {
