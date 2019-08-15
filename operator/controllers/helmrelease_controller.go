@@ -18,6 +18,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	shipitv1beta1 "ship-it-operator/api/v1beta1"
@@ -156,7 +157,7 @@ func (r *HelmReleaseReconciler) onDelete(ctx context.Context, rls shipitv1beta1.
 func isHelmReleaseNotFound(name string, err error) bool {
 	// dynamic errors can't be directly compared for equality. We use the
 	// error message string, though there's no guarantee it won't change.
-	return err.Error() == helmerrors.ErrReleaseNotFound(name).Error()
+	return strings.Contains(err.Error(), helmerrors.ErrReleaseNotFound(name).Error())
 }
 
 func (r *HelmReleaseReconciler) onUpdate(ctx context.Context, rls shipitv1beta1.HelmRelease) (ctrl.Result, error) {
