@@ -23,6 +23,7 @@ type Config struct {
 	RegistryChartPath    string `split_words:"true" required:"true"`
 	ReleaseBranch        string `split_words:"true" default:"master"`
 	OperationsRepository string `split_words:"true" required:"true"`
+	TillerHost           string `split_words:"true" required:"true"`
 }
 
 // DataDogAddress returns the local address of the datadog agent.
