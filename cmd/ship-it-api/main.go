@@ -51,13 +51,12 @@ func main() {
 	}
 
 	svc := service.New(k8s, helm.New())
-	ctrl := api.NewController(svc)
 
 	srv := http.Server{
 		Addr: ":" + cfg.ServicePort,
 		Handler: api.NewRouter(
 			http.FileServer(http.Dir("dashboard")),
-			ctrl,
+			api.NewController(svc),
 			dd.NewTiming("api.time", 1.0),
 		),
 	}
