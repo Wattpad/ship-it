@@ -103,7 +103,7 @@ func main() {
 		helm.NewClient(),
 		downloader,
 		controllers.WithNamespace(namespace),
-		controllers.WithGracePeriod(time.Second*gracePeriod),
+		controllers.WithGracePeriod(gracePeriod),
 	)
 
 	setupLog.Info("setting up HelmRelease controller")
