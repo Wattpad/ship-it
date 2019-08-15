@@ -30,6 +30,8 @@ syncd:
   ecrQueue: ship-it-ecr.fifo
   githubQueue: ship-it-github.fifo
 
+  tillerAddress: tiller-deploy.kube-system.svc.cluster.local:44134
+
   namespace: default
 
   operationsRepository: miranda

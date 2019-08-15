@@ -67,7 +67,7 @@ func main() {
 	imageReconciler := ecr.NewReconciler(gitClient, informer, logger)
 
 	chartReconciler := github.NewReconciler(
-		helm.NewClient(),
+		helm.NewClient(helm.Host(cfg.TillerHost)),
 		cfg.Namespace,
 		cfg.ReleaseName,
 		cfg.HelmTimeout(),

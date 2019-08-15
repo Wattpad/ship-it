@@ -41,6 +41,8 @@ spec:
               value: {{ .Values.syncd.githubQueue }}
             - name: RELEASE_BRANCH
               value: {{ .Values.syncd.releaseBranch }}
+            - name: TILLER_HOST
+              value: {{ .Values.syncd.tillerAddress }}
           {{ if .Values.github }}
             - name: GITHUB_ORG
               value: {{ .Values.github.org }}
