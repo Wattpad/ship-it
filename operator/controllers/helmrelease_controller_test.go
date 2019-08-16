@@ -40,7 +40,7 @@ var _ = Describe("HelmReleaseReconciler", func() {
 	releaseName := "test-release"
 	releaseNamespace := "test-namespace"
 
-	chart := &chart.Chart{
+	testChart := &chart.Chart{
 		Metadata: &chart.Metadata{
 			Name: releaseName,
 		},
@@ -54,8 +54,8 @@ var _ = Describe("HelmReleaseReconciler", func() {
 	request := ctrl.Request{NamespacedName: releaseKey}
 
 	var (
-		helmClient  *helm.FakeClient
 		downloader  *mockDownloader
+		helmClient  *helm.FakeClient
 		reconciler  *HelmReleaseReconciler
 		testRelease *shipitv1beta1.HelmRelease
 	)
@@ -63,16 +63,15 @@ var _ = Describe("HelmReleaseReconciler", func() {
 	BeforeEach(func() {
 		downloader = new(mockDownloader)
 		helmClient = new(helm.FakeClient)
-		reconciler = NewHelmReleaseReconciler(log, k8sClient, helmClient, downloader)
+		reconciler = NewHelmReleaseReconciler(log, k8sClient, helmClient, downloader, GracePeriod(42), Namespace("test"))
 
 		testRelease = &shipitv1beta1.HelmRelease{
 			TypeMeta: metav1.TypeMeta{
 				Kind: "HelmRelease",
 			},
 			ObjectMeta: metav1.ObjectMeta{
-				Name:              releaseName,
-				Namespace:         releaseNamespace,
-				DeletionTimestamp: nil,
+				Name:      releaseName,
+				Namespace: releaseNamespace,
 				Annotations: map[string]string{
 					"helmreleases.shipit.wattpad.com/autodeploy": "true",
 				},
@@ -91,7 +90,7 @@ var _ = Describe("HelmReleaseReconciler", func() {
 		}
 	})
 
-	JustBeforeEach(func() {
+	AfterEach(func() {
 		k8sClient.Delete(ctx, testRelease)
 	})
 
@@ -107,7 +106,7 @@ var _ = Describe("HelmReleaseReconciler", func() {
 		It("should ignore the release", func() {
 			ann := fmt.Sprintf("%s/autodeploy", shipitv1beta1.Resource("helmreleases"))
 			testRelease.ObjectMeta.Annotations[ann] = "false"
-			k8sClient.Create(ctx, testRelease)
+			Expect(k8sClient.Create(ctx, testRelease)).To(Succeed())
 
 			res, err := reconciler.Reconcile(request)
 			Expect(err).To(BeNil())
@@ -117,7 +116,7 @@ var _ = Describe("HelmReleaseReconciler", func() {
 
 	When("the HelmRelease has autodeploy enabled", func() {
 		It("should manage the HelmReleaseFinalizer", func() {
-			err := k8sClient.Create(ctx, testRelease)
+			Expect(k8sClient.Create(ctx, testRelease)).To(Succeed())
 
 			By("reconciling autodeployed release")
 			res, err := reconciler.Reconcile(request)
@@ -125,17 +124,23 @@ var _ = Describe("HelmReleaseReconciler", func() {
 			Expect(res.Requeue).To(BeTrue())
 
 			var got shipitv1beta1.HelmRelease
-			err = k8sClient.Get(ctx, releaseKey, &got)
-			Expect(err).To(BeNil())
+			Expect(k8sClient.Get(ctx, releaseKey, &got)).To(Succeed())
 			Expect(got.GetFinalizers()).To(ContainElement(HelmReleaseFinalizer))
 		})
 
 		It("should install the helm release if it doesn't already exist", func() {
-			downloader.On("Download", ctx, testRelease.Spec.Chart.URI()).Return(chart, nil)
+			downloader.On("Download", ctx, testRelease.Spec.Chart.URI()).Return(testChart, nil)
+
+			_, err := helmClient.ReleaseStatus(releaseName)
+			Expect(isHelmReleaseNotFound(releaseName, err)).To(BeTrue())
 
 			res, err := reconciler.Reconcile(request)
 			Expect(err).To(BeNil())
 			Expect(res.RequeueAfter).To(Equal(reconciler.GracePeriod))
+
+			var got shipitv1beta1.HelmRelease
+			Expect(k8sClient.Get(ctx, releaseKey, &got)).To(Succeed())
+			Expect(got.Status.GetCondition().Type).To(Equal(hapi.Status_PENDING_INSTALL.String()))
 
 			resp, err := helmClient.ReleaseStatus(releaseName)
 			Expect(err).To(BeNil())
