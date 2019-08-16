@@ -85,6 +85,7 @@ var _ = Describe("HelmReleaseReconciler", func() {
 				Values: runtime.RawExtension{Raw: []byte("{}")},
 			},
 			Status: shipitv1beta1.HelmReleaseStatus{
+				// conditions can't be nil
 				Conditions: []shipitv1beta1.HelmReleaseCondition{},
 			},
 		}
@@ -115,10 +116,10 @@ var _ = Describe("HelmReleaseReconciler", func() {
 	})
 
 	When("the HelmRelease has autodeploy enabled", func() {
-		It("should manage the HelmReleaseFinalizer", func() {
+		It("should reconcile the release", func() {
 			Expect(k8sClient.Create(ctx, testRelease)).To(Succeed())
 
-			By("reconciling autodeployed release")
+			By("reconciling a new release without the HelmReleaseFinalizer")
 			res, err := reconciler.Reconcile(request)
 			Expect(err).To(BeNil())
 			Expect(res.Requeue).To(BeTrue())
@@ -126,37 +127,32 @@ var _ = Describe("HelmReleaseReconciler", func() {
 			var got shipitv1beta1.HelmRelease
 			Expect(k8sClient.Get(ctx, releaseKey, &got)).To(Succeed())
 			Expect(got.GetFinalizers()).To(ContainElement(HelmReleaseFinalizer))
-		})
 
-		It("should install the helm release if it doesn't already exist", func() {
+			By("reconciling a new release")
 			downloader.On("Download", ctx, testRelease.Spec.Chart.URI()).Return(testChart, nil)
 
-			_, err := helmClient.ReleaseStatus(releaseName)
+			_, err = helmClient.ReleaseStatus(releaseName)
 			Expect(isHelmReleaseNotFound(releaseName, err)).To(BeTrue())
 
-			res, err := reconciler.Reconcile(request)
+			res, err = reconciler.Reconcile(request)
 			Expect(err).To(BeNil())
 			Expect(res.RequeueAfter).To(Equal(reconciler.GracePeriod))
 
-			var got shipitv1beta1.HelmRelease
 			Expect(k8sClient.Get(ctx, releaseKey, &got)).To(Succeed())
 			Expect(got.Status.GetCondition().Type).To(Equal(hapi.Status_PENDING_INSTALL.String()))
 
 			resp, err := helmClient.ReleaseStatus(releaseName)
 			Expect(err).To(BeNil())
 			Expect(resp.GetInfo().GetStatus().GetCode()).To(Equal(hapi.Status_DEPLOYED))
-		})
 
-		It("should update the helm release if it already exists", func() {
-			Skip("TODO")
-		})
+			By("reconciling an installed release")
+			// TODO
 
-		It("should rollback the helm release if it fails to update", func() {
-			Skip("TODO")
-		})
+			By("reconciling a failed updated release")
+			// TODO
 
-		It("should delete the helm release when the deletion timestamp is set", func() {
-			Skip("TODO")
+			By("reconciling a release with the deletion timestamp set ")
+			// TODO
 		})
 	})
 })
