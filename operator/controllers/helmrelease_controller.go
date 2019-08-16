@@ -71,13 +71,13 @@ type reconcilerConfig struct {
 	Namespace   string
 }
 
-func WithNamespace(ns string) ReconcilerOption {
+func Namespace(ns string) ReconcilerOption {
 	return func(c *reconcilerConfig) {
 		c.Namespace = ns
 	}
 }
 
-func WithGracePeriod(d time.Duration) ReconcilerOption {
+func GracePeriod(d time.Duration) ReconcilerOption {
 	return func(c *reconcilerConfig) {
 		c.GracePeriod = d
 	}

@@ -104,8 +104,8 @@ func main() {
 		mgr.GetClient(),
 		helm.NewClient(helm.Host(tillerAddr)),
 		downloader,
-		controllers.WithNamespace(namespace),
-		controllers.WithGracePeriod(gracePeriod),
+		controllers.Namespace(namespace),
+		controllers.GracePeriod(gracePeriod),
 	)
 
 	setupLog.Info("setting up HelmRelease controller")
