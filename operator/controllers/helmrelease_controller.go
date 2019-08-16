@@ -132,7 +132,7 @@ func (r *HelmReleaseReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 		return ctrl.Result{Requeue: true}, r.setFinalizer(ctx, helmRelease)
 	}
 
-	return r.onUpdate(ctx, helmRelease)
+	return r.update(ctx, helmRelease)
 }
 
 func (r *HelmReleaseReconciler) SetupWithManager(mgr ctrl.Manager) error {
@@ -148,10 +148,8 @@ func (r *HelmReleaseReconciler) setFinalizer(ctx context.Context, rls shipitv1be
 	return r.Update(ctx, &rls)
 }
 
-func (r *HelmReleaseReconciler) onDelete(ctx context.Context, rls shipitv1beta1.HelmRelease) error {
-	// Update HelmRelease Status to 'DELETING'
-	// Delete the release with helm
-	return errNotImplemented
+func (r *HelmReleaseReconciler) delete(ctx context.Context, rls shipitv1beta1.HelmRelease) error {
+	return errors.Wrap(errNotImplemented, "delete")
 }
 
 func isHelmReleaseNotFound(name string, err error) bool {
@@ -160,7 +158,7 @@ func isHelmReleaseNotFound(name string, err error) bool {
 	return strings.Contains(err.Error(), helmerrors.ErrReleaseNotFound(name).Error())
 }
 
-func (r *HelmReleaseReconciler) onUpdate(ctx context.Context, rls shipitv1beta1.HelmRelease) (ctrl.Result, error) {
+func (r *HelmReleaseReconciler) update(ctx context.Context, rls shipitv1beta1.HelmRelease) (ctrl.Result, error) {
 	releaseName := rls.Spec.ReleaseName
 
 	_, err := r.helm.ReleaseStatus(releaseName)
@@ -171,7 +169,7 @@ func (r *HelmReleaseReconciler) onUpdate(ctx context.Context, rls shipitv1beta1.
 		return ctrl.Result{}, errors.Wrapf(err, "failed to get release status for %s", releaseName)
 	}
 
-	return ctrl.Result{}, errNotImplemented
+	return ctrl.Result{}, errors.Wrap(errNotImplemented, "upgrade")
 }
 
 func (r *HelmReleaseReconciler) install(ctx context.Context, rls shipitv1beta1.HelmRelease) (ctrl.Result, error) {
@@ -202,7 +200,7 @@ func (r *HelmReleaseReconciler) install(ctx context.Context, rls shipitv1beta1.H
 }
 
 func (r *HelmReleaseReconciler) rollback(ctx context.Context, rls shipitv1beta1.HelmRelease) (ctrl.Result, error) {
-	return ctrl.Result{}, errNotImplemented
+	return ctrl.Result{}, errors.Wrap(errNotImplemented, "rollback")
 }
 
 func contains(strs []string, x string) bool {
