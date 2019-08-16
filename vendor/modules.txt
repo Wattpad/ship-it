@@ -15,12 +15,10 @@ github.com/Wattpad/sqsconsumer/sqsmessage
 github.com/Wattpad/sqsconsumer/middleware/movingaverage
 # github.com/alecthomas/jsonschema v0.0.0-20190530235721-fd8d96416671
 github.com/alecthomas/jsonschema
-# github.com/aws/aws-sdk-go v1.19.47
+# github.com/aws/aws-sdk-go v1.22.3
 github.com/aws/aws-sdk-go/aws/session
 github.com/aws/aws-sdk-go/service/sqs
 github.com/aws/aws-sdk-go/aws
-github.com/aws/aws-sdk-go/service/s3
-github.com/aws/aws-sdk-go/service/s3/s3manager
 github.com/aws/aws-sdk-go/aws/awserr
 github.com/aws/aws-sdk-go/aws/client
 github.com/aws/aws-sdk-go/aws/corehandlers
@@ -39,19 +37,15 @@ github.com/aws/aws-sdk-go/aws/signer/v4
 github.com/aws/aws-sdk-go/private/protocol
 github.com/aws/aws-sdk-go/private/protocol/query
 github.com/aws/aws-sdk-go/internal/sdkio
-github.com/aws/aws-sdk-go/internal/s3err
-github.com/aws/aws-sdk-go/private/protocol/eventstream
-github.com/aws/aws-sdk-go/private/protocol/eventstream/eventstreamapi
-github.com/aws/aws-sdk-go/private/protocol/rest
-github.com/aws/aws-sdk-go/private/protocol/restxml
-github.com/aws/aws-sdk-go/private/protocol/xml/xmlutil
-github.com/aws/aws-sdk-go/service/s3/s3iface
 github.com/aws/aws-sdk-go/internal/sdkrand
 github.com/aws/aws-sdk-go/service/sts
+github.com/aws/aws-sdk-go/service/sts/stsiface
 github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds
 github.com/aws/aws-sdk-go/aws/credentials/endpointcreds
 github.com/aws/aws-sdk-go/aws/ec2metadata
+github.com/aws/aws-sdk-go/private/protocol/rest
 github.com/aws/aws-sdk-go/private/protocol/query/queryutil
+github.com/aws/aws-sdk-go/private/protocol/xml/xmlutil
 github.com/aws/aws-sdk-go/internal/sdkuri
 github.com/aws/aws-sdk-go/private/protocol/json/jsonutil
 # github.com/cyphar/filepath-securejoin v0.2.2
@@ -317,8 +311,8 @@ k8s.io/client-go/util/workqueue
 # k8s.io/helm v2.14.3+incompatible
 k8s.io/helm/pkg/helm
 k8s.io/helm/pkg/proto/hapi/services
-k8s.io/helm/pkg/chartutil
 k8s.io/helm/pkg/proto/hapi/chart
+k8s.io/helm/pkg/chartutil
 k8s.io/helm/pkg/manifest
 k8s.io/helm/pkg/proto/hapi/release
 k8s.io/helm/pkg/proto/hapi/version
