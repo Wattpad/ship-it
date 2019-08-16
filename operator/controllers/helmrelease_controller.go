@@ -122,8 +122,8 @@ func (r *HelmReleaseReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 		return ctrl.Result{}, nil
 	}
 
-	if helmRelease.DeletionTimestamp != nil {
-		return ctrl.Result{}, r.onDelete(ctx, helmRelease)
+	if !helmRelease.DeletionTimestamp.IsZero() {
+		return ctrl.Result{}, r.delete(ctx, helmRelease)
 	}
 
 	if !contains(helmRelease.GetFinalizers(), HelmReleaseFinalizer) {
