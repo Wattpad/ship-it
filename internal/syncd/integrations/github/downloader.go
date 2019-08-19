@@ -2,6 +2,7 @@ package github
 
 import (
 	"context"
+	filepath "path"
 
 	"github.com/google/go-github/v26/github"
 	"github.com/pkg/errors"
@@ -40,7 +41,7 @@ func (d *downloader) BufferDirectory(ctx context.Context, repo, path, ref string
 
 		return []*chartutil.BufferedFile{
 			{
-				Name: file.GetName(),
+				Name: filepath.Join(path, file.GetName()),
 				Data: []byte(content),
 			},
 		}, nil
