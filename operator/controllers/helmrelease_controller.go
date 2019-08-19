@@ -202,16 +202,11 @@ func (r *HelmReleaseReconciler) install(ctx context.Context, rls shipitv1beta1.H
 func (r *HelmReleaseReconciler) rollback(ctx context.Context, rls shipitv1beta1.HelmRelease) (ctrl.Result, error) {
 	_, err := r.helm.RollbackRelease(rls.Name)
 	if err != nil {
-		msg := fmt.Sprintf("rollback failed for release %s", rls.Name)
-		rls.Status.SetCondition(shipitv1beta1.HelmReleaseCondition{
-			Type:    release.Status_FAILED.String(),
-			Message: msg,
-		})
+		r.Log.Error(err, "rollback failed for release")
 
 		return ctrl.Result{
-			Requeue:      true,
 			RequeueAfter: r.GracePeriod,
-		}, errors.Wrap(err, msg)
+		}, nil
 	}
 
 	rls.Status.SetCondition(shipitv1beta1.HelmReleaseCondition{
