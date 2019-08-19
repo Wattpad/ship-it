@@ -55,7 +55,7 @@ type HelmReleaseStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	Conditions []HelmReleaseCondition `json:"conditions"`
+	Conditions []HelmReleaseCondition `json:"conditions,omitempty"`
 }
 
 type HelmReleaseCondition struct {

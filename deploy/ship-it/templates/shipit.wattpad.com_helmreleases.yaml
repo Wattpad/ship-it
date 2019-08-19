@@ -430,8 +430,6 @@ spec:
                 - type
                 type: object
               type: array
-          required:
-          - conditions
           type: object
       type: object
   versions:
