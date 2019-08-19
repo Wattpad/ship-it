@@ -26,8 +26,8 @@ import (
 	"ship-it-operator/controllers"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/client"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/helm/pkg/helm"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -49,7 +49,6 @@ func init() {
 func main() {
 	var (
 		awsRegion            string
-		chartRepository      string
 		gracePeriod          time.Duration
 		metricsAddr          string
 		namespace            string
@@ -58,7 +57,6 @@ func main() {
 	)
 
 	flag.StringVar(&awsRegion, "aws-region", "", "The AWS region where the operator's chart repository is hosted")
-	flag.StringVar(&chartRepository, "chart-repository", "", "The URI of the chart repository used by the operator")
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&namespace, "namespace", "default", "The cluster namespace where the operator will deploy releases")
 	flag.StringVar(&tillerAddr, "tiller-address", "", "The cluster address of the tiller service")
@@ -87,23 +85,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	providers := chartdownloader.ProviderFuncs{
-		S3Func: func() client.ConfigProvider {
-			return session
-		},
-	}
-
-	downloader, err := chartdownloader.New(chartRepository, providers)
-	if err != nil {
-		setupLog.Error(err, "unable to create chart downloader")
-		os.Exit(1)
+	// S3 is currently the only supported chart repository type
+	downloaders := map[string]chartdownloader.ChartDownloader{
+		"s3": chartdownloader.NewS3Downloader(s3manager.NewDownloader(session)),
 	}
 
 	reconciler := controllers.NewHelmReleaseReconciler(
 		ctrl.Log,
 		mgr.GetClient(),
 		helm.NewClient(helm.Host(tillerAddr)),
-		downloader,
+		chartdownloader.New(downloaders),
 		controllers.Namespace(namespace),
 		controllers.GracePeriod(gracePeriod),
 	)
