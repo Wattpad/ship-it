@@ -200,9 +200,9 @@ func (r *HelmReleaseReconciler) install(ctx context.Context, rls shipitv1beta1.H
 }
 
 func (r *HelmReleaseReconciler) rollback(ctx context.Context, rls shipitv1beta1.HelmRelease) (ctrl.Result, error) {
-	_, err := r.helm.RollbackRelease(rls.Name)
+	_, err := r.helm.RollbackRelease(rls.Spec.ReleaseName)
 	if err != nil {
-		r.Log.Error(err, "rollback failed for release")
+		r.Log.Error(err, "unable to rollback release")
 
 		return ctrl.Result{
 			RequeueAfter: r.GracePeriod,
@@ -211,7 +211,7 @@ func (r *HelmReleaseReconciler) rollback(ctx context.Context, rls shipitv1beta1.
 
 	rls.Status.SetCondition(shipitv1beta1.HelmReleaseCondition{
 		Type:    release.Status_PENDING_ROLLBACK.String(),
-		Message: fmt.Sprintf("rolling back %s", rls.Name),
+		Message: fmt.Sprintf("rolling back %s", rls.Spec.ReleaseName),
 	})
 
 	return ctrl.Result{}, nil
