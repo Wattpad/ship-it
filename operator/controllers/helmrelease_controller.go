@@ -214,7 +214,7 @@ func (r *HelmReleaseReconciler) rollback(ctx context.Context, rls shipitv1beta1.
 		Message: fmt.Sprintf("rolling back %s", rls.Spec.ReleaseName),
 	})
 
-	return r.update(ctx, rls)
+	return ctrl.Result{}, r.Update(ctx, &rls)
 }
 
 func contains(strs []string, x string) bool {
