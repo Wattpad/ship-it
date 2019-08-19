@@ -18,6 +18,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func formatS3URL(bucket, object string) string {
+	return fmt.Sprintf("s3://%s/%s", bucket, object)
+}
+
 type mockS3 struct {
 	mock.Mock
 }
@@ -50,7 +54,7 @@ func TestChartDownloadSuccess(t *testing.T) {
 		w.WriteAt(chartBytes, 0)
 	})
 
-	outChart, err := dl.Download(ctx, fmt.Sprintf("s3://%s/%s", testBucket, testObject))
+	outChart, err := dl.Download(ctx, formatS3URL(testBucket, testObject))
 	require.NoError(t, err)
 
 	assert.Equal(t, expectedChart, outChart)
@@ -71,7 +75,7 @@ func TestChartDownloadFailure(t *testing.T) {
 		Key:    aws.String(testObject),
 	}).Return(0, fmt.Errorf("some download error"))
 
-	_, err := dl.Download(ctx, fmt.Sprintf("s3://%s/%s", testBucket, testObject))
+	_, err := dl.Download(ctx, formatS3URL(testBucket, testObject))
 	assert.Error(t, err)
 	mockD.AssertExpectations(t)
 }
@@ -95,7 +99,7 @@ func TestInvalidChartBytes(t *testing.T) {
 		w.WriteAt(chartBytes, 0)
 	})
 
-	_, err := dl.Download(ctx, fmt.Sprintf("s3://%s/%s", testBucket, testObject))
+	_, err := dl.Download(ctx, formatS3URL(testBucket, testObject))
 	assert.Error(t, err)
 	mockD.AssertExpectations(t)
 }
