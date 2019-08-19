@@ -200,7 +200,26 @@ func (r *HelmReleaseReconciler) install(ctx context.Context, rls shipitv1beta1.H
 }
 
 func (r *HelmReleaseReconciler) rollback(ctx context.Context, rls shipitv1beta1.HelmRelease) (ctrl.Result, error) {
-	return ctrl.Result{}, errors.Wrap(errNotImplemented, "rollback")
+	_, err := r.helm.RollbackRelease(rls.Name)
+	if err != nil {
+		msg := fmt.Sprintf("rollback failed for release %s", rls.Name)
+		rls.Status.SetCondition(shipitv1beta1.HelmReleaseCondition{
+			Type:    release.Status_FAILED.String(),
+			Message: msg,
+		})
+
+		return ctrl.Result{
+			Requeue:      true,
+			RequeueAfter: r.GracePeriod,
+		}, errors.Wrap(err, msg)
+	}
+
+	rls.Status.SetCondition(shipitv1beta1.HelmReleaseCondition{
+		Type:    release.Status_PENDING_ROLLBACK.String(),
+		Message: fmt.Sprintf("rolling back %s", rls.Name),
+	})
+
+	return ctrl.Result{}, nil
 }
 
 func contains(strs []string, x string) bool {
