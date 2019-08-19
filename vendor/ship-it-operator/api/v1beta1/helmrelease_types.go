@@ -17,6 +17,7 @@ package v1beta1
 
 import (
 	"encoding/json"
+	"path"
 	"strconv"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -70,6 +71,10 @@ type ChartSpec struct {
 	Repository string `json:"repository"`
 	Path       string `json:"path"`
 	Revision   string `json:"revision"`
+}
+
+func (cs *ChartSpec) URI() string {
+	return path.Join(cs.Repository, cs.Path)
 }
 
 // +kubebuilder:object:root=true

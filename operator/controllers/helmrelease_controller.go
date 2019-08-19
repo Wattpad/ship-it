@@ -17,15 +17,20 @@ package controllers
 
 import (
 	"context"
-	"errors"
+	"fmt"
+	"strings"
+	"time"
 
 	shipitv1beta1 "ship-it-operator/api/v1beta1"
 
 	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/proto/hapi/chart"
+	"k8s.io/helm/pkg/proto/hapi/release"
 	hapi "k8s.io/helm/pkg/proto/hapi/services"
+	helmerrors "k8s.io/helm/pkg/storage/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -35,6 +40,10 @@ import (
 const HelmReleaseFinalizer = "HelmReleaseFinalizer"
 
 var errNotImplemented = errors.New("not implemented")
+
+type ChartDownloader interface {
+	Download(ctx context.Context, chart string) (*chart.Chart, error)
+}
 
 type HelmClient interface {
 	DeleteRelease(rlsName string, opts ...helm.DeleteOption) (*hapi.UninstallReleaseResponse, error)
@@ -47,16 +56,46 @@ type HelmClient interface {
 // HelmReleaseReconciler reconciles a HelmRelease object
 type HelmReleaseReconciler struct {
 	client.Client
+	reconcilerConfig
+
 	Log logr.Logger
 
-	helm HelmClient
+	downloader ChartDownloader
+	helm       HelmClient
 }
 
-func NewHelmReleaseReconciler(l logr.Logger, client client.Client, helm HelmClient) *HelmReleaseReconciler {
+type ReconcilerOption func(*reconcilerConfig)
+
+type reconcilerConfig struct {
+	GracePeriod time.Duration
+	Namespace   string
+}
+
+func Namespace(ns string) ReconcilerOption {
+	return func(c *reconcilerConfig) {
+		c.Namespace = ns
+	}
+}
+
+func GracePeriod(d time.Duration) ReconcilerOption {
+	return func(c *reconcilerConfig) {
+		c.GracePeriod = d
+	}
+}
+
+func NewHelmReleaseReconciler(l logr.Logger, client client.Client, helm HelmClient, d ChartDownloader, opts ...ReconcilerOption) *HelmReleaseReconciler {
+	var cfg reconcilerConfig
+	for _, opt := range opts {
+		opt(&cfg)
+	}
+
 	return &HelmReleaseReconciler{
 		Client: client,
 		Log:    l.WithName("controllers").WithName("HelmRelease"),
-		helm:   helm,
+
+		downloader:       d,
+		helm:             helm,
+		reconcilerConfig: cfg,
 	}
 }
 
@@ -83,8 +122,8 @@ func (r *HelmReleaseReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 		return ctrl.Result{}, nil
 	}
 
-	if helmRelease.DeletionTimestamp != nil {
-		return ctrl.Result{}, r.onDelete(ctx, helmRelease)
+	if !helmRelease.DeletionTimestamp.IsZero() {
+		return ctrl.Result{}, r.delete(ctx, helmRelease)
 	}
 
 	if !contains(helmRelease.GetFinalizers(), HelmReleaseFinalizer) {
@@ -93,7 +132,7 @@ func (r *HelmReleaseReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 		return ctrl.Result{Requeue: true}, r.setFinalizer(ctx, helmRelease)
 	}
 
-	return r.onUpdate(ctx, helmRelease)
+	return r.update(ctx, helmRelease)
 }
 
 func (r *HelmReleaseReconciler) SetupWithManager(mgr ctrl.Manager) error {
@@ -109,14 +148,59 @@ func (r *HelmReleaseReconciler) setFinalizer(ctx context.Context, rls shipitv1be
 	return r.Update(ctx, &rls)
 }
 
-func (r *HelmReleaseReconciler) onDelete(ctx context.Context, rls shipitv1beta1.HelmRelease) error {
-	// Update HelmRelease Status to 'DELETING'
-	// Delete the release with helm
-	return errNotImplemented
+func (r *HelmReleaseReconciler) delete(ctx context.Context, rls shipitv1beta1.HelmRelease) error {
+	return errors.Wrap(errNotImplemented, "delete")
 }
 
-func (r *HelmReleaseReconciler) onUpdate(ctx context.Context, rls shipitv1beta1.HelmRelease) (ctrl.Result, error) {
-	return ctrl.Result{}, errNotImplemented
+func isHelmReleaseNotFound(name string, err error) bool {
+	// dynamic errors can't be directly compared for equality. We use the
+	// error message string, though there's no guarantee it won't change.
+	return strings.Contains(err.Error(), helmerrors.ErrReleaseNotFound(name).Error())
+}
+
+func (r *HelmReleaseReconciler) update(ctx context.Context, rls shipitv1beta1.HelmRelease) (ctrl.Result, error) {
+	releaseName := rls.Spec.ReleaseName
+
+	_, err := r.helm.ReleaseStatus(releaseName)
+	if err != nil {
+		if isHelmReleaseNotFound(releaseName, err) {
+			return r.install(ctx, rls)
+		}
+		return ctrl.Result{}, errors.Wrapf(err, "failed to get release status for %s", releaseName)
+	}
+
+	return ctrl.Result{}, errors.Wrap(errNotImplemented, "upgrade")
+}
+
+func (r *HelmReleaseReconciler) install(ctx context.Context, rls shipitv1beta1.HelmRelease) (ctrl.Result, error) {
+	chartURI := rls.Spec.Chart.URI()
+	releaseName := rls.Spec.ReleaseName
+
+	chart, err := r.downloader.Download(ctx, chartURI)
+	if err != nil {
+		return ctrl.Result{}, errors.Wrapf(err, "failed to download chart %s", chartURI)
+	}
+
+	// TODO: use the returned response's `Release.Manifest` to watch and
+	// receive events for the k8s resources owned by this chart
+	if _, err := r.helm.InstallReleaseFromChart(chart, r.Namespace, helm.ReleaseName(releaseName)); err != nil {
+		return ctrl.Result{}, errors.Wrapf(err, "failed to install release %s using chart %s", releaseName, chartURI)
+	}
+
+	rls.Status.SetCondition(shipitv1beta1.HelmReleaseCondition{
+		Type:    release.Status_PENDING_INSTALL.String(),
+		Message: fmt.Sprintf("installing chart %s", chartURI),
+	})
+
+	if err := r.Update(ctx, &rls); err != nil {
+		r.Log.Info("failed to update HelmRelease status", "release", releaseName, "status", release.Status_PENDING_INSTALL)
+	}
+
+	return ctrl.Result{RequeueAfter: r.GracePeriod}, nil
+}
+
+func (r *HelmReleaseReconciler) rollback(ctx context.Context, rls shipitv1beta1.HelmRelease) (ctrl.Result, error) {
+	return ctrl.Result{}, errors.Wrap(errNotImplemented, "rollback")
 }
 
 func contains(strs []string, x string) bool {

@@ -18,11 +18,16 @@ package main
 import (
 	"flag"
 	"os"
+	"time"
 
 	shipitv1beta1 "ship-it-operator/api/v1beta1"
 
+	"ship-it-operator/chartdownloader"
 	"ship-it-operator/controllers"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/client"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/helm/pkg/helm"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -42,9 +47,22 @@ func init() {
 }
 
 func main() {
-	var metricsAddr string
-	var enableLeaderElection bool
+	var (
+		awsRegion            string
+		chartRepository      string
+		gracePeriod          time.Duration
+		metricsAddr          string
+		namespace            string
+		tillerAddr           string
+		enableLeaderElection bool
+	)
+
+	flag.StringVar(&awsRegion, "aws-region", "", "The AWS region where the operator's chart repository is hosted")
+	flag.StringVar(&chartRepository, "chart-repository", "", "The URI of the chart repository used by the operator")
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
+	flag.StringVar(&namespace, "namespace", "default", "The cluster namespace where the operator will deploy releases")
+	flag.StringVar(&tillerAddr, "tiller-address", "", "The cluster address of the tiller service")
+	flag.DurationVar(&gracePeriod, "grace-period", 10*time.Second, "The duration the operator will wait before checking a release's status after reconciling")
 	flag.BoolVar(&enableLeaderElection, "enable-leader-election", false,
 		"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
 	flag.Parse()
@@ -61,7 +79,34 @@ func main() {
 		os.Exit(1)
 	}
 
-	reconciler := controllers.NewHelmReleaseReconciler(ctrl.Log, mgr.GetClient(), helm.NewClient())
+	session, err := session.NewSession(&aws.Config{
+		Region: aws.String(awsRegion),
+	})
+	if err != nil {
+		setupLog.Error(err, "unable to create AWS session")
+		os.Exit(1)
+	}
+
+	providers := chartdownloader.ProviderFuncs{
+		S3Func: func() client.ConfigProvider {
+			return session
+		},
+	}
+
+	downloader, err := chartdownloader.New(chartRepository, providers)
+	if err != nil {
+		setupLog.Error(err, "unable to create chart downloader")
+		os.Exit(1)
+	}
+
+	reconciler := controllers.NewHelmReleaseReconciler(
+		ctrl.Log,
+		mgr.GetClient(),
+		helm.NewClient(helm.Host(tillerAddr)),
+		downloader,
+		controllers.Namespace(namespace),
+		controllers.GracePeriod(gracePeriod),
+	)
 
 	setupLog.Info("setting up HelmRelease controller")
 	if err := reconciler.SetupWithManager(mgr); err != nil {
