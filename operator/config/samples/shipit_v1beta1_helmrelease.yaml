@@ -4,7 +4,6 @@ kind: HelmRelease
 metadata:
   name: example-microservice
   annotations:
-    helmreleases.shipit.wattpad.com/autodeploy: "true"
     helmreleases.shipit.wattpad.com/code: "https://github.com/Wattpad/highlander/tree/master/wattpad/src/services/foo"
     helmreleases.shipit.wattpad.com/datadog: "https://app.datadoghq.com/dashboard/a8k-ro2zk-k8a"
     helmreleases.shipit.wattpad.com/slack: "#squad-velocity"
@@ -14,7 +13,7 @@ spec:
   releaseName: example-release
 
   chart:
-    repository: wattpad.s3.amazonaws.com/helm-charts
+    repository: s3://charts.wattpadhq.com
     path: microservice
     revision: HEAD
 
