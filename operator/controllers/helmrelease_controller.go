@@ -202,7 +202,7 @@ func (r *HelmReleaseReconciler) install(ctx context.Context, rls shipitv1beta1.H
 func (r *HelmReleaseReconciler) rollback(ctx context.Context, rls shipitv1beta1.HelmRelease) (ctrl.Result, error) {
 	_, err := r.helm.RollbackRelease(rls.Spec.ReleaseName)
 	if err != nil {
-		r.Log.Error(err, "unable to rollback release")
+		r.Log.Error(err, "unable to rollback release", "release", rls.Spec.ReleaseName)
 
 		return ctrl.Result{
 			RequeueAfter: r.GracePeriod,
