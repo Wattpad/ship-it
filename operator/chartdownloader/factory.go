@@ -9,15 +9,15 @@ import (
 	"k8s.io/helm/pkg/proto/hapi/chart"
 )
 
-type Interface interface {
+type ChartDownloader interface {
 	Download(context.Context, string) (*chart.Chart, error)
 }
 
 type factory struct {
-	downloaders map[string]Interface
+	downloaders map[string]ChartDownloader
 }
 
-func New(downloaders map[string]Interface) Interface {
+func New(downloaders map[string]ChartDownloader) ChartDownloader {
 	return &factory{
 		downloaders: downloaders,
 	}

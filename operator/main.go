@@ -86,7 +86,7 @@ func main() {
 	}
 
 	// S3 is currently the only supported chart repository type
-	downloaders := map[string]chartdownloader.Interface{
+	downloaders := map[string]chartdownloader.ChartDownloader{
 		"s3": chartdownloader.NewS3Downloader(s3manager.NewDownloader(session)),
 	}
 

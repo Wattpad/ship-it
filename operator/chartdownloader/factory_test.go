@@ -33,7 +33,7 @@ func TestFactoryS3Provider(t *testing.T) {
 	mockS3 := new(mockS3Downloader)
 	mockS3.On("Download", mock.Anything, repoURL).Return(&chart.Chart{}, nil)
 
-	dl := New(map[string]Interface{
+	dl := New(map[string]ChartDownloader{
 		"s3": mockS3,
 	})
 
