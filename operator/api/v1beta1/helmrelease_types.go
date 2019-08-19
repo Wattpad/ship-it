@@ -30,6 +30,7 @@ import (
 type HelmReleaseStatusReason string
 
 const (
+	ReasonUnknown         HelmReleaseStatusReason = "Unknown"
 	ReasonDeleteError     HelmReleaseStatusReason = "DeleteError"
 	ReasonDeleteSuccess   HelmReleaseStatusReason = "DeleteSuccess"
 	ReasonInstallError    HelmReleaseStatusReason = "InstallError"
