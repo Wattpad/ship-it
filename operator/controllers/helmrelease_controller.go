@@ -158,15 +158,55 @@ func isHelmReleaseNotFound(name string, err error) bool {
 	return strings.Contains(err.Error(), helmerrors.ErrReleaseNotFound(name).Error())
 }
 
+func reasonForFailure(oldStatus string, oldReason shipitv1beta1.HelmReleaseStatusReason) shipitv1beta1.HelmReleaseStatusReason {
+	switch oldStatus {
+	case release.Status_DELETING.String():
+		return shipitv1beta1.ReasonDeleteError
+	case release.Status_PENDING_INSTALL.String():
+		return shipitv1beta1.ReasonInstallError
+	case release.Status_PENDING_UPGRADE.String():
+		return shipitv1beta1.ReasonUpdateError
+	case release.Status_PENDING_ROLLBACK.String():
+		return shipitv1beta1.ReasonRollbackError
+	case release.Status_FAILED.String():
+		return oldReason
+	default:
+		return shipitv1beta1.ReasonUnknown
+	}
+}
+
 func (r *HelmReleaseReconciler) update(ctx context.Context, rls shipitv1beta1.HelmRelease) (ctrl.Result, error) {
 	releaseName := rls.Spec.ReleaseName
+	oldCondition := rls.Status.GetCondition()
 
-	_, err := r.helm.ReleaseStatus(releaseName)
+	resp, err := r.helm.ReleaseStatus(releaseName)
 	if err != nil {
 		if isHelmReleaseNotFound(releaseName, err) {
 			return r.install(ctx, rls)
 		}
 		return ctrl.Result{}, errors.Wrapf(err, "failed to get release status for %s", releaseName)
+	}
+
+	releaseStatus := resp.GetInfo().GetStatus()
+	releaseStatusCode := releaseStatus.GetCode()
+
+	switch releaseStatusCode {
+	case release.Status_FAILED:
+		rls.Status.SetCondition(shipitv1beta1.HelmReleaseCondition{
+			Type:    releaseStatusCode.String(),
+			Reason:  reasonForFailure(oldCondition.Type, oldCondition.Reason),
+			Message: releaseStatus.GetNotes(),
+		})
+
+		if err := r.Update(ctx, &rls); err != nil {
+			r.Log.Error(err, "failed to update HelmRelease status", "release", releaseName, "status", releaseStatusCode.String())
+		}
+
+		if oldCondition.Type == release.Status_PENDING_UPGRADE.String() {
+			return r.rollback(ctx, rls)
+		}
+
+		return ctrl.Result{}, nil
 	}
 
 	return ctrl.Result{}, errors.Wrap(errNotImplemented, "upgrade")
