@@ -123,7 +123,7 @@ func (r *HelmReleaseReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 	}
 
 	if !helmRelease.DeletionTimestamp.IsZero() {
-		return ctrl.Result{}, r.delete(ctx, helmRelease)
+		return r.delete(ctx, helmRelease)
 	}
 
 	if !contains(helmRelease.GetFinalizers(), HelmReleaseFinalizer) {
@@ -148,8 +148,59 @@ func (r *HelmReleaseReconciler) setFinalizer(ctx context.Context, rls shipitv1be
 	return r.Update(ctx, &rls)
 }
 
-func (r *HelmReleaseReconciler) delete(ctx context.Context, rls shipitv1beta1.HelmRelease) error {
-	return errors.Wrap(errNotImplemented, "delete")
+func (r *HelmReleaseReconciler) clearFinalizer(ctx context.Context, rls shipitv1beta1.HelmRelease) error {
+	finalizers := []string{}
+
+	for _, f := range rls.GetFinalizers() {
+		if f != HelmReleaseFinalizer {
+			finalizers = append(finalizers, f)
+		}
+	}
+
+	rls.SetFinalizers(finalizers)
+	return r.Update(ctx, &rls)
+}
+
+func (r *HelmReleaseReconciler) delete(ctx context.Context, rls shipitv1beta1.HelmRelease) (ctrl.Result, error) {
+	releaseName := rls.Spec.ReleaseName
+	rlsStatus, err := r.helm.ReleaseStatus(releaseName)
+
+	if err != nil {
+		if isHelmReleaseNotFound(releaseName, err) {
+			// this will only happen if a delete --purge is run
+			return ctrl.Result{}, r.clearFinalizer(ctx, rls)
+		}
+
+		return ctrl.Result{}, err
+	}
+
+	info := rlsStatus.GetInfo()
+
+	if info.Status.Code == release.Status_DELETING {
+		return ctrl.Result{RequeueAfter: r.GracePeriod}, nil
+	}
+
+	if info.Status.Code == release.Status_DELETED {
+		return ctrl.Result{}, r.clearFinalizer(ctx, rls)
+	}
+
+	rls.Status.SetCondition(shipitv1beta1.HelmReleaseCondition{
+		Type:    release.Status_DELETING.String(),
+		Message: "Release is being deleted",
+	})
+
+	if err := r.Update(ctx, &rls); err != nil {
+		r.Log.Error(err, "unable to update status")
+		return ctrl.Result{}, err
+	}
+
+	_, err = r.helm.DeleteRelease(rls.Spec.ReleaseName)
+
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	return ctrl.Result{RequeueAfter: r.GracePeriod}, nil
 }
 
 func isHelmReleaseNotFound(name string, err error) bool {

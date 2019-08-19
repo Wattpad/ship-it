@@ -151,8 +151,14 @@ var _ = Describe("HelmReleaseReconciler", func() {
 			By("reconciling a failed updated release")
 			// TODO
 
-			By("reconciling a release with the deletion timestamp set ")
-			// TODO
+			By("reconciling a release that has been deleted")
+			Expect(k8sClient.Delete(ctx, testRelease)).To(Succeed())
+
+			_, err = reconciler.Reconcile(request)
+			Expect(err).To(BeNil())
+
+			resp, err = helmClient.ReleaseStatus(releaseName)
+			Expect(isHelmReleaseNotFound(releaseName, err)).To(BeTrue())
 		})
 	})
 })
