@@ -158,8 +158,11 @@ func isHelmReleaseNotFound(name string, err error) bool {
 	return strings.Contains(err.Error(), helmerrors.ErrReleaseNotFound(name).Error())
 }
 
-func reasonForFailure(oldStatus string, oldReason shipitv1beta1.HelmReleaseStatusReason) shipitv1beta1.HelmReleaseStatusReason {
-	switch oldStatus {
+// reasonForFailure determines the reason for a release's state transition to
+// FAILED, given the previous release state. If the old state was FAILED, the
+// original reason is re-used.
+func reasonForFailure(oldCondition shipitv1beta1.HelmReleaseCondition) shipitv1beta1.HelmReleaseStatusReason {
+	switch oldCondition.Type {
 	case release.Status_DELETING.String():
 		return shipitv1beta1.ReasonDeleteError
 	case release.Status_PENDING_INSTALL.String():
@@ -169,7 +172,7 @@ func reasonForFailure(oldStatus string, oldReason shipitv1beta1.HelmReleaseStatu
 	case release.Status_PENDING_ROLLBACK.String():
 		return shipitv1beta1.ReasonRollbackError
 	case release.Status_FAILED.String():
-		return oldReason
+		return oldCondition.Reason
 	default:
 		return shipitv1beta1.ReasonUnknown
 	}
@@ -194,7 +197,7 @@ func (r *HelmReleaseReconciler) update(ctx context.Context, rls shipitv1beta1.He
 	case release.Status_FAILED:
 		rls.Status.SetCondition(shipitv1beta1.HelmReleaseCondition{
 			Type:    releaseStatusCode.String(),
-			Reason:  reasonForFailure(oldCondition.Type, oldCondition.Reason),
+			Reason:  reasonForFailure(oldCondition),
 			Message: releaseStatus.GetNotes(),
 		})
 
