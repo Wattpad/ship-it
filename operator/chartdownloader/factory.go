@@ -4,51 +4,34 @@ import (
 	"context"
 	"fmt"
 	"net/url"
-	"strings"
 
-	"github.com/aws/aws-sdk-go/aws/client"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/pkg/errors"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 )
 
-type ChartDownloader interface {
+type Interface interface {
 	Download(context.Context, string) (*chart.Chart, error)
 }
 
-// TODO: github, GCS support?
-type Providers interface {
-	S3() client.ConfigProvider
+type factory struct {
+	downloaders map[string]Interface
 }
 
-type ProviderFuncs struct {
-	S3Func func() client.ConfigProvider
-}
-
-func (p ProviderFuncs) S3() client.ConfigProvider {
-	if p.S3Func == nil {
-		return nil
+func New(downloaders map[string]Interface) Interface {
+	return &factory{
+		downloaders: downloaders,
 	}
-	return p.S3Func()
 }
 
-func New(rawRepoURL string, p Providers) (ChartDownloader, error) {
-	repoURL, err := url.Parse(rawRepoURL)
+func (f *factory) Download(ctx context.Context, rawChartURL string) (*chart.Chart, error) {
+	repoURL, err := url.Parse(rawChartURL)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "invalid chart URL %s", rawChartURL)
 	}
 
-	switch repoURL.Scheme {
-	case "s3":
-		parts := strings.Split(repoURL.Path, "/")
-		bucket := parts[len(parts)-1]
-
-		s3 := p.S3()
-		if s3 == nil {
-			return nil, fmt.Errorf("no S3 provider for helm repository %s", rawRepoURL)
-		}
-
-		return newS3Downloader(bucket, s3manager.NewDownloader(s3)), nil
-	default:
-		return nil, fmt.Errorf("unsupported helm repository %s", rawRepoURL)
+	if dl, ok := f.downloaders[repoURL.Scheme]; ok {
+		return dl.Download(ctx, rawChartURL)
 	}
+
+	return nil, fmt.Errorf("unsupported chart transport protocol %s", rawChartURL)
 }

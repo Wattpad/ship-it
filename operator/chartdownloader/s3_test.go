@@ -27,52 +27,14 @@ func (m *mockS3) DownloadWithContext(ctx aws.Context, w io.WriterAt, input *s3.G
 	return int64(args.Int(0)), args.Error(1)
 }
 
-func TestDownloadSuccess(t *testing.T) {
-	ctx := context.Background()
-
-	var mockD mockS3
-	dl := newS3Downloader("foo", &mockD)
-
-	chartBytes, err := ioutil.ReadFile("../../testdata/foo-0.1.0.tgz")
-	require.NoError(t, err)
-
-	mockD.On("DownloadWithContext", ctx, mock.AnythingOfType("*aws.WriteAtBuffer"), &s3.GetObjectInput{
-		Bucket: aws.String(dl.Bucket),
-		Key:    aws.String("/some-chart"),
-	}).Return(0, nil).Run(func(args mock.Arguments) {
-		w := args.Get(1).(*aws.WriteAtBuffer)
-		w.WriteAt(chartBytes, 0)
-	})
-
-	outBytes, err := dl.download(ctx, "/some-chart")
-	require.NoError(t, err)
-
-	assert.Equal(t, chartBytes, outBytes)
-	mockD.AssertExpectations(t)
-}
-
-func TestDownloadFailure(t *testing.T) {
-	ctx := context.Background()
-
-	var mockD mockS3
-	dl := newS3Downloader("foo", &mockD)
-
-	mockD.On("DownloadWithContext", ctx, mock.AnythingOfType("*aws.WriteAtBuffer"), &s3.GetObjectInput{
-		Bucket: aws.String(dl.Bucket),
-		Key:    aws.String("/some-chart"),
-	}).Return(0, fmt.Errorf("some download error"))
-
-	_, err := dl.download(ctx, "/some-chart")
-
-	assert.Error(t, err)
-	mockD.AssertExpectations(t)
-}
-
 func TestChartDownloadSuccess(t *testing.T) {
 	ctx := context.Background()
 
+	testBucket := "wattpad.amazonaws.com"
+	testObject := "some-chart"
+
 	var mockD mockS3
-	dl := newS3Downloader("foo", &mockD)
+	dl := NewS3Downloader(&mockD)
 
 	chartBytes, err := ioutil.ReadFile("../../testdata/foo-0.1.0.tgz")
 	require.NoError(t, err)
@@ -81,14 +43,14 @@ func TestChartDownloadSuccess(t *testing.T) {
 	require.NoError(t, err)
 
 	mockD.On("DownloadWithContext", ctx, mock.AnythingOfType("*aws.WriteAtBuffer"), &s3.GetObjectInput{
-		Bucket: aws.String(dl.Bucket),
-		Key:    aws.String("/some-chart"),
+		Bucket: aws.String(testBucket),
+		Key:    aws.String(testObject),
 	}).Return(0, nil).Run(func(args mock.Arguments) {
 		w := args.Get(1).(*aws.WriteAtBuffer)
 		w.WriteAt(chartBytes, 0)
 	})
 
-	outChart, err := dl.Download(ctx, "/some-chart")
+	outChart, err := dl.Download(ctx, fmt.Sprintf("s3://%s/%s", testBucket, testObject))
 	require.NoError(t, err)
 
 	assert.Equal(t, expectedChart, outChart)
@@ -98,15 +60,18 @@ func TestChartDownloadSuccess(t *testing.T) {
 func TestChartDownloadFailure(t *testing.T) {
 	ctx := context.Background()
 
+	testBucket := "wattpad.amazonaws.com"
+	testObject := "some-chart"
+
 	var mockD mockS3
-	dl := newS3Downloader("foo", &mockD)
+	dl := NewS3Downloader(&mockD)
 
 	mockD.On("DownloadWithContext", ctx, mock.AnythingOfType("*aws.WriteAtBuffer"), &s3.GetObjectInput{
-		Bucket: aws.String(dl.Bucket),
-		Key:    aws.String("/some-chart"),
+		Bucket: aws.String(testBucket),
+		Key:    aws.String(testObject),
 	}).Return(0, fmt.Errorf("some download error"))
 
-	_, err := dl.Download(ctx, "/some-chart")
+	_, err := dl.Download(ctx, fmt.Sprintf("s3://%s/%s", testBucket, testObject))
 	assert.Error(t, err)
 	mockD.AssertExpectations(t)
 }
@@ -114,36 +79,51 @@ func TestChartDownloadFailure(t *testing.T) {
 func TestInvalidChartBytes(t *testing.T) {
 	ctx := context.Background()
 
+	testBucket := "wattpad.amazonaws.com"
+	testObject := "some-chart"
+
 	var mockD mockS3
-	dl := newS3Downloader("foo", &mockD)
+	dl := NewS3Downloader(&mockD)
 
 	chartBytes := []byte("some bad bytes")
 
 	mockD.On("DownloadWithContext", ctx, mock.AnythingOfType("*aws.WriteAtBuffer"), &s3.GetObjectInput{
-		Bucket: aws.String(dl.Bucket),
-		Key:    aws.String("/some-chart"),
+		Bucket: aws.String(testBucket),
+		Key:    aws.String(testObject),
 	}).Return(0, nil).Run(func(args mock.Arguments) {
 		w := args.Get(1).(*aws.WriteAtBuffer)
 		w.WriteAt(chartBytes, 0)
 	})
 
-	_, err := dl.Download(ctx, "/some-chart")
+	_, err := dl.Download(ctx, fmt.Sprintf("s3://%s/%s", testBucket, testObject))
 	assert.Error(t, err)
 	mockD.AssertExpectations(t)
 }
 
-func TestMakeS3Key(t *testing.T) {
+func TestParseBucketObject(t *testing.T) {
 	type testCase struct {
-		input    string
-		expected string
+		input  string
+		bucket string
+		object string
 	}
 
 	tests := []testCase{
-		{"some-chart", "/some-chart"},
-		{"/some-chart", "/some-chart"},
+		{
+			input:  "s3://charts.wattpadhq.com/microservice",
+			bucket: "charts.wattpadhq.com",
+			object: "microservice",
+		},
+		{
+			input:  "s3://charts.wattpadhq.com/foo/bar",
+			bucket: "charts.wattpadhq.com",
+			object: "foo/bar",
+		},
 	}
 
 	for _, test := range tests {
-		assert.Equal(t, test.expected, makeS3Key(test.input))
+		bucket, object, err := parseBucketObject(test.input)
+		assert.NoError(t, err)
+		assert.Equal(t, test.bucket, bucket)
+		assert.Equal(t, test.object, object)
 	}
 }
