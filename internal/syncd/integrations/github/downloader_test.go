@@ -2,6 +2,7 @@ package github
 
 import (
 	"context"
+	"path"
 	"testing"
 
 	"github.com/google/go-github/v26/github"
@@ -54,10 +55,10 @@ func TestBufferDirectorySingleFile(t *testing.T) {
 
 	if assert.NoError(t, err) {
 		assert.Len(t, files, 1)
-		assert.Equal(t, files[0], &chartutil.BufferedFile{
-			Name: testFilename,
+		assert.Equal(t, &chartutil.BufferedFile{
+			Name: path.Join(testPath, testFilename),
 			Data: []byte(testContent),
-		})
+		}, files[0])
 	}
 }
 
@@ -114,19 +115,19 @@ func TestBufferDirectoryFlatDirectory(t *testing.T) {
 
 	if assert.NoError(t, err) {
 		assert.Len(t, files, 3)
-		assert.EqualValues(t, files, []*chartutil.BufferedFile{
+		assert.EqualValues(t, []*chartutil.BufferedFile{
 			{
-				Name: testFilename1,
+				Name: path.Join(testPath1, testFilename1),
 				Data: []byte(testContent1),
 			},
 			{
-				Name: testFilename2,
+				Name: path.Join(testPath2, testFilename2),
 				Data: []byte(testContent2),
 			},
 			{
-				Name: testFilename3,
+				Name: path.Join(testPath3, testFilename3),
 				Data: []byte(testContent3),
 			},
-		})
+		}, files)
 	}
 }
