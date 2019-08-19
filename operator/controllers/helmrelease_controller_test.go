@@ -150,7 +150,6 @@ var _ = Describe("HelmReleaseReconciler", func() {
 
 			By("reconciling a failed updated release")
 			// TODO
-			// Add rollback tests here
 
 			By("reconciling a release with the deletion timestamp set ")
 			// TODO
