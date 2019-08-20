@@ -6,7 +6,7 @@ import { ListItem, IconButton, DialogContent, DialogActions, Button, Link } from
 import GitIcon from '../assets/octocat.png'
 import HelmIcon from '../assets/helm_icon.png'
 
-const imgAlt = "not found"
+import * as constants from '../Constants'
 
 class SelectionDialog extends React.Component {
   constructor(props) {
@@ -33,13 +33,13 @@ class SelectionDialog extends React.Component {
                 <List>
                   <ListItem>
                     <IconButton href={this.props.chart}>
-                      <img src={HelmIcon} width="32" height="32" alt={imgAlt} />
+                      <img src={HelmIcon} width="32" height="32" alt={constants.imgAlt} />
                     </IconButton>
                     <Link href={this.props.chart}>Chart Download</Link>
                   </ListItem>
                   <ListItem>
                     <IconButton href={this.props.source}>
-                      <img src={GitIcon} width="32" height="32" alt={imgAlt} />
+                      <img src={GitIcon} width="32" height="32" alt={constants.imgAlt} />
                     </IconButton>
                     <Link href={this.props.source}>Source</Link>
                   </ListItem>
@@ -53,7 +53,7 @@ class SelectionDialog extends React.Component {
             null
         }
         <IconButton onClick={this.handleOpen} width="32" height="32">
-          <img src={GitIcon} width="32" height="32" alt={imgAlt} />
+          <img src={GitIcon} width="32" height="32" alt={constants.imgAlt} />
         </IconButton>
       </div>
     )

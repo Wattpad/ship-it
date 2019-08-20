@@ -3,10 +3,8 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
-import ExpandedDetail from './ExpandedDetail'
 import SingleGridCell from './GridCell'
 
-let cardID = 0
 class ReactExpandableGrid extends React.Component {
   
   constructor(props) {
@@ -69,7 +67,6 @@ class ReactExpandableGrid extends React.Component {
 
   handleCellClick(event) {
     let target = event.target
-    cardID = this.findIdNode(target)
     if (this.state.expanded) {
       if (this.state.selected_id === event.target.id) { // Clicking on already opened detail
         this.closeExpandedDetail()
@@ -107,23 +104,8 @@ class ReactExpandableGrid extends React.Component {
     for (var i in gridData) {
       idCounter = idCounter + 1
       let thisUniqueKey = 'grid_cell_' + idCounter.toString()
-      grid.push(<SingleGridCell handleCellClick={this.handleCellClick.bind(this)} key={thisUniqueKey} id={thisUniqueKey} cellMargin={this.props.cellMargin} SingleGridCellData={gridData[i]} cellSize={this.props.cellSize} />)
+      grid.push(<SingleGridCell API_ADDRESS={this.props.API_ADDRESS} handleCellClick={this.handleCellClick.bind(this)} key={thisUniqueKey} id={thisUniqueKey} cellMargin={this.props.cellMargin} SingleGridCellData={gridData[i]} cellSize={this.props.cellSize} />)
     }
-
-    const cssforExpandedDetail = {
-      backgroundColor: this.props.detailBackgroundColor,
-      height: this.props.detailHeight,
-      display: 'none',
-      position: 'relative',
-      padding: '20px',
-      transition: 'display 2s ease-in-out 0.5s',
-    }
-
-    grid.push( // Expanded Detail here
-      <li style={cssforExpandedDetail} key='expandedDetail' id='expandedDetail'>
-        <ExpandedDetail data={gridData[cardID]} API_ADDRESS={this.props.API_ADDRESS} />
-      </li>
-    )
 
     return grid
   }
@@ -166,8 +148,6 @@ ReactExpandableGrid.propTypes = {
   cellSize: PropTypes.number,
   cellMargin: PropTypes.number,
   bgColor: PropTypes.string,
-  detailHeight: PropTypes.number,
-  detailBackgroundColor: PropTypes.string,
 }
 
 ReactExpandableGrid.defaultProps = {
@@ -175,8 +155,6 @@ ReactExpandableGrid.defaultProps = {
   cellSize: 250,
   cellMargin: 25,
   bgColor: '#f2f2f2',
-  detailHeight: 300,
-  detailBackgroundColor: '#D9D9D9',
 }
 
 export default ReactExpandableGrid
