@@ -16,7 +16,7 @@ import (
 )
 
 type githubDownloader interface {
-	BufferDirectory(ctx context.Context, repo, path, ref string) ([]*chartutil.BufferedFile, error)
+	BufferDirectory(ctx context.Context, repo, path, prefix, ref string) ([]*chartutil.BufferedFile, error)
 }
 
 type RegistryChartListener struct {
@@ -62,7 +62,7 @@ func (l *RegistryChartListener) handler(r syncd.RegistryChartReconciler) sqscons
 			return errors.Wrap(err, "failed to unmarshal github push event")
 		}
 
-		chartFiles, err := l.downloader.BufferDirectory(ctx, event.Repository, event.Path, event.Ref)
+		chartFiles, err := l.downloader.BufferDirectory(ctx, event.Repository, event.Path, event.Path, event.Ref)
 		if err != nil {
 			return errors.Wrap(err, "failed to download chart directory")
 		}

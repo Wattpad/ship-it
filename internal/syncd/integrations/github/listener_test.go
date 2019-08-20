@@ -16,8 +16,8 @@ type mockDownloader struct {
 	mock.Mock
 }
 
-func (m *mockDownloader) BufferDirectory(ctx context.Context, repo, path, ref string) ([]*chartutil.BufferedFile, error) {
-	args := m.Called(ctx, repo, path, ref)
+func (m *mockDownloader) BufferDirectory(ctx context.Context, repo, path, prefix, ref string) ([]*chartutil.BufferedFile, error) {
+	args := m.Called(ctx, repo, path, prefix, ref)
 	var ret0 []*chartutil.BufferedFile
 	if args0 := args.Get(0); args0 != nil {
 		ret0 = args0.([]*chartutil.BufferedFile)
@@ -49,7 +49,7 @@ func TestHandlerChartDownloadFails(t *testing.T) {
 	}
 
 	var md mockDownloader
-	md.On("BufferDirectory", mock.Anything, testEvent.Repository, testEvent.Path, testEvent.Ref).Return(nil, errNotFound)
+	md.On("BufferDirectory", mock.Anything, testEvent.Repository, testEvent.Path, testEvent.Path, testEvent.Ref).Return(nil, errNotFound)
 
 	listener := &RegistryChartListener{downloader: &md}
 	handler := listener.handler(nil)
@@ -82,7 +82,7 @@ description: This is a foo chart.
 	}
 
 	var md mockDownloader
-	md.On("BufferDirectory", mock.Anything, testEvent.Repository, testEvent.Path, testEvent.Ref).Return(testChartFiles, nil)
+	md.On("BufferDirectory", mock.Anything, testEvent.Repository, testEvent.Path, testEvent.Path, testEvent.Ref).Return(testChartFiles, nil)
 
 	var mr mockReconciler
 	mr.On("Reconcile", mock.Anything, mock.Anything).Return(nil)

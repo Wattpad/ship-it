@@ -2,7 +2,7 @@ package github
 
 import (
 	"context"
-	"path"
+	filepath "path"
 	"testing"
 
 	"github.com/google/go-github/v26/github"
@@ -37,7 +37,7 @@ func (m *mockGithubRepositoriesClient) GetContents(ctx context.Context, org, rep
 }
 
 func TestBufferDirectorySingleFile(t *testing.T) {
-	testOrg, testRepo, testPath, testRef := "testOrg", "testRepo", "test/path", "master"
+	testOrg, testRepo, testPath, testPrefix, testRef := "testOrg", "testRepo", "test/path", "test/path", "master"
 
 	testFilename, testContent := "filename", "content"
 
@@ -51,19 +51,19 @@ func TestBufferDirectorySingleFile(t *testing.T) {
 	}, nil, nil, nil)
 
 	downloader := newDownloader(&m, testOrg)
-	files, err := downloader.BufferDirectory(context.Background(), testRepo, testPath, testRef)
+	files, err := downloader.BufferDirectory(context.Background(), testRepo, testPath, testPrefix, testRef)
 
 	if assert.NoError(t, err) {
 		assert.Len(t, files, 1)
 		assert.Equal(t, &chartutil.BufferedFile{
-			Name: path.Join(testPath, testFilename),
+			Name: testFilename,
 			Data: []byte(testContent),
 		}, files[0])
 	}
 }
 
 func TestBufferDirectoryFlatDirectory(t *testing.T) {
-	testOrg, testRepo, testPath, testRef := "testOrg", "testRepo", "test/path", "master"
+	testOrg, testRepo, testPath, testPrefix, testRef := "testOrg", "testRepo", "test/path", "test/path", "master"
 
 	testPath1, testPath2, testPath3 := "test/path/1", "test/path/2", "test/path/3"
 
@@ -111,21 +111,21 @@ func TestBufferDirectoryFlatDirectory(t *testing.T) {
 	}, nil, nil, nil)
 
 	downloader := newDownloader(&m, testOrg)
-	files, err := downloader.BufferDirectory(context.Background(), testRepo, testPath, testRef)
+	files, err := downloader.BufferDirectory(context.Background(), testRepo, testPath, testPrefix, testRef)
 
 	if assert.NoError(t, err) {
 		assert.Len(t, files, 3)
 		assert.EqualValues(t, []*chartutil.BufferedFile{
 			{
-				Name: path.Join(testPath1, testFilename1),
+				Name: filepath.Join("/1/", testFilename1),
 				Data: []byte(testContent1),
 			},
 			{
-				Name: path.Join(testPath2, testFilename2),
+				Name: filepath.Join("/2/", testFilename2),
 				Data: []byte(testContent2),
 			},
 			{
-				Name: path.Join(testPath3, testFilename3),
+				Name: filepath.Join("/3/", testFilename3),
 				Data: []byte(testContent3),
 			},
 		}, files)
