@@ -2,7 +2,7 @@ package github
 
 import (
 	"context"
-	filepath "path"
+	"strings"
 
 	"github.com/google/go-github/v26/github"
 	"github.com/pkg/errors"
@@ -25,10 +25,24 @@ func newDownloader(svc RepositoriesService, org string) *downloader {
 	}
 }
 
+// bufferDirectory recursively buffers files in a github directory. The
+// filenames of buffered files are relative to the directory root, which
+// is required by 'chartutils.LoadFiles'
 func (d *downloader) BufferDirectory(ctx context.Context, repo, path, ref string) ([]*chartutil.BufferedFile, error) {
-	file, dir, _, err := d.repositories.GetContents(ctx, d.Organization, repo, path, &github.RepositoryContentGetOptions{
+	trimPrefix := func(p string) string {
+		if p == path {
+			return p
+		}
+		return strings.TrimPrefix(strings.TrimPrefix(p, path), "/")
+	}
+
+	return d.bufferDirectory(ctx, repo, path, trimPrefix, &github.RepositoryContentGetOptions{
 		Ref: ref,
 	})
+}
+
+func (d *downloader) bufferDirectory(ctx context.Context, repo, path string, trim func(string) string, ref *github.RepositoryContentGetOptions) ([]*chartutil.BufferedFile, error) {
+	file, dir, _, err := d.repositories.GetContents(ctx, d.Organization, repo, path, ref)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +55,7 @@ func (d *downloader) BufferDirectory(ctx context.Context, repo, path, ref string
 
 		return []*chartutil.BufferedFile{
 			{
-				Name: filepath.Join(path, file.GetName()),
+				Name: trim(path),
 				Data: []byte(content),
 			},
 		}, nil
@@ -50,7 +64,7 @@ func (d *downloader) BufferDirectory(ctx context.Context, repo, path, ref string
 	var files []*chartutil.BufferedFile
 
 	for _, subDir := range dir {
-		subFiles, err := d.BufferDirectory(ctx, repo, subDir.GetPath(), ref)
+		subFiles, err := d.bufferDirectory(ctx, repo, subDir.GetPath(), trim, ref)
 		if err != nil {
 			return nil, err
 		}

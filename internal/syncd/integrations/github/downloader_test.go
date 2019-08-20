@@ -37,9 +37,9 @@ func (m *mockGithubRepositoriesClient) GetContents(ctx context.Context, org, rep
 }
 
 func TestBufferDirectorySingleFile(t *testing.T) {
-	testOrg, testRepo, testPath, testRef := "testOrg", "testRepo", "test/path", "master"
+	testOrg, testRepo, testRef := "testOrg", "testRepo", "master"
 
-	testFilename, testContent := "filename", "content"
+	testPath, testContent := "test/file", "content"
 
 	var m mockGithubRepositoriesClient
 
@@ -47,7 +47,7 @@ func TestBufferDirectorySingleFile(t *testing.T) {
 		Ref: testRef,
 	}).Return(&github.RepositoryContent{
 		Content: github.String(testContent),
-		Name:    github.String(testFilename),
+		Name:    github.String(testPath),
 	}, nil, nil, nil)
 
 	downloader := newDownloader(&m, testOrg)
@@ -56,20 +56,26 @@ func TestBufferDirectorySingleFile(t *testing.T) {
 	if assert.NoError(t, err) {
 		assert.Len(t, files, 1)
 		assert.Equal(t, &chartutil.BufferedFile{
-			Name: path.Join(testPath, testFilename),
+			Name: testPath,
 			Data: []byte(testContent),
 		}, files[0])
 	}
 }
 
-func TestBufferDirectoryFlatDirectory(t *testing.T) {
+func TestBufferChartDirectory(t *testing.T) {
 	testOrg, testRepo, testPath, testRef := "testOrg", "testRepo", "test/path", "master"
 
-	testPath1, testPath2, testPath3 := "test/path/1", "test/path/2", "test/path/3"
+	templates := "templates"
+	templatesPath := path.Join(testPath, templates)
 
-	testFilename1, testContent1 := "filename1", "content1"
-	testFilename2, testContent2 := "filename2", "content2"
-	testFilename3, testContent3 := "filename3", "content3"
+	k8sYaml := "templates/k8s.yaml"
+	k8sPath := path.Join(testPath, k8sYaml)
+
+	chartYaml := "Chart.yaml"
+	chartPath := path.Join(testPath, chartYaml)
+
+	valuesYaml := "values.yaml"
+	valuesPath := path.Join(testPath, valuesYaml)
 
 	var m mockGithubRepositoriesClient
 
@@ -78,36 +84,44 @@ func TestBufferDirectoryFlatDirectory(t *testing.T) {
 		Ref: testRef,
 	}).Return(nil, []*github.RepositoryContent{
 		{
-			Path: github.String(testPath1),
+			Path: github.String(templatesPath),
 		},
 		{
-			Path: github.String(testPath2),
+			Path: github.String(chartPath),
 		},
 		{
-			Path: github.String(testPath3),
+			Path: github.String(valuesPath),
 		},
 	}, nil, nil)
 
-	// following calls return references to file contents
-	m.On("GetContents", mock.Anything, testOrg, testRepo, testPath1, &github.RepositoryContentGetOptions{
+	// templates directory
+	m.On("GetContents", mock.Anything, testOrg, testRepo, templatesPath, &github.RepositoryContentGetOptions{
+		Ref: testRef,
+	}).Return(nil, []*github.RepositoryContent{
+		{
+			Path: github.String(k8sPath),
+		},
+	}, nil, nil)
+
+	m.On("GetContents", mock.Anything, testOrg, testRepo, k8sPath, &github.RepositoryContentGetOptions{
 		Ref: testRef,
 	}).Return(&github.RepositoryContent{
-		Content: github.String(testContent1),
-		Name:    github.String(testFilename1),
+		Content: github.String(k8sYaml),
+		Name:    github.String(k8sYaml),
 	}, nil, nil, nil)
 
-	m.On("GetContents", mock.Anything, testOrg, testRepo, testPath2, &github.RepositoryContentGetOptions{
+	m.On("GetContents", mock.Anything, testOrg, testRepo, valuesPath, &github.RepositoryContentGetOptions{
 		Ref: testRef,
 	}).Return(&github.RepositoryContent{
-		Content: github.String(testContent2),
-		Name:    github.String(testFilename2),
+		Content: github.String(valuesYaml),
+		Name:    github.String(valuesYaml),
 	}, nil, nil, nil)
 
-	m.On("GetContents", mock.Anything, testOrg, testRepo, testPath3, &github.RepositoryContentGetOptions{
+	m.On("GetContents", mock.Anything, testOrg, testRepo, chartPath, &github.RepositoryContentGetOptions{
 		Ref: testRef,
 	}).Return(&github.RepositoryContent{
-		Content: github.String(testContent3),
-		Name:    github.String(testFilename3),
+		Content: github.String(chartYaml),
+		Name:    github.String(chartYaml),
 	}, nil, nil, nil)
 
 	downloader := newDownloader(&m, testOrg)
@@ -115,18 +129,18 @@ func TestBufferDirectoryFlatDirectory(t *testing.T) {
 
 	if assert.NoError(t, err) {
 		assert.Len(t, files, 3)
-		assert.EqualValues(t, []*chartutil.BufferedFile{
+		assert.ElementsMatch(t, []*chartutil.BufferedFile{
 			{
-				Name: path.Join(testPath1, testFilename1),
-				Data: []byte(testContent1),
+				Name: k8sYaml,
+				Data: []byte(k8sYaml),
 			},
 			{
-				Name: path.Join(testPath2, testFilename2),
-				Data: []byte(testContent2),
+				Name: valuesYaml,
+				Data: []byte(valuesYaml),
 			},
 			{
-				Name: path.Join(testPath3, testFilename3),
-				Data: []byte(testContent3),
+				Name: chartYaml,
+				Data: []byte(chartYaml),
 			},
 		}, files)
 	}
