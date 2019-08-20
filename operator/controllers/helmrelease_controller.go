@@ -184,6 +184,12 @@ func (r *HelmReleaseReconciler) delete(ctx context.Context, rls shipitv1beta1.He
 		return ctrl.Result{}, r.clearFinalizer(ctx, rls)
 	}
 
+	_, err = r.helm.DeleteRelease(rls.Spec.ReleaseName)
+
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
 	rls.Status.SetCondition(shipitv1beta1.HelmReleaseCondition{
 		Type:    release.Status_DELETING.String(),
 		Message: "Release is being deleted",
@@ -191,12 +197,6 @@ func (r *HelmReleaseReconciler) delete(ctx context.Context, rls shipitv1beta1.He
 
 	if err := r.Update(ctx, &rls); err != nil {
 		r.Log.Error(err, "unable to update status")
-		return ctrl.Result{}, err
-	}
-
-	_, err = r.helm.DeleteRelease(rls.Spec.ReleaseName)
-
-	if err != nil {
 		return ctrl.Result{}, err
 	}
 
