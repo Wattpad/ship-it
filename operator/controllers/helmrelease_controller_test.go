@@ -157,6 +157,14 @@ var _ = Describe("HelmReleaseReconciler", func() {
 			_, err = reconciler.Reconcile(request)
 			Expect(err).To(BeNil())
 
+			Expect(k8sClient.Get(ctx, releaseKey, &got)).To(Succeed())
+			Expect(got.Status.GetCondition().Type).To(Equal(hapi.Status_DELETING.String()))
+
+			_, err = reconciler.Reconcile(request)
+			Expect(err).To(BeNil())
+
+			Expect(k8sClient.Get(ctx, releaseKey, &got)).To(Not(Succeed()))
+
 			resp, err = helmClient.ReleaseStatus(releaseName)
 			Expect(isHelmReleaseNotFound(releaseName, err)).To(BeTrue())
 		})
