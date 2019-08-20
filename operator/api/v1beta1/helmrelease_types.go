@@ -31,7 +31,6 @@ type HelmReleaseStatusReason string
 
 const (
 	ReasonDeleteError     HelmReleaseStatusReason = "DeleteError"
-	ReasonDeleteSuccess   HelmReleaseStatusReason = "DeleteSuccess"
 	ReasonInstallError    HelmReleaseStatusReason = "InstallError"
 	ReasonInstallSuccess  HelmReleaseStatusReason = "InstallSuccess"
 	ReasonRollbackError   HelmReleaseStatusReason = "RollbackError"
