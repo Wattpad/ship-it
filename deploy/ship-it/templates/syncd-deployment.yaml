@@ -22,6 +22,7 @@ spec:
         {{ include "ship-it.metadataLabels" . | nindent 6 | trim }}
         role: syncd
     spec:
+      serviceAccountName: {{ template "ship-it.fullname" . }}-readonly
       containers:
         - name: {{ template "ship-it.fullname" . }}-syncd
           image: {{ include "ship-it.syncd.image" . }}

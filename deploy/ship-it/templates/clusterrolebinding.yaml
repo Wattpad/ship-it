@@ -10,5 +10,5 @@ roleRef:
   name: {{ template "ship-it.fullname" . }}-readonly
 subjects:
   - kind: ServiceAccount
-    name: {{ template "ship-it.fullname" . }}-api
+    name: {{ template "ship-it.fullname" . }}-readonly
     namespace: default
