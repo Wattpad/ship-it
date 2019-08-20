@@ -14,7 +14,7 @@ spec:
   releaseName: example-release
 
   chart:
-    repository: wattpad.s3.amazonaws.com/helm-charts
+    repository: s3://charts.wattpadhq.com
     path: microservice
     revision: HEAD
 

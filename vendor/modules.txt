@@ -129,6 +129,7 @@ github.com/stretchr/objx
 # github.com/stretchr/testify v1.3.0
 github.com/stretchr/testify/mock
 github.com/stretchr/testify/assert
+github.com/stretchr/testify/require
 # golang.org/x/crypto v0.0.0-20190621222207-cc06ce4a13d4
 golang.org/x/crypto/ssh/terminal
 golang.org/x/crypto/scrypt
