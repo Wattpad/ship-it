@@ -196,7 +196,6 @@ func (r *HelmReleaseReconciler) delete(ctx context.Context, rls shipitv1beta1.He
 	})
 
 	if err := r.Update(ctx, &rls); err != nil {
-		r.Log.Error(err, "unable to update status")
 		return ctrl.Result{}, err
 	}
 
