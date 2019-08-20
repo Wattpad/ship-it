@@ -184,7 +184,7 @@ func (r *HelmReleaseReconciler) delete(ctx context.Context, rls shipitv1beta1.He
 		return ctrl.Result{}, r.clearFinalizer(ctx, rls)
 	}
 
-	_, err = r.helm.DeleteRelease(rls.Spec.ReleaseName)
+	_, err = r.helm.DeleteRelease(releaseName)
 
 	if err != nil {
 		return ctrl.Result{}, err
