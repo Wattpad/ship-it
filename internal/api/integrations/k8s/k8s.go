@@ -95,9 +95,9 @@ func transform(r shipitv1beta1.HelmRelease) models.Release {
 		},
 		Artifacts: models.Artifacts{
 			Chart: models.HelmArtifact{
-				Path:       r.Spec.Chart.Path,
+				Path:       r.Spec.Chart.Name,
 				Repository: r.Spec.Chart.Repository,
-				Version:    r.Spec.Chart.Revision,
+				Version:    r.Spec.Chart.Version,
 			},
 			Docker: dockerArtifacts(r),
 		},

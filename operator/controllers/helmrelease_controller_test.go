@@ -22,7 +22,7 @@ type mockDownloader struct {
 	mock.Mock
 }
 
-func (m *mockDownloader) Download(ctx context.Context, chartName string) (*chart.Chart, error) {
+func (m *mockDownloader) Download(ctx context.Context, chartName string, version string) (*chart.Chart, error) {
 	args := m.Called(ctx, chartName)
 
 	var ret0 *chart.Chart
@@ -80,7 +80,8 @@ var _ = Describe("HelmReleaseReconciler", func() {
 				ReleaseName: releaseName,
 				Chart: shipitv1beta1.ChartSpec{
 					Repository: "github.com/example/foo",
-					Path:       "bar/baz",
+					Name:       "bar",
+					Version:    "0.0.0",
 				},
 				Values: runtime.RawExtension{Raw: []byte("{}")},
 			},
@@ -129,7 +130,7 @@ var _ = Describe("HelmReleaseReconciler", func() {
 			Expect(got.GetFinalizers()).To(ContainElement(HelmReleaseFinalizer))
 
 			By("reconciling a new release")
-			downloader.On("Download", ctx, testRelease.Spec.Chart.URI()).Return(testChart, nil)
+			downloader.On("Download", ctx, testRelease.Spec.Chart.URL()).Return(testChart, nil)
 
 			_, err = helmClient.ReleaseStatus(releaseName)
 			Expect(isHelmReleaseNotFound(releaseName, err)).To(BeTrue())

@@ -42,7 +42,7 @@ const HelmReleaseFinalizer = "HelmReleaseFinalizer"
 var errNotImplemented = errors.New("not implemented")
 
 type ChartDownloader interface {
-	Download(ctx context.Context, chart string) (*chart.Chart, error)
+	Download(ctx context.Context, chart string, version string) (*chart.Chart, error)
 }
 
 type HelmClient interface {
@@ -266,23 +266,24 @@ func (r *HelmReleaseReconciler) update(ctx context.Context, rls shipitv1beta1.He
 }
 
 func (r *HelmReleaseReconciler) install(ctx context.Context, rls shipitv1beta1.HelmRelease) (ctrl.Result, error) {
-	chartURI := rls.Spec.Chart.URI()
 	releaseName := rls.Spec.ReleaseName
+	chartURL := rls.Spec.Chart.URL()
+	version := rls.Spec.Chart.Version
 
-	chart, err := r.downloader.Download(ctx, chartURI)
+	chart, err := r.downloader.Download(ctx, chartURL, version)
 	if err != nil {
-		return ctrl.Result{}, errors.Wrapf(err, "failed to download chart %s", chartURI)
+		return ctrl.Result{}, errors.Wrapf(err, "failed to download chart %s", chartURL)
 	}
 
 	// TODO: use the returned response's `Release.Manifest` to watch and
 	// receive events for the k8s resources owned by this chart
-	if _, err := r.helm.InstallReleaseFromChart(chart, r.Namespace, helm.ReleaseName(releaseName)); err != nil {
-		return ctrl.Result{}, errors.Wrapf(err, "failed to install release %s using chart %s", releaseName, chartURI)
+	if _, err := r.helm.InstallReleaseFromChart(chart, r.Namespace, helm.ReleaseName(releaseName), helm.ValueOverrides(rls.Spec.Values.Raw)); err != nil {
+		return ctrl.Result{}, errors.Wrapf(err, "failed to install release %s using chart %s", releaseName, chartURL)
 	}
 
 	rls.Status.SetCondition(shipitv1beta1.HelmReleaseCondition{
 		Type:    release.Status_PENDING_INSTALL.String(),
-		Message: fmt.Sprintf("installing chart %s", chartURI),
+		Message: fmt.Sprintf("installing chart %s", chartURL),
 	})
 
 	if err := r.Update(ctx, &rls); err != nil {

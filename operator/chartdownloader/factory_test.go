@@ -15,8 +15,8 @@ type mockS3Downloader struct {
 	mock.Mock
 }
 
-func (m *mockS3Downloader) Download(ctx context.Context, chartURL string) (*chart.Chart, error) {
-	args := m.Called(ctx, chartURL)
+func (m *mockS3Downloader) Download(ctx context.Context, chartURL string, version string) (*chart.Chart, error) {
+	args := m.Called(ctx, chartURL, version)
 
 	var ret0 *chart.Chart
 	if args0 := args.Get(0); args0 != nil {
@@ -28,21 +28,23 @@ func (m *mockS3Downloader) Download(ctx context.Context, chartURL string) (*char
 
 func TestFactoryS3Provider(t *testing.T) {
 	bucket := "helm-charts"
-	repoURL := fmt.Sprintf("s3://charts.wattpadhq.com/%s", bucket)
+	chartPath := fmt.Sprintf("s3://charts.wattpadhq.com/%s", bucket)
+	version := "0.0.0"
 
 	mockS3 := new(mockS3Downloader)
-	mockS3.On("Download", mock.Anything, repoURL).Return(&chart.Chart{}, nil)
+	mockS3.On("Download", mock.Anything, chartPath, version).Return(&chart.Chart{}, nil)
 
 	dl := New(map[string]ChartDownloader{
 		"s3": mockS3,
 	})
 
-	_, err := dl.Download(context.Background(), repoURL)
+	_, err := dl.Download(context.Background(), chartPath, version)
 	require.NoError(t, err)
 }
 
 func TestFactoryUnsupportedProvider(t *testing.T) {
-	repoURL := "git://github.com/Wattpad/foo"
-	_, err := New(nil).Download(context.Background(), repoURL)
+	chartPath := "git://github.com/Wattpad/foo"
+	version := "0.0.0"
+	_, err := New(nil).Download(context.Background(), chartPath, version)
 	assert.Error(t, err)
 }

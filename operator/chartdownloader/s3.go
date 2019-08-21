@@ -3,6 +3,7 @@ package chartdownloader
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"net/url"
 	"strings"
@@ -40,21 +41,23 @@ func (dl S3Downloader) download(ctx context.Context, bucket, key string) ([]byte
 	return buf.Bytes(), err
 }
 
-func (dl S3Downloader) Download(ctx context.Context, chartURL string) (*chart.Chart, error) {
-	bucket, object, err := parseBucketObject(chartURL)
+func (dl S3Downloader) Download(ctx context.Context, chartURL string, version string) (*chart.Chart, error) {
+	bucket, prefix, err := parseBucketObject(chartURL)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to parse S3 bucket and object from URL %s", chartURL)
 	}
 
+	object := fmt.Sprintf("%s-%s.tgz", prefix, version)
+
 	chartBytes, err := dl.download(ctx, bucket, object)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to download chart %s", chartURL)
+		return nil, errors.Wrapf(err, "failed to download chart %s@%s", chartURL, version)
 	}
 
 	return chartutil.LoadArchive(bytes.NewBuffer(chartBytes))
 }
 
-func parseBucketObject(rawChartURL string) (bucket string, object string, err error) {
+func parseBucketObject(rawChartURL string) (bucket string, prefix string, err error) {
 	chartURL, err := url.Parse(rawChartURL)
 	if err != nil {
 		return "", "", err
