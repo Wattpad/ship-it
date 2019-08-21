@@ -3,3 +3,4 @@ deploy
 Makefile
 skaffold.yaml
 web/node_modules
+vendor

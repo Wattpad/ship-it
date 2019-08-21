@@ -1,7 +1,12 @@
 FROM golang:1.12 AS golang-build
 WORKDIR /build
-COPY . .
-RUN CGO_ENABLED=0 go build -mod=vendor -o ship-it-api cmd/ship-it-api/main.go
+COPY operator/go.mod operator/go.sum ./operator/
+COPY go.mod go.sum ./
+RUN go mod download
+COPY cmd/ship-it-api/main.go cmd/ship-it-api/main.go
+COPY internal/ ./internal/
+COPY operator/api ./operator/api
+RUN CGO_ENABLED=0 go build -o ship-it-api cmd/ship-it-api/main.go
 
 FROM node:12.3 AS node-build
 COPY web .

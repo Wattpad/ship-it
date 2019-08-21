@@ -11,6 +11,9 @@
 ^ship-it-syncd
 ^ship-it-operator
 
+# vendored modules
+vendor/
+
 # Test binary, build with `go test -c`
 *.test
 
