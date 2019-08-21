@@ -42,7 +42,7 @@ func main() {
 	}
 
 	dd := dogstatsd.New("wattpad.ship-it.", logger)
-	go dd.SendLoop(time.Tick(time.Second), "udp", cfg.DataDogAddress())
+	go dd.SendLoop(ctx, time.Tick(time.Second), "udp", cfg.DataDogAddress())
 
 	k8s, err := k8s.New()
 	if err != nil {

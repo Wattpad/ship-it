@@ -46,7 +46,7 @@ func main() {
 	}
 
 	dd := dogstatsd.New("wattpad.ship-it.", logger)
-	go dd.SendLoop(time.Tick(time.Second), "udp", cfg.DataDogAddress())
+	go dd.SendLoop(ctx, time.Tick(time.Second), "udp", cfg.DataDogAddress())
 
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{
