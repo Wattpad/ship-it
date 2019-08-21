@@ -389,16 +389,16 @@ spec:
           properties:
             chart:
               properties:
-                path:
+                name:
                   type: string
                 repository:
                   type: string
-                revision:
+                version:
                   type: string
               required:
               - repository
-              - path
-              - revision
+              - name
+              - version
               type: object
             releaseName:
               type: string

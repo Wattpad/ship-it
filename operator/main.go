@@ -56,10 +56,10 @@ func main() {
 		enableLeaderElection bool
 	)
 
-	flag.StringVar(&awsRegion, "aws-region", "", "The AWS region where the operator's chart repository is hosted")
+	flag.StringVar(&awsRegion, "aws-region", "us-east-1", "The AWS region where the operator's chart repository is hosted")
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&namespace, "namespace", "default", "The cluster namespace where the operator will deploy releases")
-	flag.StringVar(&tillerAddr, "tiller-address", "", "The cluster address of the tiller service")
+	flag.StringVar(&tillerAddr, "tiller-address", "localhost:44134", "The cluster address of the tiller service")
 	flag.DurationVar(&gracePeriod, "grace-period", 10*time.Second, "The duration the operator will wait before checking a release's status after reconciling")
 	flag.BoolVar(&enableLeaderElection, "enable-leader-election", false,
 		"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")

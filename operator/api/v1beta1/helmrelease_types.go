@@ -17,7 +17,7 @@ package v1beta1
 
 import (
 	"encoding/json"
-	"path"
+	"fmt"
 	"strconv"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -69,12 +69,12 @@ type HelmReleaseCondition struct {
 // ChartSpec defines the desired Helm chart
 type ChartSpec struct {
 	Repository string `json:"repository"`
-	Path       string `json:"path"`
-	Revision   string `json:"revision"`
+	Name       string `json:"name"`
+	Version    string `json:"version"`
 }
 
-func (cs *ChartSpec) URI() string {
-	return path.Join(cs.Repository, cs.Path)
+func (c ChartSpec) URL() string {
+	return fmt.Sprintf("%s/%s", c.Repository, c.Name)
 }
 
 // +kubebuilder:object:root=true

@@ -34,8 +34,9 @@ func (m *mockS3) DownloadWithContext(ctx aws.Context, w io.WriterAt, input *s3.G
 func TestChartDownloadSuccess(t *testing.T) {
 	ctx := context.Background()
 
-	testBucket := "wattpad.amazonaws.com"
-	testObject := "some-chart"
+	repo := "wattpad.amazonaws.com"
+	chart := "some-chart"
+	version := "0.0.0"
 
 	var mockD mockS3
 	dl := NewS3Downloader(&mockD)
@@ -47,14 +48,14 @@ func TestChartDownloadSuccess(t *testing.T) {
 	require.NoError(t, err)
 
 	mockD.On("DownloadWithContext", ctx, mock.AnythingOfType("*aws.WriteAtBuffer"), &s3.GetObjectInput{
-		Bucket: aws.String(testBucket),
-		Key:    aws.String(testObject),
+		Bucket: aws.String(repo),
+		Key:    aws.String(fmt.Sprintf("%s-%s.tgz", chart, version)),
 	}).Return(0, nil).Run(func(args mock.Arguments) {
 		w := args.Get(1).(*aws.WriteAtBuffer)
 		w.WriteAt(chartBytes, 0)
 	})
 
-	outChart, err := dl.Download(ctx, formatS3URL(testBucket, testObject))
+	outChart, err := dl.Download(ctx, formatS3URL(repo, chart), version)
 	require.NoError(t, err)
 
 	assert.Equal(t, expectedChart, outChart)
@@ -64,18 +65,19 @@ func TestChartDownloadSuccess(t *testing.T) {
 func TestChartDownloadFailure(t *testing.T) {
 	ctx := context.Background()
 
-	testBucket := "wattpad.amazonaws.com"
-	testObject := "some-chart"
+	repo := "wattpad.amazonaws.com"
+	chart := "some-chart"
+	version := "0.0.0"
 
 	var mockD mockS3
 	dl := NewS3Downloader(&mockD)
 
 	mockD.On("DownloadWithContext", ctx, mock.AnythingOfType("*aws.WriteAtBuffer"), &s3.GetObjectInput{
-		Bucket: aws.String(testBucket),
-		Key:    aws.String(testObject),
+		Bucket: aws.String(repo),
+		Key:    aws.String(fmt.Sprintf("%s-%s.tgz", chart, version)),
 	}).Return(0, fmt.Errorf("some download error"))
 
-	_, err := dl.Download(ctx, formatS3URL(testBucket, testObject))
+	_, err := dl.Download(ctx, formatS3URL(repo, chart), version)
 	assert.Error(t, err)
 	mockD.AssertExpectations(t)
 }
@@ -83,8 +85,9 @@ func TestChartDownloadFailure(t *testing.T) {
 func TestInvalidChartBytes(t *testing.T) {
 	ctx := context.Background()
 
-	testBucket := "wattpad.amazonaws.com"
-	testObject := "some-chart"
+	repo := "wattpad.amazonaws.com"
+	chart := "some-chart"
+	version := "0.0.0"
 
 	var mockD mockS3
 	dl := NewS3Downloader(&mockD)
@@ -92,14 +95,14 @@ func TestInvalidChartBytes(t *testing.T) {
 	chartBytes := []byte("some bad bytes")
 
 	mockD.On("DownloadWithContext", ctx, mock.AnythingOfType("*aws.WriteAtBuffer"), &s3.GetObjectInput{
-		Bucket: aws.String(testBucket),
-		Key:    aws.String(testObject),
+		Bucket: aws.String(repo),
+		Key:    aws.String(fmt.Sprintf("%s-%s.tgz", chart, version)),
 	}).Return(0, nil).Run(func(args mock.Arguments) {
 		w := args.Get(1).(*aws.WriteAtBuffer)
 		w.WriteAt(chartBytes, 0)
 	})
 
-	_, err := dl.Download(ctx, formatS3URL(testBucket, testObject))
+	_, err := dl.Download(ctx, formatS3URL(repo, chart), version)
 	assert.Error(t, err)
 	mockD.AssertExpectations(t)
 }

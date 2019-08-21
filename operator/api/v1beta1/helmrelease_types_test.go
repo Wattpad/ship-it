@@ -66,8 +66,8 @@ var _ = Describe("HelmRelease", func() {
 					ReleaseName: "test",
 					Chart: ChartSpec{
 						Repository: "blah",
-						Path:       "blah",
-						Revision:   "blah",
+						Name:       "blah",
+						Version:    "0.0.0",
 					},
 					Values: runtime.RawExtension{
 						Raw: []byte(`{"test":1}`),

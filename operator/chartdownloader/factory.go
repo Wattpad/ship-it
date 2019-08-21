@@ -10,7 +10,7 @@ import (
 )
 
 type ChartDownloader interface {
-	Download(context.Context, string) (*chart.Chart, error)
+	Download(context.Context, string, string) (*chart.Chart, error)
 }
 
 type factory struct {
@@ -23,14 +23,14 @@ func New(downloaders map[string]ChartDownloader) ChartDownloader {
 	}
 }
 
-func (f *factory) Download(ctx context.Context, rawChartURL string) (*chart.Chart, error) {
+func (f *factory) Download(ctx context.Context, rawChartURL string, version string) (*chart.Chart, error) {
 	repoURL, err := url.Parse(rawChartURL)
 	if err != nil {
 		return nil, errors.Wrapf(err, "invalid chart URL %s", rawChartURL)
 	}
 
 	if dl, ok := f.downloaders[repoURL.Scheme]; ok {
-		return dl.Download(ctx, rawChartURL)
+		return dl.Download(ctx, rawChartURL, version)
 	}
 
 	return nil, fmt.Errorf("unsupported chart transport protocol %s", rawChartURL)
