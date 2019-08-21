@@ -10,7 +10,7 @@ import (
 )
 
 type ChartDownloader interface {
-	Download(context.Context, string, string) (*chart.Chart, error)
+	Download(ctx context.Context, chart string, version string) (*chart.Chart, error)
 }
 
 type factory struct {
