@@ -277,7 +277,7 @@ func (r *HelmReleaseReconciler) install(ctx context.Context, rls shipitv1beta1.H
 
 	// TODO: use the returned response's `Release.Manifest` to watch and
 	// receive events for the k8s resources owned by this chart
-	if _, err := r.helm.InstallReleaseFromChart(chart, r.Namespace, helm.ReleaseName(releaseName)); err != nil {
+	if _, err := r.helm.InstallReleaseFromChart(chart, r.Namespace, helm.ReleaseName(releaseName), helm.ValueOverrides(rls.Spec.Values.Raw)); err != nil {
 		return ctrl.Result{}, errors.Wrapf(err, "failed to install release %s using chart %s", releaseName, chartURL)
 	}
 
