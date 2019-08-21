@@ -18,6 +18,7 @@ manager: generate fmt vet
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet
+	kubectl -n kube-system port-forward $(shell kubectl get po -n kube-system -o name -lapp=helm) 44134 &
 	go run ./main.go
 
 # Install CRDs into a cluster
