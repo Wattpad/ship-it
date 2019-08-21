@@ -118,8 +118,8 @@ func TestGetAndList(t *testing.T) {
 			ReleaseName: releaseName,
 			Chart: shipitv1beta1.ChartSpec{
 				Repository: chartRepo,
-				Path:       chartPath,
-				Revision:   chartVersion,
+				Name:       chartPath,
+				Version:    chartVersion,
 			},
 			Values: runtime.RawExtension{
 				Raw: valuesRaw,
