@@ -197,7 +197,7 @@ func (r *HelmReleaseReconciler) delete(ctx context.Context, rls shipitv1beta1.He
 		Message: "Release is being deleted",
 	})
 
-	if err := r.Update(ctx, &rls); err != nil {
+	if err := r.Status().Update(ctx, &rls); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -253,8 +253,8 @@ func (r *HelmReleaseReconciler) update(ctx context.Context, rls shipitv1beta1.He
 			Message: releaseStatus.GetNotes(),
 		})
 
-		if err := r.Update(ctx, &rls); err != nil {
-			r.Log.Error(err, "failed to update HelmRelease status", "release", releaseName, "status", releaseStatusCode.String())
+		if err := r.Status().Update(ctx, &rls); err != nil {
+			return ctrl.Result{}, err
 		}
 
 		if oldCondition.Type == release.Status_PENDING_UPGRADE.String() {
@@ -288,8 +288,8 @@ func (r *HelmReleaseReconciler) install(ctx context.Context, rls shipitv1beta1.H
 		Message: fmt.Sprintf("installing chart %s", chartURL),
 	})
 
-	if err := r.Update(ctx, &rls); err != nil {
-		r.Log.Info("failed to update HelmRelease status", "release", releaseName, "status", release.Status_PENDING_INSTALL)
+	if err := r.Status().Update(ctx, &rls); err != nil {
+		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{RequeueAfter: r.GracePeriod}, nil
@@ -310,7 +310,7 @@ func (r *HelmReleaseReconciler) rollback(ctx context.Context, rls shipitv1beta1.
 		Message: fmt.Sprintf("rolling back %s", rls.Spec.ReleaseName),
 	})
 
-	return ctrl.Result{}, r.Update(ctx, &rls)
+	return ctrl.Result{}, r.Status().Update(ctx, &rls)
 }
 
 func contains(strs []string, x string) bool {
