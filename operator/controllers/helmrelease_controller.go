@@ -151,7 +151,7 @@ func (r *HelmReleaseReconciler) setFinalizer(ctx context.Context, rls shipitv1be
 }
 
 func (r *HelmReleaseReconciler) clearFinalizer(ctx context.Context, rls shipitv1beta1.HelmRelease) error {
-	finalizers := []string{}
+	var finalizers []string
 
 	for _, f := range rls.GetFinalizers() {
 		if f != HelmReleaseFinalizer {
@@ -246,6 +246,32 @@ func (r *HelmReleaseReconciler) update(ctx context.Context, rls shipitv1beta1.He
 	releaseStatusCode := releaseStatus.GetCode()
 
 	switch releaseStatusCode {
+	case release.Status_DELETING, release.Status_PENDING_INSTALL, release.Status_PENDING_ROLLBACK, release.Status_PENDING_UPGRADE:
+		// if the release is still in transition, requeue until it settles
+		return ctrl.Result{RequeueAfter: r.GracePeriod}, nil
+	case release.Status_DEPLOYED:
+		if oldCondition.Type == release.Status_DEPLOYED.String() {
+			return r.upgrade(ctx, rls)
+		}
+
+		var reason shipitv1beta1.HelmReleaseStatusReason
+
+		switch oldCondition.Type {
+		case release.Status_PENDING_INSTALL.String():
+			reason = shipitv1beta1.ReasonInstallSuccess
+		case release.Status_PENDING_UPGRADE.String():
+			reason = shipitv1beta1.ReasonUpdateSuccess
+		case release.Status_PENDING_ROLLBACK.String():
+			reason = shipitv1beta1.ReasonRollbackSuccess
+		}
+
+		rls.Status.SetCondition(shipitv1beta1.HelmReleaseCondition{
+			Type:    releaseStatusCode.String(),
+			Reason:  reason,
+			Message: releaseStatus.GetNotes(),
+		})
+
+		return ctrl.Result{}, r.Status().Update(ctx, &rls)
 	case release.Status_FAILED:
 		rls.Status.SetCondition(shipitv1beta1.HelmReleaseCondition{
 			Type:    releaseStatusCode.String(),
@@ -262,55 +288,85 @@ func (r *HelmReleaseReconciler) update(ctx context.Context, rls shipitv1beta1.He
 		}
 
 		return ctrl.Result{}, nil
+	default: // Status_UNKNOWN, Status_SUPERSEDED, Status_DELETED
+		return ctrl.Result{}, nil
 	}
-
-	return ctrl.Result{}, errors.Wrap(errNotImplemented, "upgrade")
 }
 
 func (r *HelmReleaseReconciler) install(ctx context.Context, rls shipitv1beta1.HelmRelease) (ctrl.Result, error) {
+	releaseChart := rls.Spec.Chart
 	releaseName := rls.Spec.ReleaseName
-	chartURL := rls.Spec.Chart.URL()
-	version := rls.Spec.Chart.Version
 
-	chart, err := r.downloader.Download(ctx, chartURL, version)
+	chartVersion := fmt.Sprintf("%s@%s", releaseChart.URL(), releaseChart.Version)
+
+	chart, err := r.downloader.Download(ctx, releaseChart.URL(), releaseChart.Version)
 	if err != nil {
-		return ctrl.Result{}, errors.Wrapf(err, "failed to download chart %s", chartURL)
+		return ctrl.Result{}, errors.Wrapf(err, "failed to download chart %s", chartVersion)
 	}
 
 	// TODO: use the returned response's `Release.Manifest` to watch and
 	// receive events for the k8s resources owned by this chart
 	if _, err := r.helm.InstallReleaseFromChart(chart, r.Namespace, helm.ReleaseName(releaseName), helm.ValueOverrides(rls.Spec.Values.Raw)); err != nil {
-		return ctrl.Result{}, errors.Wrapf(err, "failed to install release %s using chart %s", releaseName, chartURL)
+		return ctrl.Result{}, errors.Wrapf(err, "failed to install release %s using chart %s", releaseName, chartVersion)
 	}
 
 	rls.Status.SetCondition(shipitv1beta1.HelmReleaseCondition{
 		Type:    release.Status_PENDING_INSTALL.String(),
-		Message: fmt.Sprintf("installing chart %s", chartURL),
+		Message: fmt.Sprintf("installing chart %s", chartVersion),
 	})
 
 	if err := r.Status().Update(ctx, &rls); err != nil {
 		return ctrl.Result{}, err
 	}
 
+	r.Log.Info("HelmRelease installed", "release", releaseName)
 	return ctrl.Result{RequeueAfter: r.GracePeriod}, nil
 }
 
 func (r *HelmReleaseReconciler) rollback(ctx context.Context, rls shipitv1beta1.HelmRelease) (ctrl.Result, error) {
-	_, err := r.helm.RollbackRelease(rls.Spec.ReleaseName)
-	if err != nil {
-		r.Log.Error(err, "unable to rollback release", "release", rls.Spec.ReleaseName)
+	releaseName := rls.Spec.ReleaseName
 
-		return ctrl.Result{
-			RequeueAfter: r.GracePeriod,
-		}, nil
+	if _, err := r.helm.RollbackRelease(releaseName); err != nil {
+		return ctrl.Result{}, errors.Wrapf(err, "failed to rollback release %s", releaseName)
 	}
 
 	rls.Status.SetCondition(shipitv1beta1.HelmReleaseCondition{
 		Type:    release.Status_PENDING_ROLLBACK.String(),
-		Message: fmt.Sprintf("rolling back %s", rls.Spec.ReleaseName),
+		Message: fmt.Sprintf("rolling back %s", releaseName),
 	})
 
+	r.Log.Info("HelmRelease rolled back", "release", releaseName)
 	return ctrl.Result{}, r.Status().Update(ctx, &rls)
+}
+
+func (r *HelmReleaseReconciler) upgrade(ctx context.Context, rls shipitv1beta1.HelmRelease) (ctrl.Result, error) {
+	releaseChart := rls.Spec.Chart
+	releaseName := rls.Spec.ReleaseName
+
+	chartVersion := fmt.Sprintf("%s@%s", releaseChart.URL(), releaseChart.Version)
+
+	chart, err := r.downloader.Download(ctx, releaseChart.URL(), releaseChart.Version)
+	if err != nil {
+		return ctrl.Result{}, errors.Wrapf(err, "failed to download chart %s", chartVersion)
+	}
+
+	// TODO: use the returned response's `Release.Manifest` to watch and
+	// receive events for the k8s resources owned by this chart
+	if _, err := r.helm.UpdateReleaseFromChart(releaseName, chart, helm.UpdateValueOverrides(rls.Spec.Values.Raw)); err != nil {
+		return ctrl.Result{}, errors.Wrapf(err, "failed to update release %s using chart %s", releaseName, chartVersion)
+	}
+
+	rls.Status.SetCondition(shipitv1beta1.HelmReleaseCondition{
+		Type:    release.Status_PENDING_UPGRADE.String(),
+		Message: fmt.Sprintf("upgrading chart %s", chartVersion),
+	})
+
+	if err := r.Status().Update(ctx, &rls); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	r.Log.Info("HelmRelease upgraded", "release", releaseName)
+	return ctrl.Result{RequeueAfter: r.GracePeriod}, nil
 }
 
 func contains(strs []string, x string) bool {

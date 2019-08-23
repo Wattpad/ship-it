@@ -23,7 +23,7 @@ type mockDownloader struct {
 }
 
 func (m *mockDownloader) Download(ctx context.Context, chartName string, version string) (*chart.Chart, error) {
-	args := m.Called(ctx, chartName)
+	args := m.Called(ctx, chartName, version)
 
 	var ret0 *chart.Chart
 	if args0 := args.Get(0); args0 != nil {
@@ -66,8 +66,10 @@ var _ = Describe("HelmReleaseReconciler", func() {
 		reconciler = NewHelmReleaseReconciler(log, k8sClient, helmClient, downloader, GracePeriod(42), Namespace("test"))
 
 		testRelease = &shipitv1beta1.HelmRelease{
+
 			TypeMeta: metav1.TypeMeta{
-				Kind: "HelmRelease",
+				APIVersion: "shipit.wattpad.com/v1beta1",
+				Kind:       "HelmRelease",
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      releaseName,
@@ -84,10 +86,6 @@ var _ = Describe("HelmReleaseReconciler", func() {
 					Version:    "0.0.0",
 				},
 				Values: runtime.RawExtension{Raw: []byte("{}")},
-			},
-			Status: shipitv1beta1.HelmReleaseStatus{
-				// conditions can't be nil
-				Conditions: []shipitv1beta1.HelmReleaseCondition{},
 			},
 		}
 	})
@@ -121,6 +119,7 @@ var _ = Describe("HelmReleaseReconciler", func() {
 			Expect(k8sClient.Create(ctx, testRelease)).To(Succeed())
 
 			By("reconciling a new release without the HelmReleaseFinalizer")
+
 			res, err := reconciler.Reconcile(request)
 			Expect(err).To(BeNil())
 			Expect(res.Requeue).To(BeTrue())
@@ -130,11 +129,13 @@ var _ = Describe("HelmReleaseReconciler", func() {
 			Expect(got.GetFinalizers()).To(ContainElement(HelmReleaseFinalizer))
 
 			By("reconciling a new release")
-			downloader.On("Download", ctx, testRelease.Spec.Chart.URL()).Return(testChart, nil)
+			downloader.On("Download", ctx, testRelease.Spec.Chart.URL(), testRelease.Spec.Chart.Version).Return(testChart, nil)
 
 			_, err = helmClient.ReleaseStatus(releaseName)
 			Expect(isHelmReleaseNotFound(releaseName, err)).To(BeTrue())
 
+			// first reconcile updates the HelmRelease to be
+			// PENDING_INSTALL while it asks tiller to install the release
 			res, err = reconciler.Reconcile(request)
 			Expect(err).To(BeNil())
 			Expect(res.RequeueAfter).To(Equal(reconciler.GracePeriod))
@@ -146,8 +147,44 @@ var _ = Describe("HelmReleaseReconciler", func() {
 			Expect(err).To(BeNil())
 			Expect(resp.GetInfo().GetStatus().GetCode()).To(Equal(hapi.Status_DEPLOYED))
 
+			// second reconcile observes the completed release
+			// install and updates the HelmRelease to be DEPLOYED
+			res, err = reconciler.Reconcile(request)
+			Expect(err).To(BeNil())
+			Expect(res).To(BeZero())
+
+			Expect(k8sClient.Get(ctx, releaseKey, &got)).To(Succeed())
+			Expect(got.Status.GetCondition().Type).To(Equal(hapi.Status_DEPLOYED.String()))
+
 			By("reconciling an installed release")
-			// TODO
+
+			resp, err = helmClient.ReleaseStatus(releaseName)
+			Expect(err).To(BeNil())
+			Expect(resp.GetInfo().GetStatus().GetCode()).To(Equal(hapi.Status_DEPLOYED))
+
+			downloader.On("Download", ctx, testRelease.Spec.Chart.URL(), testRelease.Spec.Chart.Version).Return(testChart, nil)
+
+			// first reconcile updates the HelmRelease to be
+			// PENDING_UPGRADE while it asks tiller to upgrade the release
+			res, err = reconciler.Reconcile(request)
+			Expect(err).To(BeNil())
+			// Expect(res.RequeueAfter).To(Equal(reconciler.GracePeriod))
+
+			Expect(k8sClient.Get(ctx, releaseKey, &got)).To(Succeed())
+			Expect(got.Status.GetCondition().Type).To(Equal(hapi.Status_PENDING_UPGRADE.String()))
+
+			resp, err = helmClient.ReleaseStatus(releaseName)
+			Expect(err).To(BeNil())
+			Expect(resp.GetInfo().GetStatus().GetCode()).To(Equal(hapi.Status_DEPLOYED))
+
+			// second reconcile observes the completed release
+			// upgrade and updates the HelmRelease to be DEPLOYED
+			res, err = reconciler.Reconcile(request)
+			Expect(err).To(BeNil())
+			Expect(res).To(BeZero())
+
+			Expect(k8sClient.Get(ctx, releaseKey, &got)).To(Succeed())
+			Expect(got.Status.GetCondition().Type).To(Equal(hapi.Status_DEPLOYED.String()))
 
 			By("reconciling a failed updated release")
 			// TODO
@@ -155,12 +192,17 @@ var _ = Describe("HelmReleaseReconciler", func() {
 			By("reconciling a release that has been deleted")
 			Expect(k8sClient.Delete(ctx, testRelease)).To(Succeed())
 
+			// first reconcile updates the HelmRelease to be
+			// DELETING while it asks tiller to delete the release
 			_, err = reconciler.Reconcile(request)
 			Expect(err).To(BeNil())
 
 			Expect(k8sClient.Get(ctx, releaseKey, &got)).To(Succeed())
 			Expect(got.Status.GetCondition().Type).To(Equal(hapi.Status_DELETING.String()))
 
+			// second reconcile observes the completed release
+			// deletion and clears the HelmRelease's finalizer so it
+			// can be deleted by kubernetes
 			_, err = reconciler.Reconcile(request)
 			Expect(err).To(BeNil())
 
