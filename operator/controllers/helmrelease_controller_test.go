@@ -66,7 +66,6 @@ var _ = Describe("HelmReleaseReconciler", func() {
 		reconciler = NewHelmReleaseReconciler(log, k8sClient, helmClient, downloader, GracePeriod(42), Namespace("test"))
 
 		testRelease = &shipitv1beta1.HelmRelease{
-
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: "shipit.wattpad.com/v1beta1",
 				Kind:       "HelmRelease",
