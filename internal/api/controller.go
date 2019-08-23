@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"regexp"
 
 	"ship-it/internal/api/models"
 
 	"github.com/go-chi/chi"
+	"k8s.io/helm/pkg/tiller"
 )
 
 type Service interface {
@@ -16,11 +16,6 @@ type Service interface {
 	GetReleaseResources(context.Context, string) (*models.ReleaseResources, error)
 	ListReleases(context.Context) ([]models.Release, error)
 }
-
-// importing "k8s.io/helm/pkg/tiller" (specifically its transitive dependency
-// on 'k8s.io/kubernetes' pkgs) breaks the build horribly.
-// https://github.com/helm/helm/blob/master/pkg/tiller/release_server.go#L82
-var tillerValidName = regexp.MustCompile("^(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])+$")
 
 type controller struct {
 	svc Service
@@ -88,7 +83,7 @@ func validateReleaseName(name string) error {
 	// https: //github.com/helm/helm/blob/master/pkg/tiller/release_server.go#L50
 	releaseNameMaxLen := 53
 
-	if !tillerValidName.MatchString(name) || len(name) > releaseNameMaxLen {
+	if !tiller.ValidName.MatchString(name) || len(name) > releaseNameMaxLen {
 		return errors.New("invalid release name")
 	}
 
