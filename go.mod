@@ -38,5 +38,5 @@ require (
 	k8s.io/klog v0.3.3 // indirect
 	k8s.io/utils v0.0.0-20190607212802-c55fbcfc754a // indirect
 	ship-it-operator v0.0.0-00010101000000-000000000000
-	sigs.k8s.io/controller-runtime v0.2.0-beta.2
+	sigs.k8s.io/controller-runtime v0.2.0
 )
