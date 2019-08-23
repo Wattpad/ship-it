@@ -25,7 +25,7 @@ func newDownloader(svc RepositoriesService, org string) *downloader {
 	}
 }
 
-// bufferDirectory recursively buffers files in a github directory. The
+// BufferDirectory recursively buffers files in a github directory. The
 // filenames of buffered files are relative to the directory root, which
 // is required by 'chartutils.LoadFiles'
 func (d *downloader) BufferDirectory(ctx context.Context, repo, path, ref string) ([]*chartutil.BufferedFile, error) {
