@@ -33,6 +33,7 @@ import (
 	helmerrors "k8s.io/helm/pkg/storage/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
 // The HelmReleaseFinalizer allows the controller to clean up the associated
@@ -138,6 +139,7 @@ func (r *HelmReleaseReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 func (r *HelmReleaseReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&shipitv1beta1.HelmRelease{}).
+		WithEventFilter(predicate.GenerationChangedPredicate{}).
 		Complete(r)
 }
 
