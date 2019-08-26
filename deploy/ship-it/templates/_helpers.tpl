@@ -59,3 +59,11 @@ Image value hack for skaffold.
 {{- .Values.syncd.image.repository -}}
 {{- end -}}
 {{- end -}}
+
+{{- define "ship-it.operator.image" -}}
+{{- if .Values.operator.image.tag -}}
+{{- printf "%s:%s" .Values.operator.image.repository .Values.operator.image.tag -}}
+{{- else -}}
+{{- .Values.operator.image.repository -}}
+{{- end -}}
+{{- end -}}

@@ -22,7 +22,7 @@ spec:
         {{ include "ship-it.metadataLabels" . | nindent 6 | trim }}
         role: syncd
     spec:
-      serviceAccountName: {{ template "ship-it.fullname" . }}-readonly
+      serviceAccountName: {{ template "ship-it.fullname" . }}
       containers:
         - name: {{ template "ship-it.fullname" . }}-syncd
           image: {{ include "ship-it.syncd.image" . }}
@@ -43,8 +43,8 @@ spec:
             - name: RELEASE_BRANCH
               value: {{ .Values.syncd.releaseBranch }}
             - name: TILLER_HOST
-              value: {{ .Values.syncd.tillerAddress }}
-          {{ if .Values.github }}
+              value: {{ .Values.tillerAddress }}
+          {{- if .Values.github }}
             - name: GITHUB_ORG
               value: {{ .Values.github.org }}
           {{- end}}
@@ -53,7 +53,7 @@ spec:
               value: {{ $value | quote }}
           {{- end }}
           resources:
-            {{ toYaml .Values.syncd.resources | nindent 10 | trim }}
+            {{ toYaml .Values.syncd.resources | nindent 12 | trim }}
           volumeMounts:
             - mountPath: {{ .Values.sslCertPath }}
               name: aws-cert
