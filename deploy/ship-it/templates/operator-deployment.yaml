@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "ship-it.fullname" . }}-operator
+  labels:
+    {{ include "ship-it.metadataLabels" . | nindent 2 | trim }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ template "ship-it.name" . }}
+      instance: {{ .Release.Name }}
+      role: operator
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+  template:
+    metadata:
+      annotations:
+        iam.amazonaws.com/role: {{ template "ship-it.name" . }}
+      labels:
+        {{ include "ship-it.metadataLabels" . | nindent 6 | trim }}
+        role: operator
+    spec:
+      serviceAccountName: {{ template "ship-it.fullname" . }}
+      containers:
+        - name: {{ template "ship-it.fullname" . }}-operator
+          image: {{ include "ship-it.operator.image" . }}
+          imagePullPolicy: {{ .Values.operator.image.pullPolicy }}
+          command:
+            - /manager
+          args:
+            - --tiller-addr
+            - {{ .Values.tillerAddress }}
+            - --aws-region
+            - {{ .Values.awsRegion }}
+            - --grace-period
+            - {{ .Values.operator.gracePeriod }}
+            - --metrics-addr
+            - :{{ .Values.operator.metricsPort }}
+            {{- if .Values.operator.enableLeaderElection }}
+            - --enable-leader-election
+            {{- end }}
+          resources:
+            {{ toYaml .Values.operator.resources | nindent 12 | trim }}

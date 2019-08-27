@@ -21,6 +21,24 @@ api:
   containerPort: 80
   servicePort: 80
 
+operator:
+  image: 
+    repository: 723255503624.dkr.ecr.us-east-1.amazonaws.com/ship-it-operator
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 1
+      memory: 256Mi
+
+  gracePeriod: 10s
+  metricsPort: 8080
+  enableLeaderElection: false
+
 syncd:
   image:
     repository: 723255503624.dkr.ecr.us-east-1.amazonaws.com/ship-it-syncd
@@ -29,8 +47,6 @@ syncd:
 
   ecrQueue: ship-it-ecr.fifo
   githubQueue: ship-it-github.fifo
-
-  tillerAddress: tiller-deploy.kube-system.svc.cluster.local:44134
 
   namespace: default
 
@@ -44,14 +60,16 @@ syncd:
     requests:
       cpu: 100m
       memory: 100Mi
-      limits:
-        cpu: 1
-        memory: 1Gi
+    limits:
+      cpu: 1
+      memory: 1Gi
 
 github:
   org: "Wattpad"
   token: "foobarbaz"
 
 awsRegion: "us-east-1"
+
+tillerAddress: tiller-deploy.kube-system.svc.cluster.local:44134
 
 sslCertPath: "/etc/ssl/certs/ca-certificates.crt"

@@ -7,8 +7,8 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ template "ship-it.fullname" . }}-readonly
+  name: {{ template "ship-it.fullname" . }}
 subjects:
   - kind: ServiceAccount
-    name: {{ template "ship-it.fullname" . }}-readonly
+    name: {{ template "ship-it.fullname" . }}
     namespace: default

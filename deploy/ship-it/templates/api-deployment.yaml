@@ -22,7 +22,7 @@ spec:
         {{ include "ship-it.metadataLabels" . | nindent 6 | trim }}
         role: api
     spec:
-      serviceAccountName: {{ template "ship-it.fullname" . }}-readonly
+      serviceAccountName: {{ template "ship-it.fullname" . }}
       containers:
       - name: {{ template "ship-it.fullname" . }}
         image: {{ include "ship-it.api.image" . }}
