@@ -6,7 +6,6 @@ import (
 
 	"ship-it/internal"
 
-	"github.com/Wattpad/sqsconsumer"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics/discard"
 	"github.com/stretchr/testify/assert"
@@ -23,7 +22,7 @@ func (m *MockReconciler) Reconcile(ctx context.Context, image *internal.Image) e
 }
 
 func TestMakeImageFromEvent(t *testing.T) {
-	event := &ecrPushEvent{
+	event := &pushEvent{
 		RepositoryName: "ship-it",
 		RegistryId:     "723255503624",
 		Tag:            "shipped",
@@ -50,29 +49,21 @@ func TestValidateTag(t *testing.T) {
 }
 
 func TestECRHandler(t *testing.T) {
-	mockSQSClient := new(MockSQS)
-	fakeURL := "www.wattpad.com"
-	mockSQSService := &sqsconsumer.SQSService{
-		Svc:    mockSQSClient,
-		URL:    &fakeURL,
-		Logger: func(format string, args ...interface{}) {},
-	}
 	testListener := &ImageListener{
-		logger:  log.NewNopLogger(),
-		service: mockSQSService,
-		timer:   discard.NewHistogram(),
+		logger: log.NewNopLogger(),
+		timer:  discard.NewHistogram(),
 	}
 
 	mockReconciler := new(MockReconciler)
 
-	err := testListener.handler(mockReconciler)(context.Background(), `some bad message`)
+	err := testListener.handler(mockReconciler)(context.Background(), "some bad message")
 	assert.Error(t, err)
 
 	mockReconciler.On("Reconcile", mock.Anything, &internal.Image{
 		Registry:   "723255503624.dkr.ecr.us-east-1.amazonaws.com",
 		Repository: "monolith-php",
 		Tag:        "78bc9ccf64eb838c6a0e0492ded722274925e2bd",
-	}).Return(error(nil))
+	}).Return(nil)
 
 	inputJSON := `
 {
