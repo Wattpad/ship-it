@@ -23,7 +23,7 @@ func (m *MockReconciler) Reconcile(ctx context.Context, image *internal.Image) e
 }
 
 func TestMakeImageFromEvent(t *testing.T) {
-	event := &ecrPushEvent{
+	event := &pushEvent{
 		RepositoryName: "ship-it",
 		RegistryId:     "723255503624",
 		Tag:            "shipped",

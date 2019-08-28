@@ -24,7 +24,7 @@ type ImageListener struct {
 	timer   metrics.Histogram
 }
 
-type ecrPushEvent struct {
+type pushEvent struct {
 	EventTime      time.Time `json:"eventTime"`
 	RepositoryName string    `json:"repositoryName"`
 	Tag            string    `json:"tag"`
@@ -33,7 +33,7 @@ type ecrPushEvent struct {
 
 var validImageTagRegex = regexp.MustCompile("^[0-9a-f]{40}$")
 
-func (e ecrPushEvent) Image() *internal.Image {
+func (e pushEvent) Image() *internal.Image {
 	return &internal.Image{
 		Registry:   e.RegistryId + ".dkr.ecr.us-east-1.amazonaws.com",
 		Repository: e.RepositoryName,
@@ -65,17 +65,18 @@ func (l *ImageListener) Listen(ctx context.Context, r syncd.ImageReconciler) err
 
 func (l *ImageListener) handler(r syncd.ImageReconciler) sqsconsumer.MessageHandlerFunc {
 	return func(ctx context.Context, msg string) error {
-		var ecrEvent ecrPushEvent
-		err := json.Unmarshal([]byte(msg), &ecrEvent)
-		if err != nil {
+		var event pushEvent
+		if err := json.Unmarshal([]byte(msg), &event); err != nil {
 			return errors.Wrap(err, "failure to parse ecr push event")
 		}
 
-		if !validImageTagRegex.MatchString(ecrEvent.Tag) {
-			l.logger.Log("error", fmt.Sprintf(`ignoring event for invalid image tag "%s" found in repo "%s"`, ecrEvent.Tag, ecrEvent.RepositoryName))
+		image := event.Image()
+
+		if !validImageTagRegex.MatchString(image.Tag) {
+			l.logger.Log("error", fmt.Sprintf("ignoring event for invalid image \"%s\"", image.URI()))
 			return nil
 		}
 
-		return r.Reconcile(ctx, ecrEvent.Image())
+		return r.Reconcile(ctx, image)
 	}
 }
