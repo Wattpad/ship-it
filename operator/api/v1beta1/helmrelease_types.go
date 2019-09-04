@@ -80,6 +80,7 @@ func (c ChartSpec) URL() string {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:path=helmreleases,shortName=rls
+// +kubebuilder:subresource:status
 
 // HelmRelease is the Schema for the helmreleases API
 type HelmRelease struct {

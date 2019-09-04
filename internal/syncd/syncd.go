@@ -9,23 +9,21 @@ import (
 	"k8s.io/helm/pkg/proto/hapi/chart"
 )
 
-// ImageReconciler is a callback that reconciles new service images with the
-// state of ship-it's service registry chart. For example, by updating the chart
-// in a remote repository to use the new image.
+// ImageReconciler reconciles a new image with the state of ship-it's service
+// registry chart. For example, by updating chart values in a remote
+// repository to use the new image.
 type ImageReconciler interface {
 	Reconcile(context.Context, *internal.Image) error
 }
 
 // ImageListener models a stream of `*Image` events for service images. It calls
-// the ImageReconciler to reconcile new images with ship-it's service registry
-// chart.
+// the ImageReconciler to reconcile new images with ship-it's service registry chart.
 type ImageListener interface {
 	Listen(context.Context, ImageReconciler) error
 }
 
-// RegistryChartReconciler is an callback that reconciles a new registry chart
-// with the kubernetes cluster state. For example, by deploying the chart to a
-// cluster.
+// RegistryChartReconciler is reconciles the registry chart with the
+// kubernetes cluster state. For example, by deploying the chart to a cluster.
 type RegistryChartReconciler interface {
 	Reconcile(context.Context, *chart.Chart) error
 }

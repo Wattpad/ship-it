@@ -17,11 +17,6 @@ type Service interface {
 	ListReleases(context.Context) ([]models.Release, error)
 }
 
-// importing "k8s.io/helm/pkg/tiller" (specifically its transitive dependency
-// on 'k8s.io/kubernetes' pkgs) breaks the build horribly.
-// https://github.com/helm/helm/blob/master/pkg/tiller/release_server.go#L82
-var tillerValidName = regexp.MustCompile("^(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])+$")
-
 type controller struct {
 	svc Service
 }
@@ -79,6 +74,11 @@ func (c *controller) GetReleaseResources(w http.ResponseWriter, r *http.Request)
 
 	Success200(w, status)
 }
+
+// importing "k8s.io/helm/pkg/tiller" breaks the build horribly, so we
+// copy-paste the pkg var instead.
+// https://github.com/helm/helm/blob/master/pkg/tiller/release_server.go#L82
+var tillerValidName = regexp.MustCompile("^(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])+$")
 
 func validateReleaseName(name string) error {
 	if name == "" {
