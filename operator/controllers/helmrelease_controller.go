@@ -249,6 +249,8 @@ func (r *HelmReleaseReconciler) update(ctx context.Context, rls shipitv1beta1.He
 	case release.Status_DELETING, release.Status_PENDING_INSTALL, release.Status_PENDING_ROLLBACK, release.Status_PENDING_UPGRADE:
 		// if the release is still in transition, requeue until it settles
 		return ctrl.Result{RequeueAfter: r.GracePeriod}, nil
+	case release.Status_DELETED:
+		return r.install(ctx, rls)
 	case release.Status_DEPLOYED:
 		if oldCondition.Type == release.Status_DEPLOYED.String() {
 			return r.upgrade(ctx, rls)
@@ -306,7 +308,7 @@ func (r *HelmReleaseReconciler) install(ctx context.Context, rls shipitv1beta1.H
 
 	// TODO: use the returned response's `Release.Manifest` to watch and
 	// receive events for the k8s resources owned by this chart
-	if _, err := r.helm.InstallReleaseFromChart(chart, r.Namespace, helm.ReleaseName(releaseName), helm.ValueOverrides(rls.Spec.Values.Raw)); err != nil {
+	if _, err := r.helm.InstallReleaseFromChart(chart, r.Namespace, helm.ReleaseName(releaseName), helm.InstallReuseName(true), helm.ValueOverrides(rls.Spec.Values.Raw)); err != nil {
 		return ctrl.Result{}, errors.Wrapf(err, "failed to install release %s using chart %s", releaseName, chartVersion)
 	}
 
