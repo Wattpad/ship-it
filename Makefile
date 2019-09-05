@@ -40,7 +40,7 @@ kind:
 	@echo Creating a kind cluster...
 	kind create cluster --name $(KIND_CLUSTER_NAME)
 	$(eval KUBECONFIG := $(shell kind get kubeconfig-path --name $(KIND_CLUSTER_NAME)))
-	KUBECONFIG=$(KUBECONFIG) kubectl apply -f testdata/tiller_rbac.yaml
+	KUBECONFIG=$(KUBECONFIG) kubectl apply -f hack/tiller/rbac.yaml
 	KUBECONFIG=$(KUBECONFIG) helm init --service-account tiller
 	KUBECONFIG=$(KUBECONFIG) kubectl rollout status deployment -n kube-system tiller-deploy
 	@echo Done! Set your kubectl context:
