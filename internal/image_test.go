@@ -31,9 +31,10 @@ func TestParseImage(t *testing.T) {
 	}
 
 	for name, test := range testCases {
+		tc := test
 		t.Run(name, func(t *testing.T) {
-			img, _ := ParseImage(test.repo, test.tag)
-			assert.Equal(t, test.expected, img)
+			img, _ := ParseImage(tc.repo, tc.tag)
+			assert.Equal(t, tc.expected, img)
 		})
 	}
 }
@@ -124,9 +125,10 @@ func TestGetImagePath(t *testing.T) {
 	}
 
 	for name, test := range testCases {
+		tc := test
 		t.Run(name, func(t *testing.T) {
-			output := getImagePath(test.inputMap, test.serviceName)
-			assert.Equal(t, test.expected, output)
+			output := getImagePath(tc.inputMap, tc.serviceName)
+			assert.Equal(t, tc.expected, output)
 		})
 	}
 }
@@ -178,8 +180,9 @@ func TestTable(t *testing.T) {
 		},
 	}
 	for name, test := range testCases {
+		tc := test
 		t.Run(name, func(t *testing.T) {
-			assert.Equal(t, test.expected, table(test.inputMap, test.path))
+			assert.Equal(t, tc.expected, table(tc.inputMap, tc.path))
 		})
 	}
 }
@@ -233,9 +236,10 @@ func TestWithImage(t *testing.T) {
 	}
 
 	for name, test := range testCases {
+		tc := test
 		t.Run(name, func(t *testing.T) {
-			WithImage(test.inputImage, test.inputMap)
-			assert.Equal(t, test.expectedMap, test.inputMap)
+			WithImage(tc.inputImage, tc.inputMap)
+			assert.Equal(t, tc.expectedMap, tc.inputMap)
 		})
 	}
 }
