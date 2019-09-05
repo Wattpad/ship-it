@@ -25,6 +25,7 @@ require (
 	golang.org/x/net v0.0.0-20190501004415-9ce7a6920f09
 	google.golang.org/grpc v1.22.1 // indirect
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6 // indirect
+	k8s.io/api v0.0.0-20190409021203-6e4e0e4f393b
 	k8s.io/apimachinery v0.0.0-20190404173353-6a84e37a896d
 	k8s.io/client-go v11.0.1-0.20190409021438-1a26190bd76a+incompatible
 	k8s.io/helm v2.14.3+incompatible

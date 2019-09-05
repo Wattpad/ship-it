@@ -21,6 +21,8 @@ import (
 	"strings"
 	"time"
 
+	appsv1 "k8s.io/api/apps/v1"
+
 	shipitv1beta1 "ship-it-operator/api/v1beta1"
 
 	"github.com/go-logr/logr"
@@ -263,6 +265,70 @@ func (r *HelmReleaseReconciler) update(ctx context.Context, rls shipitv1beta1.He
 			reason = shipitv1beta1.ReasonUpdateSuccess
 		case release.Status_PENDING_ROLLBACK.String():
 			reason = shipitv1beta1.ReasonRollbackSuccess
+		}
+
+		r.Log.Info("Release is deployed, but we need to check if its fully rolled out")
+
+		// Check all Deployments have rolled out
+		// get Deployments by label instance=releaseName
+		// check status.conditions for type: Available, status: False
+		// if all pods aren't rolled out Requeue until X minutes has passed
+
+		var deploymentList appsv1.DeploymentList
+
+		err = r.List(
+			ctx,
+			&deploymentList,
+			client.InNamespace(rls.ObjectMeta.Namespace),
+			client.MatchingLabels(map[string]string{
+				"instance": releaseName, // this makes an assumption
+			}),
+		)
+
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		// TODO this logic can live in its own func
+		deployments := deploymentList.Items
+
+		for _, deployment := range deployments {
+			conditions := deployment.Status.Conditions
+
+			var available bool
+			var progressing bool
+
+			for _, condition := range conditions {
+				if condition.Type == "Available" {
+					available = condition.Status == "True"
+				} else if condition.Type == "Progressing" {
+					progressing = condition.Status == "True"
+				}
+			}
+
+			if !available && !progressing {
+				if oldCondition.Type == release.Status_PENDING_INSTALL.String() {
+					rls.Status.SetCondition(shipitv1beta1.HelmReleaseCondition{
+						Type:    release.Status_FAILED.String(),
+						Reason:  oldCondition.Reason,
+						Message: "Deployments in the release did not roll out successfully",
+					})
+					r.Log.Info("Chart install was successful but Deployments did not complete.")
+					return ctrl.Result{}, r.Status().Update(ctx, &rls)
+				}
+
+				r.Log.Info("Chart upgrade was successful but Deployments did not complete. Rolling back.")
+				return r.rollback(ctx, rls)
+			}
+
+			if !available && progressing {
+				rls.Status.SetCondition(shipitv1beta1.HelmReleaseCondition{
+					Type:    oldCondition.Type,
+					Reason:  oldCondition.Reason,
+					Message: "Deployments in the release are still rolling out",
+				})
+				return ctrl.Result{RequeueAfter: r.GracePeriod}, r.Status().Update(ctx, &rls)
+			}
 		}
 
 		rls.Status.SetCondition(shipitv1beta1.HelmReleaseCondition{
