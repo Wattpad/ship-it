@@ -102,7 +102,7 @@ func (hr HelmRelease) HelmValues() map[string]interface{} {
 	return obj
 }
 
-func (s *HelmReleaseStatus) SetCondition(condition HelmReleaseCondition) *HelmReleaseStatus {
+func (s *HelmReleaseStatus) SetCondition(condition HelmReleaseCondition) {
 	now := metav1.Now()
 	condition.LastUpdateTime = now
 
@@ -115,16 +115,15 @@ func (s *HelmReleaseStatus) SetCondition(condition HelmReleaseCondition) *HelmRe
 		}
 
 		s.Conditions[i] = condition
-		return s
+		return
 	}
 
 	// otherwise add the new condition
 	condition.LastTransitionTime = now
 	s.Conditions = append(s.Conditions, condition)
-	return s
 }
 
-func (s *HelmReleaseStatus) GetCondition() HelmReleaseCondition {
+func (s HelmReleaseStatus) GetCondition() HelmReleaseCondition {
 	for _, c := range s.Conditions {
 		return c
 	}

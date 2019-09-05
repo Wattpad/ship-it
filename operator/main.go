@@ -95,6 +95,7 @@ func main() {
 		mgr.GetClient(),
 		helm.NewClient(helm.Host(tillerAddr)),
 		chartdownloader.New(downloaders),
+		mgr.GetEventRecorderFor("ship-it"),
 		controllers.Namespace(namespace),
 		controllers.GracePeriod(gracePeriod),
 	)
