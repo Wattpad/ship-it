@@ -14,7 +14,7 @@ import (
 // modifies HelmRelease fields like the Finalizers and Status. It broadcasts
 // kubernetes events whenever the release's status condition changes.
 type ReleaseManager struct {
-	helm     ReleaseCRUD
+	helm     HelmClient
 	recorder record.EventRecorder
 }
 

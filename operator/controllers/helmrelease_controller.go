@@ -46,19 +46,11 @@ type ChartDownloader interface {
 }
 
 type HelmClient interface {
-	ReleaseCRUD
-	ReleaseStatuser
-}
-
-type ReleaseCRUD interface {
 	DeleteRelease(rlsName string, opts ...helm.DeleteOption) (*hapi.UninstallReleaseResponse, error)
 	InstallReleaseFromChart(chart *chart.Chart, ns string, opts ...helm.InstallOption) (*hapi.InstallReleaseResponse, error)
+	ReleaseStatus(rlsName string, opts ...helm.StatusOption) (*hapi.GetReleaseStatusResponse, error)
 	RollbackRelease(rlsName string, opts ...helm.RollbackOption) (*hapi.RollbackReleaseResponse, error)
 	UpdateReleaseFromChart(rlsName string, chart *chart.Chart, opts ...helm.UpdateOption) (*hapi.UpdateReleaseResponse, error)
-}
-
-type ReleaseStatuser interface {
-	ReleaseStatus(rlsName string, opts ...helm.StatusOption) (*hapi.GetReleaseStatusResponse, error)
 }
 
 // HelmReleaseReconciler reconciles a HelmRelease object
@@ -69,7 +61,7 @@ type HelmReleaseReconciler struct {
 	Log logr.Logger
 
 	downloader ChartDownloader
-	helm       ReleaseStatuser
+	helm       HelmClient
 	manager    ReleaseManager
 }
 
