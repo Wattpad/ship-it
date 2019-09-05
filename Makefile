@@ -6,6 +6,8 @@ VERSION := $(shell git rev-parse HEAD)
 TARGET_IMAGE := $(TARGET):$(VERSION)
 LATEST_IMAGE := $(TARGET):latest
 
+KIND_CLUSTER_NAME := ship-it-dev
+
 env-target:
 ifndef TARGET
 	    $(error TARGET is undefined)
@@ -33,3 +35,14 @@ docs/operator-release-states.png: docs/operator-release-states.dot
 	dot -Tpng docs/operator-release-states.dot -o docs/operator-release-states.png
 
 docs: api/*.json docs/operator-release-states.png
+
+kind:
+	@echo Creating a kind cluster...
+	kind create cluster --name $(KIND_CLUSTER_NAME)
+	$(eval KUBECONFIG := $(shell kind get kubeconfig-path --name $(KIND_CLUSTER_NAME)))
+	kubectl apply -f testdata/tiller_rbac.yaml
+	helm init --service-account tiller
+	kubectl rollout status deployment -n kube-system tiller-deploy
+	@echo Done! Set your kubectl context:
+	@echo
+	@echo export KUBECONFIG=$(KUBECONFIG)
