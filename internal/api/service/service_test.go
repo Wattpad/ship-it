@@ -31,9 +31,9 @@ func (k *mockK8sClient) List(ctx context.Context, namespace string) ([]models.Re
 }
 
 func (k *mockK8sClient) Get(ctx context.Context, namespace, name string) (*models.Release, error) {
-	for _, r := range k.releases {
+	for i, r := range k.releases {
 		if r.Name == name {
-			return &r, nil
+			return &k.releases[i], nil
 		}
 	}
 	return nil, errors.New("release not found")
