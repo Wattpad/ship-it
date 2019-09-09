@@ -26,6 +26,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/client-go/tools/record"
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 	"k8s.io/helm/pkg/proto/hapi/release"
@@ -36,11 +37,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
-// The HelmReleaseFinalizer allows the controller to clean up the associated
-// release before the HelmRelease resource is deleted.
+// HelmReleaseFinalizer allows the controller to clean up the associated release
+// before the HelmRelease resource is deleted.
 const HelmReleaseFinalizer = "HelmReleaseFinalizer"
-
-var errNotImplemented = errors.New("not implemented")
 
 type ChartDownloader interface {
 	Download(ctx context.Context, chart string, version string) (*chart.Chart, error)
@@ -63,6 +62,7 @@ type HelmReleaseReconciler struct {
 
 	downloader ChartDownloader
 	helm       HelmClient
+	manager    ReleaseManager
 }
 
 type ReconcilerOption func(*reconcilerConfig)
@@ -84,7 +84,7 @@ func GracePeriod(d time.Duration) ReconcilerOption {
 	}
 }
 
-func NewHelmReleaseReconciler(l logr.Logger, client client.Client, helm HelmClient, d ChartDownloader, opts ...ReconcilerOption) *HelmReleaseReconciler {
+func NewHelmReleaseReconciler(l logr.Logger, client client.Client, helm HelmClient, d ChartDownloader, rec record.EventRecorder, opts ...ReconcilerOption) *HelmReleaseReconciler {
 	var cfg reconcilerConfig
 	for _, opt := range opts {
 		opt(&cfg)
@@ -97,6 +97,11 @@ func NewHelmReleaseReconciler(l logr.Logger, client client.Client, helm HelmClie
 		downloader:       d,
 		helm:             helm,
 		reconcilerConfig: cfg,
+
+		manager: ReleaseManager{
+			helm:     helm,
+			recorder: rec,
+		},
 	}
 }
 
@@ -107,9 +112,9 @@ func (r *HelmReleaseReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 	ctx := context.Background()
 	log := r.Log.WithValues("name", req.NamespacedName)
 
-	var helmRelease shipitv1beta1.HelmRelease
+	helmRelease := new(shipitv1beta1.HelmRelease)
 
-	if err := r.Get(ctx, req.NamespacedName, &helmRelease); err != nil {
+	if err := r.Get(ctx, req.NamespacedName, helmRelease); err != nil {
 		if apierrs.IsNotFound(err) {
 			log.Info("HelmRelease doesn't exist")
 			return ctrl.Result{}, nil
@@ -127,13 +132,13 @@ func (r *HelmReleaseReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 		return r.delete(ctx, helmRelease)
 	}
 
-	if !contains(helmRelease.GetFinalizers(), HelmReleaseFinalizer) {
+	if !hasFinalizer(helmRelease) {
 		// setting the finalizer does not change the release's
 		// metadata.generation, so we have to requeue
-		return ctrl.Result{Requeue: true}, r.setFinalizer(ctx, helmRelease)
+		return ctrl.Result{Requeue: true}, r.Update(ctx, setFinalizer(helmRelease))
 	}
 
-	return r.update(ctx, helmRelease)
+	return r.deploy(ctx, helmRelease)
 }
 
 func (r *HelmReleaseReconciler) SetupWithManager(mgr ctrl.Manager) error {
@@ -143,14 +148,26 @@ func (r *HelmReleaseReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *HelmReleaseReconciler) setFinalizer(ctx context.Context, rls shipitv1beta1.HelmRelease) error {
-	finalizers := rls.GetFinalizers()
-	rls.SetFinalizers(append(finalizers, HelmReleaseFinalizer))
-
-	return r.Update(ctx, &rls)
+func contains(strs []string, x string) bool {
+	for _, s := range strs {
+		if s == x {
+			return true
+		}
+	}
+	return false
 }
 
-func (r *HelmReleaseReconciler) clearFinalizer(ctx context.Context, rls shipitv1beta1.HelmRelease) error {
+func hasFinalizer(rls *shipitv1beta1.HelmRelease) bool {
+	return contains(rls.GetFinalizers(), HelmReleaseFinalizer)
+}
+
+func setFinalizer(rls *shipitv1beta1.HelmRelease) *shipitv1beta1.HelmRelease {
+	finalizers := rls.GetFinalizers()
+	rls.SetFinalizers(append(finalizers, HelmReleaseFinalizer))
+	return rls
+}
+
+func clearFinalizer(rls *shipitv1beta1.HelmRelease) *shipitv1beta1.HelmRelease {
 	var finalizers []string
 
 	for _, f := range rls.GetFinalizers() {
@@ -160,47 +177,39 @@ func (r *HelmReleaseReconciler) clearFinalizer(ctx context.Context, rls shipitv1
 	}
 
 	rls.SetFinalizers(finalizers)
-	return r.Update(ctx, &rls)
+	return rls
 }
 
-func (r *HelmReleaseReconciler) delete(ctx context.Context, rls shipitv1beta1.HelmRelease) (ctrl.Result, error) {
+func (r *HelmReleaseReconciler) delete(ctx context.Context, rls *shipitv1beta1.HelmRelease) (ctrl.Result, error) {
 	releaseName := rls.Spec.ReleaseName
-	rlsStatus, err := r.helm.ReleaseStatus(releaseName)
 
+	resp, err := r.helm.ReleaseStatus(releaseName)
 	if err != nil {
 		if isHelmReleaseNotFound(releaseName, err) {
 			// this will only happen if a delete --purge is run
-			return ctrl.Result{}, r.clearFinalizer(ctx, rls)
+			return ctrl.Result{}, r.Update(ctx, clearFinalizer(rls))
 		}
 
 		return ctrl.Result{}, err
 	}
 
-	info := rlsStatus.GetInfo()
-
-	if info.Status.Code == release.Status_DELETING {
+	switch resp.GetInfo().GetStatus().GetCode() {
+	case release.Status_DELETING:
 		return ctrl.Result{RequeueAfter: r.GracePeriod}, nil
+	case release.Status_DELETED:
+		return ctrl.Result{}, r.Update(ctx, clearFinalizer(rls))
 	}
 
-	if info.Status.Code == release.Status_DELETED {
-		return ctrl.Result{}, r.clearFinalizer(ctx, rls)
-	}
-
-	_, err = r.helm.DeleteRelease(releaseName)
-
+	rls, err = r.manager.Delete(rls)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
 
-	rls.Status.SetCondition(shipitv1beta1.HelmReleaseCondition{
-		Type:    release.Status_DELETING.String(),
-		Message: "Release is being deleted",
-	})
-
-	if err := r.Status().Update(ctx, &rls); err != nil {
+	if err := r.Status().Update(ctx, rls); err != nil {
 		return ctrl.Result{}, err
 	}
 
+	r.Log.Info("deleting HelmRelease", "release", releaseName)
 	return ctrl.Result{RequeueAfter: r.GracePeriod}, nil
 }
 
@@ -210,29 +219,8 @@ func isHelmReleaseNotFound(name string, err error) bool {
 	return strings.Contains(err.Error(), helmerrors.ErrReleaseNotFound(name).Error())
 }
 
-// reasonForFailure determines the reason for a release's state transition to
-// FAILED, given the previous release state. If the old state was FAILED, the
-// original reason is re-used.
-func reasonForFailure(oldCondition shipitv1beta1.HelmReleaseCondition) shipitv1beta1.HelmReleaseStatusReason {
-	switch oldCondition.Type {
-	case release.Status_DELETING.String():
-		return shipitv1beta1.ReasonDeleteError
-	case release.Status_PENDING_INSTALL.String():
-		return shipitv1beta1.ReasonInstallError
-	case release.Status_PENDING_UPGRADE.String():
-		return shipitv1beta1.ReasonUpdateError
-	case release.Status_PENDING_ROLLBACK.String():
-		return shipitv1beta1.ReasonRollbackError
-	case release.Status_FAILED.String():
-		return oldCondition.Reason
-	default:
-		return shipitv1beta1.ReasonUnknown
-	}
-}
-
-func (r *HelmReleaseReconciler) update(ctx context.Context, rls shipitv1beta1.HelmRelease) (ctrl.Result, error) {
+func (r *HelmReleaseReconciler) deploy(ctx context.Context, rls *shipitv1beta1.HelmRelease) (ctrl.Result, error) {
 	releaseName := rls.Spec.ReleaseName
-	oldCondition := rls.Status.GetCondition()
 
 	resp, err := r.helm.ReleaseStatus(releaseName)
 	if err != nil {
@@ -242,11 +230,10 @@ func (r *HelmReleaseReconciler) update(ctx context.Context, rls shipitv1beta1.He
 		return ctrl.Result{}, errors.Wrapf(err, "failed to get release status for %s", releaseName)
 	}
 
-	releaseStatus := resp.GetInfo().GetStatus()
-	releaseStatusCode := releaseStatus.GetCode()
+	oldCondition := rls.Status.GetCondition()
 
-	switch releaseStatusCode {
-	case release.Status_DELETING, release.Status_PENDING_INSTALL, release.Status_PENDING_ROLLBACK, release.Status_PENDING_UPGRADE:
+	switch statusCode := resp.GetInfo().GetStatus().GetCode(); statusCode {
+	case release.Status_DELETING, release.Status_PENDING_INSTALL, release.Status_PENDING_UPGRADE, release.Status_PENDING_ROLLBACK:
 		// if the release is still in transition, requeue until it settles
 		return ctrl.Result{RequeueAfter: r.GracePeriod}, nil
 	case release.Status_DELETED:
@@ -256,32 +243,9 @@ func (r *HelmReleaseReconciler) update(ctx context.Context, rls shipitv1beta1.He
 			return r.upgrade(ctx, rls)
 		}
 
-		var reason shipitv1beta1.HelmReleaseStatusReason
-
-		switch oldCondition.Type {
-		case release.Status_PENDING_INSTALL.String():
-			reason = shipitv1beta1.ReasonInstallSuccess
-		case release.Status_PENDING_UPGRADE.String():
-			reason = shipitv1beta1.ReasonUpdateSuccess
-		case release.Status_PENDING_ROLLBACK.String():
-			reason = shipitv1beta1.ReasonRollbackSuccess
-		}
-
-		rls.Status.SetCondition(shipitv1beta1.HelmReleaseCondition{
-			Type:    releaseStatusCode.String(),
-			Reason:  reason,
-			Message: releaseStatus.GetNotes(),
-		})
-
-		return ctrl.Result{}, r.Status().Update(ctx, &rls)
+		return ctrl.Result{}, r.Status().Update(ctx, r.manager.Deployed(rls))
 	case release.Status_FAILED:
-		rls.Status.SetCondition(shipitv1beta1.HelmReleaseCondition{
-			Type:    releaseStatusCode.String(),
-			Reason:  reasonForFailure(oldCondition),
-			Message: releaseStatus.GetNotes(),
-		})
-
-		if err := r.Status().Update(ctx, &rls); err != nil {
+		if err := r.Status().Update(ctx, r.manager.Failed(rls)); err != nil {
 			return ctrl.Result{}, err
 		}
 
@@ -290,92 +254,61 @@ func (r *HelmReleaseReconciler) update(ctx context.Context, rls shipitv1beta1.He
 		}
 
 		return ctrl.Result{}, nil
-	default: // Status_UNKNOWN, Status_SUPERSEDED, Status_DELETED
-		return ctrl.Result{}, nil
+	default: // Status_UNKNOWN
+		return ctrl.Result{}, fmt.Errorf("unhandled release status code %s", statusCode)
 	}
 }
 
-func (r *HelmReleaseReconciler) install(ctx context.Context, rls shipitv1beta1.HelmRelease) (ctrl.Result, error) {
-	releaseChart := rls.Spec.Chart
+func (r *HelmReleaseReconciler) install(ctx context.Context, rls *shipitv1beta1.HelmRelease) (ctrl.Result, error) {
+	chartSpec := rls.Spec.Chart
 	releaseName := rls.Spec.ReleaseName
 
-	chartVersion := fmt.Sprintf("%s@%s", releaseChart.URL(), releaseChart.Version)
-
-	chart, err := r.downloader.Download(ctx, releaseChart.URL(), releaseChart.Version)
+	chart, err := r.downloader.Download(ctx, chartSpec.URL(), chartSpec.Version)
 	if err != nil {
-		return ctrl.Result{}, errors.Wrapf(err, "failed to download chart %s", chartVersion)
+		return ctrl.Result{}, errors.Wrapf(err, "failed to download chart %s", chartSpec.URL())
 	}
 
-	// TODO: use the returned response's `Release.Manifest` to watch and
-	// receive events for the k8s resources owned by this chart
-	if _, err := r.helm.InstallReleaseFromChart(chart, r.Namespace, helm.ReleaseName(releaseName), helm.InstallReuseName(true), helm.ValueOverrides(rls.Spec.Values.Raw)); err != nil {
-		return ctrl.Result{}, errors.Wrapf(err, "failed to install release %s using chart %s", releaseName, chartVersion)
+	rls, err = r.manager.Install(rls, chart, r.Namespace)
+	if err != nil {
+		return ctrl.Result{}, errors.Wrapf(err, "failed to install release %s using chart %s", releaseName, chartSpec.URL())
 	}
 
-	rls.Status.SetCondition(shipitv1beta1.HelmReleaseCondition{
-		Type:    release.Status_PENDING_INSTALL.String(),
-		Message: fmt.Sprintf("installing chart %s", chartVersion),
-	})
-
-	if err := r.Status().Update(ctx, &rls); err != nil {
+	if err := r.Status().Update(ctx, rls); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	r.Log.Info("HelmRelease installed", "release", releaseName)
+	r.Log.Info("installing HelmRelease", "release", releaseName)
 	return ctrl.Result{RequeueAfter: r.GracePeriod}, nil
 }
 
-func (r *HelmReleaseReconciler) rollback(ctx context.Context, rls shipitv1beta1.HelmRelease) (ctrl.Result, error) {
-	releaseName := rls.Spec.ReleaseName
-
-	if _, err := r.helm.RollbackRelease(releaseName); err != nil {
-		return ctrl.Result{}, errors.Wrapf(err, "failed to rollback release %s", releaseName)
-	}
-
-	rls.Status.SetCondition(shipitv1beta1.HelmReleaseCondition{
-		Type:    release.Status_PENDING_ROLLBACK.String(),
-		Message: fmt.Sprintf("rolling back %s", releaseName),
-	})
-
-	r.Log.Info("HelmRelease rolled back", "release", releaseName)
-	return ctrl.Result{}, r.Status().Update(ctx, &rls)
-}
-
-func (r *HelmReleaseReconciler) upgrade(ctx context.Context, rls shipitv1beta1.HelmRelease) (ctrl.Result, error) {
-	releaseChart := rls.Spec.Chart
-	releaseName := rls.Spec.ReleaseName
-
-	chartVersion := fmt.Sprintf("%s@%s", releaseChart.URL(), releaseChart.Version)
-
-	chart, err := r.downloader.Download(ctx, releaseChart.URL(), releaseChart.Version)
+func (r *HelmReleaseReconciler) rollback(ctx context.Context, rls *shipitv1beta1.HelmRelease) (ctrl.Result, error) {
+	rls, err := r.manager.Rollback(rls)
 	if err != nil {
-		return ctrl.Result{}, errors.Wrapf(err, "failed to download chart %s", chartVersion)
-	}
-
-	// TODO: use the returned response's `Release.Manifest` to watch and
-	// receive events for the k8s resources owned by this chart
-	if _, err := r.helm.UpdateReleaseFromChart(releaseName, chart, helm.UpdateValueOverrides(rls.Spec.Values.Raw)); err != nil {
-		return ctrl.Result{}, errors.Wrapf(err, "failed to update release %s using chart %s", releaseName, chartVersion)
-	}
-
-	rls.Status.SetCondition(shipitv1beta1.HelmReleaseCondition{
-		Type:    release.Status_PENDING_UPGRADE.String(),
-		Message: fmt.Sprintf("upgrading chart %s", chartVersion),
-	})
-
-	if err := r.Status().Update(ctx, &rls); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	r.Log.Info("HelmRelease upgraded", "release", releaseName)
-	return ctrl.Result{RequeueAfter: r.GracePeriod}, nil
+	r.Log.Info("rolling back HelmRelease", "release", rls.Spec.ReleaseName)
+	return ctrl.Result{}, r.Status().Update(ctx, rls)
 }
 
-func contains(strs []string, x string) bool {
-	for _, s := range strs {
-		if s == x {
-			return true
-		}
+func (r *HelmReleaseReconciler) upgrade(ctx context.Context, rls *shipitv1beta1.HelmRelease) (ctrl.Result, error) {
+	chartSpec := rls.Spec.Chart
+	releaseName := rls.Spec.ReleaseName
+
+	chart, err := r.downloader.Download(ctx, chartSpec.URL(), chartSpec.Version)
+	if err != nil {
+		return ctrl.Result{}, errors.Wrapf(err, "failed to download chart %s", chartSpec.URL())
 	}
-	return false
+
+	rls, err = r.manager.Upgrade(rls, chart)
+	if err != nil {
+		return ctrl.Result{}, errors.Wrapf(err, "failed to upgrade release %s using chart %s", releaseName, chartSpec.URL())
+	}
+
+	if err := r.Status().Update(ctx, rls); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	r.Log.Info("upgrading HelmRelease", "release", releaseName)
+	return ctrl.Result{RequeueAfter: r.GracePeriod}, nil
 }

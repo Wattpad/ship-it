@@ -3,15 +3,18 @@ package controllers
 import (
 	"context"
 	"fmt"
+
 	shipitv1beta1 "ship-it-operator/api/v1beta1"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
 	"github.com/stretchr/testify/mock"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/tools/record"
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 	hapi "k8s.io/helm/pkg/proto/hapi/release"
@@ -53,6 +56,14 @@ var _ = Describe("HelmReleaseReconciler", func() {
 
 	request := ctrl.Request{NamespacedName: releaseKey}
 
+	var recorder record.FakeRecorder
+
+	go func() {
+		for range recorder.Events {
+			// discard events
+		}
+	}()
+
 	var (
 		downloader  *mockDownloader
 		helmClient  *helm.FakeClient
@@ -63,7 +74,7 @@ var _ = Describe("HelmReleaseReconciler", func() {
 	BeforeEach(func() {
 		downloader = new(mockDownloader)
 		helmClient = new(helm.FakeClient)
-		reconciler = NewHelmReleaseReconciler(log, k8sClient, helmClient, downloader, GracePeriod(42), Namespace("test"))
+		reconciler = NewHelmReleaseReconciler(log, k8sClient, helmClient, downloader, &recorder, GracePeriod(42), Namespace("test"))
 
 		testRelease = &shipitv1beta1.HelmRelease{
 			TypeMeta: metav1.TypeMeta{
@@ -91,6 +102,22 @@ var _ = Describe("HelmReleaseReconciler", func() {
 
 	AfterEach(func() {
 		k8sClient.Delete(ctx, testRelease)
+	})
+
+	Context("HelmReleaseFinalizer", func() {
+		It("should set and clear the finalizer", func() {
+			Expect(hasFinalizer(testRelease)).To(BeFalse())
+
+			By("setting the finalizer")
+			got := setFinalizer(testRelease)
+			Expect(hasFinalizer(testRelease)).To(BeTrue())
+			Expect(got.GetFinalizers()).To(ContainElement(HelmReleaseFinalizer))
+
+			By("clearing the finalizer")
+			got = clearFinalizer(testRelease)
+			Expect(hasFinalizer(testRelease)).To(BeFalse())
+			Expect(got.GetFinalizers()).To(Not(ContainElement(HelmReleaseFinalizer)))
+		})
 	})
 
 	When("the HelmRelease isn't found", func() {
