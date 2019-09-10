@@ -282,13 +282,19 @@ func (r *HelmReleaseReconciler) install(ctx context.Context, rls *shipitv1beta1.
 }
 
 func (r *HelmReleaseReconciler) rollback(ctx context.Context, rls *shipitv1beta1.HelmRelease) (ctrl.Result, error) {
+	releaseName := rls.Spec.ReleaseName
+
 	rls, err := r.manager.Rollback(rls)
 	if err != nil {
+		return ctrl.Result{}, errors.Wrapf(err, "failed to roll back release %s", releaseName)
+	}
+
+	if err := r.Status().Update(ctx, rls); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	r.Log.Info("rolling back HelmRelease", "release", rls.Spec.ReleaseName)
-	return ctrl.Result{}, r.Status().Update(ctx, rls)
+	r.Log.Info("rolling back HelmRelease", "release", releaseName)
+	return ctrl.Result{RequeueAfter: r.GracePeriod}, nil
 }
 
 func (r *HelmReleaseReconciler) upgrade(ctx context.Context, rls *shipitv1beta1.HelmRelease) (ctrl.Result, error) {

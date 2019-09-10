@@ -17,6 +17,7 @@ import (
 	"k8s.io/client-go/tools/record"
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/proto/hapi/chart"
+	"k8s.io/helm/pkg/proto/hapi/release"
 	hapi "k8s.io/helm/pkg/proto/hapi/release"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -194,7 +195,7 @@ var _ = Describe("HelmReleaseReconciler", func() {
 			// PENDING_UPGRADE while it asks tiller to upgrade the release
 			res, err = reconciler.Reconcile(request)
 			Expect(err).To(BeNil())
-			// Expect(res.RequeueAfter).To(Equal(reconciler.GracePeriod))
+			Expect(res.RequeueAfter).To(Equal(reconciler.GracePeriod))
 
 			Expect(k8sClient.Get(ctx, releaseKey, &got)).To(Succeed())
 			Expect(got.Status.GetCondition().Type).To(Equal(hapi.Status_PENDING_UPGRADE.String()))
@@ -213,7 +214,36 @@ var _ = Describe("HelmReleaseReconciler", func() {
 			Expect(got.Status.GetCondition().Type).To(Equal(hapi.Status_DEPLOYED.String()))
 
 			By("reconciling a failed updated release")
-			// TODO
+
+			// fake a failed release upgrade
+			got.Status.SetCondition(shipitv1beta1.HelmReleaseCondition{
+				Type: hapi.Status_PENDING_UPGRADE.String(),
+			})
+
+			Expect(k8sClient.Status().Update(ctx, &got)).To(Succeed())
+			failedUpgrade(helmClient, releaseName)
+
+			// first reconcile updates the HelmRelease to be
+			// PENDING_ROLLBACK while it asks tiller to rollback the release
+			res, err = reconciler.Reconcile(request)
+			Expect(err).To(BeNil())
+			Expect(res.RequeueAfter).To(Equal(reconciler.GracePeriod))
+
+			// the fake helm client doesn't actually implement a
+			// rollback, so we do it live
+			fakedRollback(helmClient, releaseName)
+
+			Expect(k8sClient.Get(ctx, releaseKey, &got)).To(Succeed())
+			Expect(got.Status.GetCondition().Type).To(Equal(hapi.Status_PENDING_ROLLBACK.String()))
+
+			// second reconcile observes the completed rollback and
+			// updates the HelmRelease to be DEPLOYED
+			res, err = reconciler.Reconcile(request)
+			Expect(err).To(BeNil())
+			Expect(res).To(BeZero())
+
+			Expect(k8sClient.Get(ctx, releaseKey, &got)).To(Succeed())
+			Expect(got.Status.GetCondition().Type).To(Equal(hapi.Status_DEPLOYED.String()))
 
 			By("reconciling a release that has been deleted")
 			Expect(k8sClient.Delete(ctx, testRelease)).To(Succeed())
@@ -239,3 +269,22 @@ var _ = Describe("HelmReleaseReconciler", func() {
 		})
 	})
 })
+
+// reaching into the fake client internals to fake a failed release
+func failedUpgrade(client *helm.FakeClient, name string) {
+	for _, rls := range client.Rels {
+		if rls.Name == name {
+			rls.Info.Status.Code = release.Status_FAILED
+			return
+		}
+	}
+}
+
+func fakedRollback(client *helm.FakeClient, name string) {
+	for _, rls := range client.Rels {
+		if rls.Name == name {
+			rls.Info.Status.Code = release.Status_DEPLOYED
+			return
+		}
+	}
+}
