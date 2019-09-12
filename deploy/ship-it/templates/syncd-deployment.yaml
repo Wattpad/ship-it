@@ -47,6 +47,8 @@ spec:
           {{- if .Values.github }}
             - name: GITHUB_ORG
               value: {{ .Values.github.org }}
+            - name: GITHUB_TOKEN
+              value: {{ .Values.github.token }}
           {{- end}}
           {{- range $name, $value := .Values.devEnv }}
             - name: {{ $name }}

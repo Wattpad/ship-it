@@ -22,9 +22,9 @@ api:
   servicePort: 80
 
 operator:
-  image: 
+  image:
     repository: 723255503624.dkr.ecr.us-east-1.amazonaws.com/ship-it-operator
-    tag: latest
+    tag: ae101faf94f89e8410726a9fe261eee24e79eac2
     pullPolicy: IfNotPresent
 
   resources:
