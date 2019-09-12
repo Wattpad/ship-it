@@ -38,7 +38,7 @@ docs: api/*.json docs/operator-release-states.png
 
 kind:
 	@echo Creating a kind cluster...
-	kind create cluster --name $(KIND_CLUSTER_NAME)
+	kind create cluster --name $(KIND_CLUSTER_NAME) >/dev/null 2>&1 || true
 	$(eval KUBECONFIG := $(shell kind get kubeconfig-path --name $(KIND_CLUSTER_NAME)))
 	KUBECONFIG=$(KUBECONFIG) kubectl apply -f hack/tiller/rbac.yaml
 	KUBECONFIG=$(KUBECONFIG) helm init --service-account tiller
