@@ -11,7 +11,7 @@ type Image struct {
 	Tag        string
 }
 
-func (t Image) Tagged() string {
+func (i Image) Tagged() string {
 	var tag string
 	if i.Tag != "" {
 		tag = ":" + i.Tag
