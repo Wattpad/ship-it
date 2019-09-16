@@ -11,6 +11,15 @@ type Image struct {
 	Tag        string
 }
 
+func (t Image) Tagged() string {
+	var tag string
+	if i.Tag != "" {
+		tag = ":" + i.Tag
+	}
+
+	return i.URI() + tag
+}
+
 func (i Image) URI() string {
 	return i.Registry + "/" + i.Repository
 }

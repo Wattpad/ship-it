@@ -73,7 +73,7 @@ func (l *ImageListener) handler(r syncd.ImageReconciler) sqsconsumer.MessageHand
 		image := event.Image()
 
 		if !validImageTagRegex.MatchString(image.Tag) {
-			l.logger.Log("error", fmt.Sprintf("ignoring event for invalid image \"%s\"", image.URI()))
+			l.logger.Log("error", fmt.Sprintf("ignoring event for invalid image \"%s\"", image.Tagged()))
 			return nil
 		}
 
