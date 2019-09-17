@@ -26,7 +26,11 @@ class TopBar extends React.Component {
             </Typography>
             <div className="search-releases">
               <TextField
-                InputProps={{ type: "search" }}
+                fullWidth
+                InputProps={{
+                  type: "search",
+                  placeholder: "Search by name, squad or status",
+                }}
                 onChange={e => this.props.onQueryChanged(e.target.value)}
               />
             </div>
