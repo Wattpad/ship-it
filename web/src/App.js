@@ -10,7 +10,7 @@ const API_ADDRESS = urljoin(window.location.protocol + '//' + window.location.ho
 class App extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {query: ""}
+    this.state = { query: "" }
     axios.get(urljoin(API_ADDRESS, 'releases')).then(response => {
       this.setState({data : response.data})
     })
@@ -19,7 +19,7 @@ class App extends React.Component {
   render() {
     return (
       <div className="App">
-        <TopBar onQueryChanged={q => this.setState({query: q})}/>
+        <TopBar onQueryChanged={ q => this.setState({ query: q }) }/>
         {
           this.state.data ?
           <ReactExpandableGrid

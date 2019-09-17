@@ -105,7 +105,16 @@ class ReactExpandableGrid extends React.Component {
       idCounter = idCounter + 1
       let thisUniqueKey = 'grid_cell_' + idCounter.toString()
       if (this.matchesQuery(gridData[i], this.props.query)) {
-        grid.push(<SingleGridCell API_ADDRESS={this.props.API_ADDRESS} handleCellClick={this.handleCellClick.bind(this)} key={thisUniqueKey} id={thisUniqueKey} cellMargin={this.props.cellMargin} SingleGridCellData={gridData[i]} cellSize={this.props.cellSize} />)
+        grid.push(
+          <SingleGridCell
+            API_ADDRESS={this.props.API_ADDRESS}
+            handleCellClick={this.handleCellClick.bind(this)}
+            key={thisUniqueKey}
+            id={thisUniqueKey}
+            cellMargin={this.props.cellMargin}
+            SingleGridCellData={gridData[i]}
+            cellSize={this.props.cellSize} />
+        )
       }
     }
 
