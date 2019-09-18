@@ -1,4 +1,4 @@
-FROM golang:1.12 AS golang-build
+FROM golang:1.13 AS golang-build
 WORKDIR /build
 COPY operator/go.mod operator/go.sum ./operator/
 COPY go.mod go.sum ./
