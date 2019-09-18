@@ -64,6 +64,11 @@
   margin: auto;
 }
 
+.search-releases {
+  width: 300px;
+  margin-left: 24px;
+}
+
 .kube-resource-list {
   display: flex;
   align-items: center;
