@@ -52,7 +52,7 @@ class ExpandedCard extends React.Component {
                             <div className="switch-status">
                                 <FormControlLabel
                                     control={
-                                        <Switch disabled color="primary" checked={this.props.data.autoDeploy} />
+                                        <Switch color="primary" checked={this.props.data.autoDeploy} />
                                     }
                                     label="AutoDeploy"
                                 />
