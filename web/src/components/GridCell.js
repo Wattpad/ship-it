@@ -60,7 +60,7 @@ class SingleGridCell extends React.Component {
     const singleGridCellStyle = {
       backgroundSize: this.props.cellSize,
       width: this.props.cellSize,
-      height: this.props.cellSize,
+      height: 'auto',
       display: 'inline-block',
       margin: this.props.cellMargin,
       marginBottom: 25,
@@ -69,7 +69,7 @@ class SingleGridCell extends React.Component {
 
     const cardStyle = {
       width: this.props.cellSize,
-      height: this.props.cellSize
+      height: 'auto'
     }
 
     let deployDate = new Date(this.props.SingleGridCellData.lastDeployed)
