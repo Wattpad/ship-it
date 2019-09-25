@@ -11,6 +11,8 @@ require (
 	github.com/Wattpad/sqsconsumer v0.0.0-20190611184259-511082fa45b3
 	github.com/alecthomas/jsonschema v0.0.0-20190530235721-fd8d96416671
 	github.com/aws/aws-sdk-go v1.22.3
+	github.com/bradleyfalzon/ghinstallation v0.1.2
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/go-chi/chi v4.0.2+incompatible
 	github.com/go-kit/kit v0.9.0
 	github.com/go-logfmt/logfmt v0.4.0 // indirect
