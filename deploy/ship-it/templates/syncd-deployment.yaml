@@ -28,8 +28,9 @@ spec:
           image: {{ include "ship-it.syncd.image" . }}
           imagePullPolicy: {{ .Values.syncd.image.pullPolicy }}
           envFrom:
-            - secretKeyRef:
-              - name: {{ .Values.existingSecretName }}
+            - secretRef:
+                name: {{ .Values.existingSecretName }}
+                optional: false
           env:
             - name: AWS_REGION
               value: {{ .Values.awsRegion }}
