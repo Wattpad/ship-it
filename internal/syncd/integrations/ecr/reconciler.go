@@ -2,45 +2,48 @@ package ecr
 
 import (
 	"context"
-	"ship-it/internal"
+
+	"ship-it/internal/image"
 
 	"github.com/go-kit/kit/log"
-	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/types"
 )
 
-type HelmReleaseEditor interface {
-	UpdateAndReplace(ctx context.Context, releaseName string, image *internal.Image) error
+// ChartEditor edits a remote chart containing HelmReleases. It updates the
+// named release specs using the given image reference.
+type ChartEditor interface {
+	Edit(ctx context.Context, releases []types.NamespacedName, image *image.Ref) error
 }
 
-type IndexerService interface {
-	Lookup(image *internal.Image) ([]types.NamespacedName, error)
+// ReleaseIndexer provides access to an index of container images and the
+// deployed releases that are using them.
+type ReleaseIndexer interface {
+	Lookup(image *image.Ref) ([]types.NamespacedName, error)
 }
 
 type ImageReconciler struct {
-	editor  HelmReleaseEditor
-	indexer IndexerService
+	editor  ChartEditor
+	indexer ReleaseIndexer
 	logger  log.Logger
 }
 
-func NewReconciler(r HelmReleaseEditor, i IndexerService, l log.Logger) *ImageReconciler {
+func NewReconciler(l log.Logger, e ChartEditor, i ReleaseIndexer) *ImageReconciler {
 	return &ImageReconciler{
-		editor:  r,
+		editor:  e,
 		indexer: i,
 		logger:  l,
 	}
 }
 
-func (r *ImageReconciler) Reconcile(ctx context.Context, image *internal.Image) error {
+func (r *ImageReconciler) Reconcile(ctx context.Context, image *image.Ref) error {
 	releases, err := r.indexer.Lookup(image)
 	if err != nil {
-		return errors.Wrapf(err, "failed to obtain the releases corresponding to the repository: %s", image.Repository)
+		return err
 	}
-	for _, release := range releases {
-		err := r.editor.UpdateAndReplace(ctx, release.Name, image)
-		if err != nil {
-			r.logger.Log("error", err)
-		}
+
+	if len(releases) == 0 {
+		return nil
 	}
-	return nil
+
+	return r.editor.Edit(ctx, releases, image)
 }

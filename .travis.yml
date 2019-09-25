@@ -40,9 +40,9 @@ jobs:
 
     - stage: Test and Lint
       name: Go
-      install: go get "github.com/golangci/golangci-lint/cmd/golangci-lint"
+      install: GO111MODULE=off go get "github.com/golangci/golangci-lint/cmd/golangci-lint"
       script:
-        - golangci-lint run -D errcheck -E goimports -E interfacer -E scopelint ./...
+        - golangci-lint --deadline=5m run -D errcheck -E goimports -E interfacer -E scopelint ./...
         - go test ./...
 
     - stage: Test and Lint

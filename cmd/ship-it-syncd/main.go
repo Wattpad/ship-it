@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -15,10 +17,10 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
+	"github.com/bradleyfalzon/ghinstallation"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics/dogstatsd"
 	gogithub "github.com/google/go-github/v26/github"
-	"golang.org/x/oauth2"
 	"k8s.io/helm/pkg/helm"
 )
 
@@ -48,14 +50,43 @@ func main() {
 	dd := dogstatsd.New("wattpad.ship-it.", logger)
 	go dd.SendLoop(ctx, time.Tick(time.Second), "udp", cfg.DataDogAddress())
 
-	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{
-			AccessToken: cfg.GithubToken,
-		},
-	)
+	// adapted from http.DefaultTransport
+	defaultTransport := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+			DualStack: true,
+		}).DialContext,
+		ForceAttemptHTTP2:     true,
+		MaxIdleConns:          10,
+		IdleConnTimeout:       time.Minute,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: time.Second,
+	}
 
-	oauthClient := oauth2.NewClient(context.Background(), ts)
-	githubClient := gogithub.NewClient(oauthClient)
+	githubTransport, err := ghinstallation.New(
+		defaultTransport,
+		cfg.GithubAppID,
+		cfg.GithubInstallationID,
+		[]byte(cfg.GithubAppSecret),
+	)
+	if err != nil {
+		logger.Log("error", err)
+		os.Exit(1)
+	}
+
+	githubClient := gogithub.NewClient(&http.Client{
+		Transport: githubTransport,
+	})
+
+	registryEditor := ecr.NewChartEditor(
+		githubClient.Git,
+		cfg.GithubOrg,
+		cfg.OperationsRepository,
+		cfg.ReleaseBranch,
+		cfg.RegistryChartPath,
+	)
 
 	informer, err := k8s.NewInformer(ctx)
 	if err != nil {
@@ -63,8 +94,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	gitClient := ecr.NewGitHub(ctx, githubClient, cfg.GithubOrg, cfg.OperationsRepository, cfg.ReleaseBranch, cfg.RegistryChartPath)
-	imageReconciler := ecr.NewReconciler(gitClient, informer, logger)
+	imageReconciler := ecr.NewReconciler(logger, registryEditor, informer)
 
 	chartReconciler := github.NewReconciler(
 		helm.NewClient(helm.Host(cfg.TillerHost)),

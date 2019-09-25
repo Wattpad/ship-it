@@ -27,16 +27,9 @@ spec:
       - name: {{ template "ship-it.fullname" . }}
         image: {{ include "ship-it.api.image" . }}
         imagePullPolicy: {{ .Values.api.image.pullPolicy }}
-        envFrom:
-          - secretRef:
-              name: {{ .Values.api.secretName }}
         env:
         - name: AWS_REGION
           value: {{ .Values.awsRegion }}
-        {{ if .Values.github }}
-        - name: GITHUB_ORG
-          value: {{ .Values.github.org }}
-        {{- end}}
         {{- range $name, $value := .Values.devEnv }}
         - name: {{ $name }}
           value: {{ $value | quote }}
