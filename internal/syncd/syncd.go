@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"ship-it/internal"
+	"ship-it/internal/image"
 
 	"k8s.io/helm/pkg/proto/hapi/chart"
 )
@@ -13,7 +13,7 @@ import (
 // registry chart. For example, by updating chart values in a remote
 // repository to use the new image.
 type ImageReconciler interface {
-	Reconcile(context.Context, *internal.Image) error
+	Reconcile(context.Context, *image.Ref) error
 }
 
 // ImageListener models a stream of `*Image` events for service images. It calls

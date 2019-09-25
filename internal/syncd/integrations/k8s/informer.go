@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	shipitv1beta1 "ship-it-operator/api/v1beta1"
-	"ship-it/internal"
+	"ship-it/internal/image"
 	"ship-it/internal/unstructured"
 
 	"github.com/pkg/errors"
@@ -83,7 +83,7 @@ func NewInformerWithCache(ctx context.Context, c cache.Cache) (*ImageRepositoryI
 
 // Lookup returns the namespaced names of all releases that depend on the given
 // image repository URI.
-func (i *ImageRepositoryInformer) Lookup(image *internal.Image) ([]types.NamespacedName, error) {
+func (i *ImageRepositoryInformer) Lookup(image *image.Ref) ([]types.NamespacedName, error) {
 	URI := image.URI()
 	objs, err := i.indexer.ByIndex(imageRepositoriesIndex, URI)
 	if err != nil {

@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"time"
 
-	"ship-it/internal"
+	"ship-it/internal/image"
 	"ship-it/internal/syncd"
 	"ship-it/internal/syncd/middleware"
 
@@ -33,8 +33,8 @@ type pushEvent struct {
 
 var validImageTagRegex = regexp.MustCompile("^[0-9a-f]{40}$")
 
-func (e pushEvent) Image() *internal.Image {
-	return &internal.Image{
+func (e pushEvent) Image() image.Ref {
+	return image.Ref{
 		Registry:   e.RegistryId + ".dkr.ecr.us-east-1.amazonaws.com",
 		Repository: e.RepositoryName,
 		Tag:        e.Tag,
@@ -73,10 +73,10 @@ func (l *ImageListener) handler(r syncd.ImageReconciler) sqsconsumer.MessageHand
 		image := event.Image()
 
 		if !validImageTagRegex.MatchString(image.Tag) {
-			l.logger.Log("error", fmt.Sprintf("ignoring event for invalid image \"%s\"", image.Tagged()))
+			l.logger.Log("error", fmt.Sprintf("ignoring event for invalid image \"%s\"", image))
 			return nil
 		}
 
-		return r.Reconcile(ctx, image)
+		return r.Reconcile(ctx, &image)
 	}
 }

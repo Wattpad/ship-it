@@ -3,10 +3,10 @@ package k8s
 import (
 	"context"
 	"encoding/json"
-	"ship-it/internal"
 	"testing"
 
 	shipitv1beta1 "ship-it-operator/api/v1beta1"
+	"ship-it/internal/image"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -30,7 +30,7 @@ func TestLookup(t *testing.T) {
 	helmReleaseKind := "HelmRelease"
 	wordCountsRelease := "word-counts-release"
 
-	testImage := &internal.Image{
+	testImage := &image.Ref{
 		Registry:   "foo",
 		Repository: "word-counts-repo",
 		Tag:        "",

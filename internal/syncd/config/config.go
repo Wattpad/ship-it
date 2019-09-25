@@ -14,15 +14,17 @@ type Config struct {
 	DogstatsdHost        string `split_words:"true" required:"true"`
 	DogstatsdPort        string `split_words:"true" default:"8125"`
 	EcrQueue             string `split_words:"true" required:"true"`
-	GithubToken          string `split_words:"true" required:"true"`
+	GithubAppID          int    `envconfig:"GITHUB_APP_ID" required:"true"`
+	GithubAppSecret      string `split_words:"true" required:"true"`
+	GithubInstallationID int    `envconfig:"GITHUB_INSTALLATION_ID" required:"true"`
 	GithubOrg            string `split_words:"true" required:"true"`
 	GithubQueue          string `split_words:"true" required:"true"`
-	Namespace            string `split_words:"true" default:"default"`
-	ReleaseName          string `split_words:"true" required:"true"`
 	HelmTimeoutSeconds   int64  `split_words:"true" default:"10"`
+	Namespace            string `split_words:"true" default:"default"`
+	OperationsRepository string `split_words:"true" required:"true"`
 	RegistryChartPath    string `split_words:"true" required:"true"`
 	ReleaseBranch        string `split_words:"true" default:"master"`
-	OperationsRepository string `split_words:"true" required:"true"`
+	ReleaseName          string `split_words:"true" required:"true"`
 	TillerHost           string `split_words:"true" required:"true"`
 }
 
