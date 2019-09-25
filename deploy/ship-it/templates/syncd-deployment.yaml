@@ -27,6 +27,9 @@ spec:
         - name: {{ template "ship-it.fullname" . }}-syncd
           image: {{ include "ship-it.syncd.image" . }}
           imagePullPolicy: {{ .Values.syncd.image.pullPolicy }}
+          envFrom:
+            - secretKeyRef:
+              - name: {{ .Values.existingSecretName }}
           env:
             - name: AWS_REGION
               value: {{ .Values.awsRegion }}
@@ -44,12 +47,8 @@ spec:
               value: {{ .Values.syncd.releaseBranch }}
             - name: TILLER_HOST
               value: {{ .Values.tillerAddress }}
-          {{- if .Values.github }}
             - name: GITHUB_ORG
-              value: {{ .Values.github.org }}
-            - name: GITHUB_TOKEN
-              value: {{ .Values.github.token }}
-          {{- end}}
+              value: {{ .Values.syncd.githubOrg }}
           {{- range $name, $value := .Values.devEnv }}
             - name: {{ $name }}
               value: {{ $value | quote }}
