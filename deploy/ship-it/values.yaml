@@ -44,7 +44,7 @@ operator:
 
 syncd:
   annotations:
-    reloader.stakater.com/auto: true
+    reloader.stakater.com/auto: "true"
 
   image:
     repository: 723255503624.dkr.ecr.us-east-1.amazonaws.com/ship-it-syncd
