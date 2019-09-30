@@ -16,13 +16,13 @@ type ImageReconciler interface {
 	Reconcile(context.Context, *image.Ref) error
 }
 
-// ImageListener models a stream of `*Image` events for service images. It calls
+// ImageListener models a stream of `*image.Ref` events for service images. It calls
 // the ImageReconciler to reconcile new images with ship-it's service registry chart.
 type ImageListener interface {
 	Listen(context.Context, ImageReconciler) error
 }
 
-// RegistryChartReconciler is reconciles the registry chart with the
+// RegistryChartReconciler reconciles the registry chart with the
 // kubernetes cluster state. For example, by deploying the chart to a cluster.
 type RegistryChartReconciler interface {
 	Reconcile(context.Context, *chart.Chart) error
