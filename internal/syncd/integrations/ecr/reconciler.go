@@ -5,7 +5,6 @@ import (
 
 	"ship-it/internal/image"
 
-	"github.com/go-kit/kit/log"
 	"k8s.io/apimachinery/pkg/types"
 )
 
@@ -24,14 +23,12 @@ type ReleaseIndexer interface {
 type ImageReconciler struct {
 	editor  ChartEditor
 	indexer ReleaseIndexer
-	logger  log.Logger
 }
 
-func NewReconciler(l log.Logger, e ChartEditor, i ReleaseIndexer) *ImageReconciler {
+func NewReconciler(e ChartEditor, i ReleaseIndexer) *ImageReconciler {
 	return &ImageReconciler{
 		editor:  e,
 		indexer: i,
-		logger:  l,
 	}
 }
 

@@ -94,7 +94,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	imageReconciler := ecr.NewReconciler(logger, registryEditor, informer)
+	imageReconciler := ecr.NewReconciler(registryEditor, informer)
 
 	chartReconciler := github.NewReconciler(
 		helm.NewClient(helm.Host(cfg.TillerHost)),

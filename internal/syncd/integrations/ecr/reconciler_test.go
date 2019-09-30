@@ -7,7 +7,6 @@ import (
 
 	"ship-it/internal/image"
 
-	"github.com/go-kit/kit/log"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/types"
@@ -34,7 +33,7 @@ func (m *MockReleaseIndexer) Lookup(image *image.Ref) ([]types.NamespacedName, e
 func TestReconcileLookupFailure(t *testing.T) {
 	mockEditor := new(MockReleaseEditor)
 	mockIndexer := new(MockReleaseIndexer)
-	reconciler := NewReconciler(log.NewNopLogger(), mockEditor, mockIndexer)
+	reconciler := NewReconciler(mockEditor, mockIndexer)
 	inputImage := &image.Ref{
 		Registry:   "723255503624.dkr.ecr.us-east-1.amazonaws.com",
 		Repository: "bar",
@@ -53,7 +52,7 @@ func TestReconcilerUpdateFailure(t *testing.T) {
 	mockEditor := new(MockReleaseEditor)
 	mockIndexer := new(MockReleaseIndexer)
 
-	reconciler := NewReconciler(log.NewNopLogger(), mockEditor, mockIndexer)
+	reconciler := NewReconciler(mockEditor, mockIndexer)
 
 	inputImage := &image.Ref{
 		Registry:   "723255503624.dkr.ecr.us-east-1.amazonaws.com",
@@ -83,7 +82,7 @@ func TestReconcilerSuccess(t *testing.T) {
 	mockEditor := new(MockReleaseEditor)
 	mockIndexer := new(MockReleaseIndexer)
 
-	reconciler := NewReconciler(log.NewNopLogger(), mockEditor, mockIndexer)
+	reconciler := NewReconciler(mockEditor, mockIndexer)
 
 	inputImage := &image.Ref{
 		Registry:   "723255503624.dkr.ecr.us-east-1.amazonaws.com",
