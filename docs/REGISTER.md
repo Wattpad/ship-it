@@ -17,15 +17,13 @@ metadata:
     helmreleases.shipit.wattpad.com/slack: "#squad-velocity"
     helmreleases.shipit.wattpad.com/squad: "velocity"
     helmreleases.shipit.wattpad.com/sumologic: "https://service.us2.sumologic.com/ui/#/search/FS9RYU6LlHWYF082XFBGJ9oK698pJThnNQ1l18r0"
-  labels:
-    {{ include "ship-it-registry.labels" . | nindent 4 | trim }}
 spec:
   releaseName: word-counts
 
   chart:
     repository: https://wattpad.s3.amazonaws.com/helm-charts
-    path: sqs-consumer
-    revision: HEAD
+    name: sqs-consumer
+    version: HEAD
 
   values:
     autoscaler:
