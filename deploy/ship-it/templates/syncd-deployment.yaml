@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ template "ship-it.fullname" . }}-syncd
+  annotations:
+    {{ toYaml .Values.syncd.annotations | nindent 2 | trim }}
   labels:
     {{ include "ship-it.metadataLabels" . | nindent 2 | trim }}
 spec:
