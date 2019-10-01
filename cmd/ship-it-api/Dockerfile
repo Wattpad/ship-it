@@ -9,8 +9,10 @@ COPY operator/api ./operator/api
 RUN CGO_ENABLED=0 go build -o ship-it-api cmd/ship-it-api/main.go
 
 FROM node:12.3 AS node-build
+COPY web/package.json .
+RUN npm install
 COPY web .
-RUN npm install react-scripts && npm run build
+RUN npm run build
 
 FROM alpine:3.8
 RUN apk add --no-cache ca-certificates
