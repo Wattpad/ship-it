@@ -16,7 +16,7 @@ spec:
   chart:
     repository: s3://charts.wattpadhq.com
     name: microservice
-    version: 0.2.2
+    version: 0.2.3-test
 
   values:
     image:

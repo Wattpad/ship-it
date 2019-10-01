@@ -51,8 +51,15 @@ jobs:
         - curl -sL https://github.com/kubernetes-sigs/kubebuilder/releases/download/v1.0.8/kubebuilder_1.0.8_linux_amd64.tar.gz | tar -xz -C /tmp/
         - sudo mv /tmp/kubebuilder_1.0.8_linux_amd64 /usr/local/kubebuilder
         - export PATH=$PATH:/usr/local/kubebuilder/bin
+        - curl -Lo kind https://github.com/kubernetes-sigs/kind/releases/download/0.0.1/kind-linux-amd64 && chmod +x kind && sudo mv kind /usr/local/bin/
+        - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+        - curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh
+        - chmod 700 get_helm.sh && sudo ./get_helm.sh
+        - make kind
+        - export KUBECONFIG="$(kind get kubeconfig-path --name ship-it-dev)"
         - cd operator
       script:
+        - make install
         - make test
 
     - stage: Test and Lint

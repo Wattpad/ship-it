@@ -23,6 +23,8 @@ import (
 
 	shipitv1beta1 "ship-it-operator/api/v1beta1"
 
+	appsv1 "k8s.io/api/apps/v1"
+
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
@@ -239,8 +241,61 @@ func (r *HelmReleaseReconciler) deploy(ctx context.Context, rls *shipitv1beta1.H
 	case release.Status_DELETED:
 		return r.install(ctx, rls)
 	case release.Status_DEPLOYED:
-		if oldCondition.Type == release.Status_DEPLOYED.String() {
+		if oldCondition.Type == release.Status_FAILED.String() ||
+			oldCondition.Type == release.Status_DEPLOYED.String() {
 			return r.upgrade(ctx, rls)
+		}
+
+		var deploymentList appsv1.DeploymentList
+
+		err = r.List(
+			ctx,
+			&deploymentList,
+			client.InNamespace(rls.ObjectMeta.Namespace),
+			client.MatchingLabels(map[string]string{
+				// this makes an assumption about the chart
+				// we could have a configurable `matcher` to explicitly tell ship-it what things it should be watching
+				"instance": releaseName,
+			}),
+		)
+
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		deployments := deploymentList.Items
+
+		for _, deployment := range deployments {
+			conditions := deployment.Status.Conditions
+
+			var available bool
+			var progressing bool
+
+			for _, condition := range conditions {
+				if condition.Type == "Available" {
+					available = condition.Status == "True"
+				} else if condition.Type == "Progressing" {
+					progressing = condition.Status == "True"
+				}
+			}
+
+			if !available && !progressing {
+				rls.Status.SetCondition(shipitv1beta1.HelmReleaseCondition{
+					Type:    release.Status_FAILED.String(),
+					Reason:  oldCondition.Reason,
+					Message: "Deployments in the release did not roll out successfully",
+				})
+				return ctrl.Result{}, r.Status().Update(ctx, rls)
+			}
+
+			if !available && progressing {
+				rls.Status.SetCondition(shipitv1beta1.HelmReleaseCondition{
+					Type:    oldCondition.Type,
+					Reason:  oldCondition.Reason,
+					Message: "Deployments in the release are still rolling out",
+				})
+				return ctrl.Result{RequeueAfter: r.GracePeriod}, r.Status().Update(ctx, rls)
+			}
 		}
 
 		return ctrl.Result{}, r.Status().Update(ctx, r.manager.Deployed(rls))
@@ -285,6 +340,7 @@ func (r *HelmReleaseReconciler) rollback(ctx context.Context, rls *shipitv1beta1
 	releaseName := rls.Spec.ReleaseName
 
 	rls, err := r.manager.Rollback(rls)
+
 	if err != nil {
 		return ctrl.Result{}, errors.Wrapf(err, "failed to roll back release %s", releaseName)
 	}

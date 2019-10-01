@@ -20,6 +20,8 @@ import (
 	"os"
 	"time"
 
+	appsv1 "k8s.io/api/apps/v1"
+
 	shipitv1beta1 "ship-it-operator/api/v1beta1"
 
 	"ship-it-operator/chartdownloader"
@@ -41,8 +43,8 @@ var (
 )
 
 func init() {
-
 	shipitv1beta1.AddToScheme(scheme)
+	appsv1.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
 }
 

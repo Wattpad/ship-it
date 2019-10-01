@@ -10,7 +10,9 @@ all: manager
 
 # Run tests
 test: generate fmt vet manifests
-	go test ./... -coverprofile cover.out
+	kill -9 $(shell ps aux | grep 'port-forward pod/tiller-deploy' | grep -v 'grep' | awk '{print $$2}') 2>/dev/null || true
+	kubectl -n kube-system port-forward $(shell kubectl get po -n kube-system -o name -lapp=helm) 44134 &
+	go test -v ./... -coverprofile cover.out
 
 # Build manager binary
 manager: generate fmt vet
