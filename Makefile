@@ -36,9 +36,9 @@ docs/operator-release-states.png: docs/operator-release-states.dot
 
 docs: api/*.json docs/operator-release-states.png
 
-kind:
-	@echo Creating a kind cluster...
-	kind create cluster --name $(KIND_CLUSTER_NAME) >/dev/null 2>&1 || true
+kind-up:
+	@echo Creating the $(KIND_CLUSTER_NAME) cluster...
+	kind create cluster --config hack/$(KIND_CLUSTER_NAME).yaml --name $(KIND_CLUSTER_NAME) >/dev/null 2>&1 || true
 	$(eval KUBECONFIG := $(shell kind get kubeconfig-path --name $(KIND_CLUSTER_NAME)))
 	KUBECONFIG=$(KUBECONFIG) kubectl apply -f hack/tiller/rbac.yaml
 	KUBECONFIG=$(KUBECONFIG) kubectl apply -f hack/github/secret.yaml
@@ -47,6 +47,10 @@ kind:
 	@echo Done! Set your kubectl context:
 	@echo
 	@echo export KUBECONFIG=$(KUBECONFIG)
+
+kind-down:
+	@echo Destroying the $(KIND_CLUSTER_NAME) cluster...
+	kind delete cluster --name $(KIND_CLUSTER_NAME)
 
 kind-install-ship-it:
 	kind load docker-image --name $(KIND_CLUSTER_NAME) ship-it-api:$(VERSION)
