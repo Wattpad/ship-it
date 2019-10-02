@@ -42,7 +42,7 @@ $ cd operator && make docker-build
 $ make kind-deploy
 ```
 
-5. Connect to the service
+5. Connect to the service's node port (check the chart values)
 
 ```bash
 curl -i http://localhost:31901/api/releases
