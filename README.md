@@ -36,10 +36,10 @@ $ TARGET=ship-it-syncd make build
 $ cd operator && make docker-build
 ```
 
-4. Install/upgrade local ship-it images
+4. Deploy local ship-it images
 
 ```bash
-$ make kind-install-ship-it
+$ make kind-deploy
 ```
 
 5. Connect to the service

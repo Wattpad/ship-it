@@ -52,7 +52,7 @@ kind-down:
 	@echo Destroying the $(KIND_CLUSTER_NAME) cluster...
 	kind delete cluster --name $(KIND_CLUSTER_NAME)
 
-kind-install-ship-it:
+kind-deploy:
 	kind load docker-image --name $(KIND_CLUSTER_NAME) ship-it-api:$(VERSION)
 	kind load docker-image --name $(KIND_CLUSTER_NAME) ship-it-syncd:$(VERSION)
 	kind load docker-image --name $(KIND_CLUSTER_NAME) ship-it-operator:$(VERSION)
