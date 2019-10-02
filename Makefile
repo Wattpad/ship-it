@@ -41,8 +41,16 @@ kind:
 	kind create cluster --name $(KIND_CLUSTER_NAME) >/dev/null 2>&1 || true
 	$(eval KUBECONFIG := $(shell kind get kubeconfig-path --name $(KIND_CLUSTER_NAME)))
 	KUBECONFIG=$(KUBECONFIG) kubectl apply -f hack/tiller/rbac.yaml
+	KUBECONFIG=$(KUBECONFIG) kubectl apply -f hack/github/secret.yaml
 	KUBECONFIG=$(KUBECONFIG) helm init --service-account tiller
 	KUBECONFIG=$(KUBECONFIG) kubectl rollout status deployment -n kube-system tiller-deploy
 	@echo Done! Set your kubectl context:
 	@echo
 	@echo export KUBECONFIG=$(KUBECONFIG)
+
+kind-install-ship-it:
+	kind load docker-image --name $(KIND_CLUSTER_NAME) ship-it-api:$(VERSION)
+	kind load docker-image --name $(KIND_CLUSTER_NAME) ship-it-syncd:$(VERSION)
+	kind load docker-image --name $(KIND_CLUSTER_NAME) ship-it-operator:$(VERSION)
+	helm upgrade --install localstack deploy/localstack
+	helm upgrade --install ship-it deploy/ship-it --set api.image.tag=$(VERSION),api.image.repository=ship-it-api,syncd.image.tag=$(VERSION),syncd.image.repository=ship-it-syncd,operator.image.tag=$(VERSION),operator.image.repository=ship-it-operator,devEnv.DOGSTATSD_HOST="localhost"
