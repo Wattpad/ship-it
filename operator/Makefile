@@ -1,6 +1,8 @@
 
 # Image URL to use all building/pushing image targets
-IMG ?= 723255503624.dkr.ecr.us-east-1.amazonaws.com/ship-it-operator:$(shell git rev-parse HEAD)
+IMAGE ?= ship-it-operator:$(shell git rev-parse HEAD)
+REGISTRY := 723255503624.dkr.ecr.us-east-1.amazonaws.com
+
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=true"
 
@@ -45,11 +47,11 @@ generate: controller-gen
 
 # Build the docker image
 docker-build:
-	docker build . -t ${IMG}
+	docker build . -t ${IMAGE}
 
 # Push the docker image
 docker-push: docker-build
-	docker push ${IMG}
+	docker push $(REGISTRY)/${IMAGE}
 
 # find or download controller-gen
 # download controller-gen if necessary

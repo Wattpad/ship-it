@@ -8,41 +8,54 @@ The technical background and architecture of Ship-it can be found in the overvie
 
 ## Local Development
 
-This project uses skaffold for local development and testing. To get started,
-you'll need to install these tools locally:
+This project uses kind for local development and testing. To get started,
+you'll need to install these tools to your development machine:
 
 * helm: https://github.com/helm/helm
-* minikube: https://github.com/kubernetes/minikube
-* skaffold: https://github.com/GoogleContainerTools/skaffold
+* kind: https://github.com/kubernetes-sigs/kind
 
-1. Start minikube cluster
+1. Create a new kind cluster
 
 ```bash
-$ minikube start
+$ make kind-up
 ```
 
 2. Update kubectl's cluster context
 
 ```bash
-$ minikube update-context
+$ export KUBECONFIG=$(kind get kubeconfig-path --name="ship-it-dev")
 $ kubectl config current-context
-minikube
+kubernetes-admin@ship-it-dev
 ```
 
-3. Install tiller in minikube
+3. Build local images
 
 ```bash
-$ helm init
+$ TARGET=ship-it-api make build
+$ TARGET=ship-it-syncd make build
+$ cd operator && make docker-build
 ```
 
-4. Run skaffold in development mode
+4. Deploy local ship-it images
 
 ```bash
-$ skaffold dev
+$ make kind-deploy
 ```
 
-5. Get the service address
+5. Connect to the service's node port (check the chart values)
 
 ```bash
-minikube service ship-it-api
+curl -i http://localhost:31901/api/releases
+```
+
+or
+
+```bash
+open http://localhost:31901
+```
+
+6. Destroy cluster when finished
+
+```bash
+make kind-down
 ```
