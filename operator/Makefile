@@ -51,6 +51,7 @@ docker-build:
 
 # Push the docker image
 docker-push: docker-build
+	docker tag $(IMAGE) $(REGISTRY)/${IMAGE}
 	docker push $(REGISTRY)/${IMAGE}
 
 # find or download controller-gen
