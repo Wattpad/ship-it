@@ -1,5 +1,8 @@
 .PHONY: build docs jsonschema push
 
+CHART_VERSION := $(shell helm inspect deploy/ship-it | awk '/version/{ print $$2; }')
+CHART_REPOSITORY := $(shell helm repo list | awk '/wattpad/{ print $$2; }')
+
 REGISTRY := 723255503624.dkr.ecr.us-east-1.amazonaws.com
 VERSION := $(shell git rev-parse HEAD)
 
@@ -21,6 +24,10 @@ push: build
 	docker tag $(TARGET_IMAGE) $(REGISTRY)/$(LATEST_IMAGE)
 	docker push $(REGISTRY)/$(TARGET_IMAGE)
 	docker push $(REGISTRY)/$(LATEST_IMAGE)
+
+chart:
+	helm package deploy/ship-it
+	helm s3 push ship-it-$(CHART_VERSION).tgz $(CHART_REPOSITORY)
 
 # empty target
 internal/api/models/*.go:
