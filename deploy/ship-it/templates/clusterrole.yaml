@@ -25,9 +25,16 @@ rules:
   - helmreleases
   verbs:
   - get
+  - put
   - list
   - watch
   - create
   - update
   - patch
   - delete
+- apiGroups:
+  - shipit.wattpad.com
+  resources:
+  - "*/status"
+  verbs:
+  - update

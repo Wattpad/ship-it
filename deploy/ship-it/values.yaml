@@ -6,6 +6,8 @@ existingSecretName: ship-it
 sslCertPath: /etc/ssl/certs/ca-certificates.crt
 tillerAddress: tiller-deploy.kube-system.svc.cluster.local:44134
 
+iamRoleArn: arn:aws:iam::723255503624:role/ship-it-prod-v4
+
 api:
   image:
     repository: 723255503624.dkr.ecr.us-east-1.amazonaws.com/ship-it-api
