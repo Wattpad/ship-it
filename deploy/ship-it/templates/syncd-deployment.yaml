@@ -52,6 +52,12 @@ spec:
               value: {{ .Values.tillerAddress }}
             - name: GITHUB_ORG
               value: {{ .Values.syncd.githubOrg }}
+          {{- if .Values.useDogstatsdHostIP }}
+            - name: DOGSTATSD_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+          {{- end }}
           {{- range $name, $value := .Values.devEnv }}
             - name: {{ $name }}
               value: {{ $value | quote }}
