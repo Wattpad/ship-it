@@ -2,11 +2,13 @@ nameOverride: ""
 fullnameOverride: ""
 
 awsRegion: us-east-1
-existingSecretName: ship-it
-sslCertPath: /etc/ssl/certs/ca-certificates.crt
+sslCertPath: /etc/ssl/certs/ca-bundle.crt
 tillerAddress: tiller-deploy.kube-system.svc.cluster.local:44134
 
 iamRoleArn: arn:aws:iam::723255503624:role/ship-it-prod-v4
+
+externalSecretName: prod-v3/default/ship-it
+existingSecretName: ship-it
 
 useDogstatsdHostIP: true
 
