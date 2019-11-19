@@ -30,6 +30,12 @@ spec:
         env:
         - name: AWS_REGION
           value: {{ .Values.awsRegion }}
+        {{- if .Values.useDogstatsdHostIP }}
+        - name: DOGSTATSD_HOST
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        {{- end }}
         {{- range $name, $value := .Values.devEnv }}
         - name: {{ $name }}
           value: {{ $value | quote }}
