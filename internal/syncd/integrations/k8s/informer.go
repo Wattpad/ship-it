@@ -40,7 +40,7 @@ type ImageRepositoryInformer struct {
 	indexer toolscache.Indexer
 }
 
-func NewInformer(ctx context.Context) (*ImageRepositoryInformer, error) {
+func NewInformer(ctx context.Context, ns string) (*ImageRepositoryInformer, error) {
 	scheme := runtime.NewScheme()
 	shipitv1beta1.AddToScheme(scheme)
 
@@ -49,7 +49,10 @@ func NewInformer(ctx context.Context) (*ImageRepositoryInformer, error) {
 		return nil, err
 	}
 
-	c, err := cache.New(config, cache.Options{Scheme: scheme})
+	c, err := cache.New(config, cache.Options{
+		Scheme:    scheme,
+		Namespace: ns,
+	})
 	if err != nil {
 		return nil, err
 	}

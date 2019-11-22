@@ -88,7 +88,7 @@ func main() {
 		cfg.RegistryChartPath,
 	)
 
-	informer, err := k8s.NewInformer(ctx)
+	informer, err := k8s.NewInformer(ctx, cfg.Namespace)
 	if err != nil {
 		logger.Log("error", err)
 		os.Exit(1)
