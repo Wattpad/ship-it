@@ -58,7 +58,6 @@ operator:
 
   gracePeriod: 10s
   metricsPort: 8080
-  namespace: kube-system
   enableLeaderElection: false
 
 syncd:
@@ -71,8 +70,6 @@ syncd:
 
   ecrQueue: ship-it-ecr.fifo
   githubQueue: ship-it-github.fifo
-
-  namespace: kube-system
 
   githubOrg: ""
   operationsRepository: ""
