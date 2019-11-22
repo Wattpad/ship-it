@@ -2,19 +2,31 @@ nameOverride: ""
 fullnameOverride: ""
 
 awsRegion: us-east-1
+
+# SSL Certs path for EKS Linux AMI
 sslCertPath: /etc/ssl/certs/ca-bundle.crt
+
+# Tiller service's cluster address
 tillerAddress: tiller-deploy.kube-system.svc.cluster.local:44134
 
-iamRoleArn: arn:aws:iam::723255503624:role/ship-it-prod-v4
+# IAM role used by ship-it's ServiceAccount
+iamRoleArn: ""
 
-externalSecretName: prod-v3/default/ship-it
-existingSecretName: ship-it
+# Optional: The desired name of ship-it's ExternalSecret. If no name is provided
+# an ExternalSecret will not be created.
+externalSecretName: ""
 
+# Optional: The name of an existing Secret which is used to populate the syncd
+# deployment's pod env.
+existingSecretName: ""
+
+# Whether to use the host IP as the DOGSTATSD_HOST to send metrics to. Should be
+# set to true if using a dd-agent Daemonset.
 useDogstatsdHostIP: true
 
 api:
   image:
-    repository: 723255503624.dkr.ecr.us-east-1.amazonaws.com/ship-it-api
+    repository: wattpad/ship-it-api
     tag: latest
     pullPolicy: IfNotPresent
 
@@ -26,14 +38,14 @@ api:
       cpu: 1
       memory: 1Gi
 
-  nodePort: 31901
+  nodePort: 30001
   containerPort: 80
   servicePort: 80
 
 operator:
   image:
-    repository: 723255503624.dkr.ecr.us-east-1.amazonaws.com/ship-it-operator
-    tag: ae101faf94f89e8410726a9fe261eee24e79eac2
+    repository: wattpad/ship-it-operator
+    tag: latest
     pullPolicy: IfNotPresent
 
   resources:
@@ -46,29 +58,28 @@ operator:
 
   gracePeriod: 10s
   metricsPort: 8080
-  namespace: wattpad-system
+  namespace: kube-system
   enableLeaderElection: false
 
 syncd:
-  annotations:
-    reloader.stakater.com/auto: "true"
+  annotations: {}
 
   image:
-    repository: 723255503624.dkr.ecr.us-east-1.amazonaws.com/ship-it-syncd
+    repository: wattpad/ship-it-syncd
     tag: latest
     pullPolicy: IfNotPresent
 
   ecrQueue: ship-it-ecr.fifo
   githubQueue: ship-it-github.fifo
 
-  namespace: wattpad-system
+  namespace: kube-system
 
-  githubOrg: Wattpad
-  operationsRepository: miranda
+  githubOrg: ""
+  operationsRepository: ""
 
   releaseName: ship-it-registry
   releaseBranch: master
-  registryChartPath: k8s/charts/components/ship-it-registry
+  registryChartPath: ""
 
   resources:
     requests:

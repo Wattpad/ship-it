@@ -46,6 +46,8 @@ spec:
               value: {{ .Values.syncd.ecrQueue }}
             - name: GITHUB_QUEUE
               value: {{ .Values.syncd.githubQueue }}
+            - name: NAMESPACE
+              value: {{ .Release.Namespace }}
             - name: RELEASE_BRANCH
               value: {{ .Values.syncd.releaseBranch }}
             - name: TILLER_HOST
