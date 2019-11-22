@@ -34,6 +34,8 @@ spec:
             - {{ .Values.tillerAddress }}
             - --aws-region
             - {{ .Values.awsRegion }}
+            - --namespace
+            - {{ .Values.namespace }}
             - --grace-period
             - {{ .Values.operator.gracePeriod }}
             - --metrics-addr
