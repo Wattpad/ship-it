@@ -34,7 +34,9 @@ spec:
             - {{ .Values.tillerAddress }}
             - --aws-region
             - {{ .Values.awsRegion }}
-            - --namespace
+            - --target-namespace
+            - {{ .Values.operator.targetNamespace }}
+            - --watch-namespace
             - {{ .Release.Namespace }}
             - --grace-period
             - {{ .Values.operator.gracePeriod }}

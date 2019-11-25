@@ -59,6 +59,7 @@ operator:
   gracePeriod: 10s
   metricsPort: 8080
   enableLeaderElection: false
+  targetNamespace: "default"
 
 syncd:
   annotations: {}
