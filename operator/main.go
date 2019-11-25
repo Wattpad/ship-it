@@ -51,14 +51,16 @@ func main() {
 		awsRegion            string
 		gracePeriod          time.Duration
 		metricsAddr          string
-		namespace            string
+		targetNamespace      string
+		watchNamespace       string
 		tillerAddr           string
 		enableLeaderElection bool
 	)
 
 	flag.StringVar(&awsRegion, "aws-region", "us-east-1", "The AWS region where the operator's chart repository is hosted")
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
-	flag.StringVar(&namespace, "namespace", "default", "The cluster namespace where the operator will deploy releases")
+	flag.StringVar(&watchNamespace, "watch-namespace", "default", "The cluster namespace where the operator will watch HelmRelease resources")
+	flag.StringVar(&targetNamespace, "target-namespace", "default", "The cluster namespace where the operator will deploy releases")
 	flag.StringVar(&tillerAddr, "tiller-address", "localhost:44134", "The cluster address of the tiller service")
 	flag.DurationVar(&gracePeriod, "grace-period", 10*time.Second, "The duration the operator will wait before checking a release's status after reconciling")
 	flag.BoolVar(&enableLeaderElection, "enable-leader-election", false,
@@ -70,7 +72,7 @@ func main() {
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:             scheme,
 		MetricsBindAddress: metricsAddr,
-		Namespace:          namespace,
+		Namespace:          watchNamespace,
 		LeaderElection:     enableLeaderElection,
 	})
 	if err != nil {
@@ -97,7 +99,7 @@ func main() {
 		helm.NewClient(helm.Host(tillerAddr)),
 		chartdownloader.New(downloaders),
 		mgr.GetEventRecorderFor("ship-it"),
-		controllers.Namespace(namespace),
+		controllers.Namespace(targetNamespace),
 		controllers.GracePeriod(gracePeriod),
 	)
 
