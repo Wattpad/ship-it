@@ -70,6 +70,7 @@ func main() {
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:             scheme,
 		MetricsBindAddress: metricsAddr,
+		Namespace:          namespace,
 		LeaderElection:     enableLeaderElection,
 	})
 	if err != nil {
