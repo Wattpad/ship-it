@@ -74,7 +74,13 @@ jobs:
       before_script:
         - export PATH=$PATH:$HOME/.local/bin
         - eval $(aws ecr get-login --no-include-email --region us-east-1)
+        - curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh
+        - chmod 700 get_helm.sh && sudo ./get_helm.sh
+        - helm init --client-only
+        - helm plugin install https://github.com/hypnoglow/helm-s3.git
       script:
+        - helm repo add wattpad s3://charts.wattpadhq.com
+        - make chart || true
         - TARGET=ship-it-api make push
         - TARGET=ship-it-syncd make push
         - cd operator && make docker-push
