@@ -16,34 +16,20 @@ services:
 stages:
   - name: Test and Lint
     if: type = pull_request
-  - name: Build
-    if: type = pull_request
   - name: Push
     if: type = push AND branch = master
-  - name: Codecov
-    if: type = pull_request
 
 jobs:
   include:
-    - stage: Build
-      name: Docker
-      script:
-        - TARGET=ship-it-api make build
-        - TARGET=ship-it-syncd make build
-    
-    - stage: Build
-      name: Operator
-      before_script:
-        - cd operator
-      script:
-        - make docker-build
-
     - stage: Test and Lint
-      name: Go
+      name: Go and Codecov
       install: GO111MODULE=off go get "github.com/golangci/golangci-lint/cmd/golangci-lint"
       script:
         - golangci-lint --deadline=5m run -D errcheck -E goimports -E interfacer -E scopelint ./...
-        - go test ./...
+        - go test -race -coverprofile=coverage.txt -covermode=atomic ./...
+        - TARGET=ship-it-api make build
+        - TARGET=ship-it-syncd make build
+      after_success: bash <(curl -s https://codecov.io/bash)
 
     - stage: Test and Lint
       name: Operator
@@ -54,6 +40,7 @@ jobs:
         - cd operator
       script:
         - make test
+        - make docker-build
 
     - stage: Test and Lint
       name: JavaScript
@@ -84,11 +71,6 @@ jobs:
         - TARGET=ship-it-api make push
         - TARGET=ship-it-syncd make push
         - cd operator && make docker-push
-
-    - stage: Codecov
-      name: Test Coverage Report
-      script: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
-      after_success: bash <(curl -s https://codecov.io/bash)
 
 branches:
   only:
