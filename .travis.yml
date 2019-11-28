@@ -46,15 +46,6 @@ jobs:
       name: JavaScript
       script: cd web && npm install -D && npm run lint && npm run test
 
-    - stage: Test and Lint
-      name: Helm Lint
-      script:
-        - curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh
-        - chmod 700 get_helm.sh && sudo ./get_helm.sh
-        - helm init --client-only
-        - helm lint deploy/ship-it
-        - helm lint deploy/localstack
-
     - stage: Push
       name: Push
       install: pip install --user awscli
@@ -64,6 +55,8 @@ jobs:
         - curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh
         - chmod 700 get_helm.sh && sudo ./get_helm.sh
         - helm init --client-only
+        - helm lint deploy/ship-it
+        - helm lint deploy/localstack
         - helm plugin install https://github.com/hypnoglow/helm-s3.git
       script:
         - helm repo add wattpad s3://charts.wattpadhq.com
