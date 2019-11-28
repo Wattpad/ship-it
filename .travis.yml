@@ -23,7 +23,7 @@ jobs:
   include:
     - stage: Test and Lint
       name: Go and Codecov
-      install: GO111MODULE=off go get "github.com/golangci/golangci-lint/cmd/golangci-lint"
+      install: curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $(go env GOPATH)/bin v1.21.0
       script:
         - golangci-lint --deadline=5m run -D errcheck -E goimports -E interfacer -E scopelint ./...
         - go test -race -coverprofile=coverage.txt -covermode=atomic ./...
