@@ -1,7 +1,7 @@
 .PHONY: build docs jsonschema push
 
-CHART_VERSION := $(shell helm inspect deploy/ship-it | awk '/version/{ print $$2; }')
-CHART_REPOSITORY := $(shell helm repo list | awk '/wattpad/{ print $$1; }')
+CHART_VERSION = $(shell helm inspect deploy/ship-it | awk '/version/{ print $$2; }')
+CHART_REPOSITORY = $(shell helm repo list | awk '/wattpad/{ print $$1; }')
 
 REGISTRY := 723255503624.dkr.ecr.us-east-1.amazonaws.com
 VERSION := $(shell git rev-parse HEAD)

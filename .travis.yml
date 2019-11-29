@@ -14,38 +14,39 @@ services:
   - docker
 
 stages:
-  - name: Test and Lint
+  - name: Lint
     if: type = pull_request
-  - name: Build
+  - name: Test and Build
     if: type = pull_request
   - name: Push
     if: type = push AND branch = master
-  - name: Codecov
-    if: type = pull_request
 
 jobs:
   include:
-    - stage: Build
-      name: Docker
+    - stage: Lint
+      name: Go
+      install: curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $(go env GOPATH)/bin v1.21.0
+      script: golangci-lint --deadline=5m run -D errcheck -E goimports -E interfacer -E scopelint ./...
+
+    - stage: Lint
+      name: Helm
+      install:
+        - curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh
+        - chmod 700 get_helm.sh && sudo ./get_helm.sh
       script:
+        - helm init --client-only
+        - helm lint deploy/ship-it
+        - helm lint deploy/localstack
+
+    - stage: Test and Build
+      name: Go
+      script:
+        - go test -race -coverprofile=coverage.txt -covermode=atomic ./...
         - TARGET=ship-it-api make build
         - TARGET=ship-it-syncd make build
-    
-    - stage: Build
-      name: Operator
-      before_script:
-        - cd operator
-      script:
-        - make docker-build
+      after_success: bash <(curl -s https://codecov.io/bash)
 
-    - stage: Test and Lint
-      name: Go
-      install: GO111MODULE=off go get "github.com/golangci/golangci-lint/cmd/golangci-lint"
-      script:
-        - golangci-lint --deadline=5m run -D errcheck -E goimports -E interfacer -E scopelint ./...
-        - go test ./...
-
-    - stage: Test and Lint
+    - stage: Test and Build
       name: Operator
       before_script:
         - curl -sL https://github.com/kubernetes-sigs/kubebuilder/releases/download/v1.0.8/kubebuilder_1.0.8_linux_amd64.tar.gz | tar -xz -C /tmp/
@@ -54,19 +55,11 @@ jobs:
         - cd operator
       script:
         - make test
+        - make docker-build
 
-    - stage: Test and Lint
+    - stage: Test and Build
       name: JavaScript
       script: cd web && npm install -D && npm run lint && npm run test
-
-    - stage: Test and Lint
-      name: Helm Lint
-      script:
-        - curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh
-        - chmod 700 get_helm.sh && sudo ./get_helm.sh
-        - helm init --client-only
-        - helm lint deploy/ship-it
-        - helm lint deploy/localstack
 
     - stage: Push
       name: Push
@@ -84,11 +77,6 @@ jobs:
         - TARGET=ship-it-api make push
         - TARGET=ship-it-syncd make push
         - cd operator && make docker-push
-
-    - stage: Codecov
-      name: Test Coverage Report
-      script: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
-      after_success: bash <(curl -s https://codecov.io/bash)
 
 branches:
   only:
