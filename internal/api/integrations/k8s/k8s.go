@@ -77,9 +77,10 @@ func transform(r shipitv1beta1.HelmRelease) models.Release {
 	annotations := r.Annotations()
 
 	return models.Release{
-		Name:       r.ObjectMeta.GetName(),
-		Created:    r.ObjectMeta.GetCreationTimestamp().Time,
-		AutoDeploy: annotations.AutoDeploy(),
+		Name:         r.ObjectMeta.GetName(),
+		Created:      r.ObjectMeta.GetCreationTimestamp().Time,
+		LastDeployed: r.Status.GetCondition().LastUpdateTime.Time,
+		AutoDeploy:   annotations.AutoDeploy(),
 		Owner: models.Owner{
 			Squad: annotations.Squad(),
 			Slack: annotations.Slack(),
