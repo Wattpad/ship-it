@@ -30,6 +30,8 @@ spec:
         env:
         - name: AWS_REGION
           value: {{ .Values.awsRegion }}
+        - name: TILLER_ADDRESS
+          value: {{ .Values.tillerAddress }}
         {{- if .Values.useDogstatsdHostIP }}
         - name: DOGSTATSD_HOST
           valueFrom:
