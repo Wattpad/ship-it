@@ -14,10 +14,8 @@ type ReleaseResources struct {
 	client ReleaseStatuser
 }
 
-func New() *ReleaseResources {
-	return &ReleaseResources{
-		client: helm.NewClient(),
-	}
+func New(client ReleaseStatuser) *ReleaseResources {
+	return &ReleaseResources{client: client}
 }
 
 func (r *ReleaseResources) Get(name string) (string, error) {
