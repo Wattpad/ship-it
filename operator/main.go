@@ -25,7 +25,7 @@ import (
 	"ship-it-operator/chartdownloader"
 	"ship-it-operator/controllers"
 
-	"ship-it-operator/notifications/slack"
+	"ship-it-operator/notifications"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -103,7 +103,7 @@ func main() {
 	reconciler := controllers.NewHelmReleaseReconciler(
 		ctrl.Log,
 		mgr.GetClient(),
-		slack.NewManager(slackToken, slackChannel),
+		notifications.NewSlack(slackToken, slackChannel),
 		helm.NewClient(helm.Host(tillerAddr)),
 		chartdownloader.New(downloaders),
 		mgr.GetEventRecorderFor("ship-it"),

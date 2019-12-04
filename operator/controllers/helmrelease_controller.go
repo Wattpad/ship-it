@@ -23,8 +23,6 @@ import (
 
 	shipitv1beta1 "ship-it-operator/api/v1beta1"
 
-	"ship-it-operator/notifications"
-
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
@@ -47,6 +45,11 @@ type ChartDownloader interface {
 	Download(ctx context.Context, chart string, version string) (*chart.Chart, error)
 }
 
+// Notifier sends a notification
+type Notifier interface {
+	Send(string) error
+}
+
 type HelmClient interface {
 	DeleteRelease(rlsName string, opts ...helm.DeleteOption) (*hapi.UninstallReleaseResponse, error)
 	InstallReleaseFromChart(chart *chart.Chart, ns string, opts ...helm.InstallOption) (*hapi.InstallReleaseResponse, error)
@@ -63,7 +66,7 @@ type HelmReleaseReconciler struct {
 	Log logr.Logger
 
 	downloader ChartDownloader
-	notifier   notifications.Notifier
+	notifier   Notifier
 	helm       HelmClient
 	manager    ReleaseManager
 }
@@ -87,7 +90,7 @@ func GracePeriod(d time.Duration) ReconcilerOption {
 	}
 }
 
-func NewHelmReleaseReconciler(l logr.Logger, client client.Client, notifier notifications.Notifier, helm HelmClient, d ChartDownloader, rec record.EventRecorder, opts ...ReconcilerOption) *HelmReleaseReconciler {
+func NewHelmReleaseReconciler(l logr.Logger, client client.Client, notifier Notifier, helm HelmClient, d ChartDownloader, rec record.EventRecorder, opts ...ReconcilerOption) *HelmReleaseReconciler {
 	var cfg reconcilerConfig
 	for _, opt := range opts {
 		opt(&cfg)
