@@ -56,5 +56,5 @@ spec:
               valueFrom:
                 secretRef:
                   name: {{ .Values.existingSecretName }}
-                  key: slack_token
+                  key: SLACK_TOKEN
                   optional: false
