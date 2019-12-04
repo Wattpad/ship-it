@@ -69,8 +69,8 @@ func main() {
 	flag.DurationVar(&gracePeriod, "grace-period", 10*time.Second, "The duration the operator will wait before checking a release's status after reconciling")
 	flag.BoolVar(&enableLeaderElection, "enable-leader-election", false,
 		"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
-	flag.StringVar(&slackChannel, "slack-channel", "us-east-1", "The channel to send Slack notifications to")
-	flag.StringVar(&slackToken, "slack-token", "us-east-1", "API token for Slack")
+	flag.StringVar(&slackChannel, "slack-channel", "", "The channel to send Slack notifications to")
+	flag.StringVar(&slackToken, "slack-token", "", "API token for Slack")
 
 	flag.Parse()
 

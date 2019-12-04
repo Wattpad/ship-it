@@ -22,12 +22,12 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-var sentNotifications []string
-
-type fakeNotifier struct{}
+type fakeNotifier struct {
+	sentNotifications []string
+}
 
 func (m *fakeNotifier) Send(msg string) error {
-	sentNotifications = append(sentNotifications, msg)
+	m.sentNotifications = append(m.sentNotifications, msg)
 	return nil
 }
 
