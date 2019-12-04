@@ -10,12 +10,13 @@ import (
 
 	"ship-it/internal/api"
 	"ship-it/internal/api/config"
-	"ship-it/internal/api/integrations/helm"
+	helmstatus "ship-it/internal/api/integrations/helm"
 	"ship-it/internal/api/integrations/k8s"
 	"ship-it/internal/api/service"
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics/dogstatsd"
+	"k8s.io/helm/pkg/helm"
 )
 
 func main() {
@@ -50,7 +51,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	svc := service.New(k8s, helm.New())
+	svc := service.New(
+		k8s,
+		helmstatus.New(helm.NewClient(helm.Host(cfg.TillerAddress))),
+	)
 
 	srv := http.Server{
 		Addr: ":" + cfg.ServicePort,

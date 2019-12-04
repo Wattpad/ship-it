@@ -11,6 +11,7 @@ type Config struct {
 	DogstatsdHost string `split_words:"true" required:"true"`
 	DogstatsdPort string `split_words:"true" default:"8125"`
 	ServicePort   string `split_words:"true" default:"80"`
+	TillerAddress string `split_words:"true" required:"true"`
 }
 
 // DataDogAddress returns the local address of the datadog agent.
