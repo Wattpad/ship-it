@@ -252,6 +252,7 @@ func (r *HelmReleaseReconciler) deploy(ctx context.Context, rls *shipitv1beta1.H
 		return ctrl.Result{}, r.Status().Update(ctx, r.manager.Deployed(rls))
 	case release.Status_FAILED:
 		if err := r.Status().Update(ctx, r.manager.Failed(rls)); err != nil {
+			r.notifier.Send(fmt.Sprintf("🔥 `%s` failed to deploy.", releaseName))
 			return ctrl.Result{}, err
 		}
 
@@ -300,7 +301,7 @@ func (r *HelmReleaseReconciler) rollback(ctx context.Context, rls *shipitv1beta1
 	}
 
 	r.Log.Info("rolling back HelmRelease", "release", releaseName)
-	r.notifier.Send(fmt.Sprintf("🔥 `%s` is being rolled back.", releaseName))
+	r.notifier.Send(fmt.Sprintf("⚠️ `%s` is being rolled back.", releaseName))
 	return ctrl.Result{RequeueAfter: r.GracePeriod}, nil
 }
 
