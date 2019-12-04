@@ -23,6 +23,8 @@ import (
 
 	shipitv1beta1 "ship-it-operator/api/v1beta1"
 
+	"ship-it-operator/notifications/slack"
+
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
@@ -61,6 +63,7 @@ type HelmReleaseReconciler struct {
 	Log logr.Logger
 
 	downloader ChartDownloader
+	slack      *slack.Manager
 	helm       HelmClient
 	manager    ReleaseManager
 }
@@ -84,7 +87,7 @@ func GracePeriod(d time.Duration) ReconcilerOption {
 	}
 }
 
-func NewHelmReleaseReconciler(l logr.Logger, client client.Client, helm HelmClient, d ChartDownloader, rec record.EventRecorder, opts ...ReconcilerOption) *HelmReleaseReconciler {
+func NewHelmReleaseReconciler(l logr.Logger, client client.Client, slackManager *slack.Manager, helm HelmClient, d ChartDownloader, rec record.EventRecorder, opts ...ReconcilerOption) *HelmReleaseReconciler {
 	var cfg reconcilerConfig
 	for _, opt := range opts {
 		opt(&cfg)
@@ -95,6 +98,7 @@ func NewHelmReleaseReconciler(l logr.Logger, client client.Client, helm HelmClie
 		Log:    l.WithName("controllers").WithName("HelmRelease"),
 
 		downloader:       d,
+		slack:            slackManager,
 		helm:             helm,
 		reconcilerConfig: cfg,
 
@@ -197,6 +201,7 @@ func (r *HelmReleaseReconciler) delete(ctx context.Context, rls *shipitv1beta1.H
 	case release.Status_DELETING:
 		return ctrl.Result{RequeueAfter: r.GracePeriod}, nil
 	case release.Status_DELETED:
+		r.slack.Send(fmt.Sprintf("`%s` has been deleted.", releaseName))
 		return ctrl.Result{}, r.Update(ctx, clearFinalizer(rls))
 	}
 
@@ -243,6 +248,7 @@ func (r *HelmReleaseReconciler) deploy(ctx context.Context, rls *shipitv1beta1.H
 			return r.upgrade(ctx, rls)
 		}
 
+		r.slack.Send(fmt.Sprintf("`%s` is now deployed.", releaseName))
 		return ctrl.Result{}, r.Status().Update(ctx, r.manager.Deployed(rls))
 	case release.Status_FAILED:
 		if err := r.Status().Update(ctx, r.manager.Failed(rls)); err != nil {
@@ -294,6 +300,7 @@ func (r *HelmReleaseReconciler) rollback(ctx context.Context, rls *shipitv1beta1
 	}
 
 	r.Log.Info("rolling back HelmRelease", "release", releaseName)
+	r.slack.Send(fmt.Sprintf("`%s` is being rolled back.", releaseName))
 	return ctrl.Result{RequeueAfter: r.GracePeriod}, nil
 }
 

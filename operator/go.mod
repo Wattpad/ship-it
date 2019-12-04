@@ -16,6 +16,7 @@ require (
 	github.com/huandu/xstrings v1.2.0 // indirect
 	github.com/json-iterator/go v1.1.6 // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
+	github.com/nlopes/slack v0.6.0
 	github.com/onsi/ginkgo v1.8.0
 	github.com/onsi/gomega v1.5.0
 	github.com/pkg/errors v0.8.1
