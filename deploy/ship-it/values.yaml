@@ -60,6 +60,7 @@ operator:
   metricsPort: 8080
   enableLeaderElection: false
   targetNamespace: "default"
+  slackChannel: ""
 
 syncd:
   annotations: {}

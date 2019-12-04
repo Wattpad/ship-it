@@ -42,8 +42,19 @@ spec:
             - {{ .Values.operator.gracePeriod }}
             - --metrics-addr
             - :{{ .Values.operator.metricsPort }}
+            - --slack-channel
+            - {{ .Values.operator.slackChannel }}
+            - --slack-token
+            - "$(SLACK_TOKEN)"
             {{- if .Values.operator.enableLeaderElection }}
             - --enable-leader-election
             {{- end }}
           resources:
             {{ toYaml .Values.operator.resources | nindent 12 | trim }}
+          env:
+            - name: SLACK_TOKEN
+              valueFrom:
+                secretRef:
+                  name: {{ .Values.existingSecretName }}
+                  key: slack_token
+                  optional: false
