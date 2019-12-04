@@ -201,7 +201,7 @@ func (r *HelmReleaseReconciler) delete(ctx context.Context, rls *shipitv1beta1.H
 	case release.Status_DELETING:
 		return ctrl.Result{RequeueAfter: r.GracePeriod}, nil
 	case release.Status_DELETED:
-		r.slack.Send(fmt.Sprintf("`%s` has been deleted.", releaseName))
+		r.slack.Send(fmt.Sprintf("🗑️ `%s` has been deleted.", releaseName))
 		return ctrl.Result{}, r.Update(ctx, clearFinalizer(rls))
 	}
 
@@ -248,7 +248,7 @@ func (r *HelmReleaseReconciler) deploy(ctx context.Context, rls *shipitv1beta1.H
 			return r.upgrade(ctx, rls)
 		}
 
-		r.slack.Send(fmt.Sprintf("`%s` is now deployed.", releaseName))
+		r.slack.Send(fmt.Sprintf("🚢 `%s` is now deployed.", releaseName))
 		return ctrl.Result{}, r.Status().Update(ctx, r.manager.Deployed(rls))
 	case release.Status_FAILED:
 		if err := r.Status().Update(ctx, r.manager.Failed(rls)); err != nil {
@@ -300,7 +300,7 @@ func (r *HelmReleaseReconciler) rollback(ctx context.Context, rls *shipitv1beta1
 	}
 
 	r.Log.Info("rolling back HelmRelease", "release", releaseName)
-	r.slack.Send(fmt.Sprintf("`%s` is being rolled back.", releaseName))
+	r.slack.Send(fmt.Sprintf("🔥 `%s` is being rolled back.", releaseName))
 	return ctrl.Result{RequeueAfter: r.GracePeriod}, nil
 }
 
