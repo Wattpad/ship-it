@@ -24,6 +24,7 @@ import (
 
 	"ship-it-operator/chartdownloader"
 	"ship-it-operator/controllers"
+
 	"ship-it-operator/notifications/slack"
 
 	"github.com/aws/aws-sdk-go/aws"

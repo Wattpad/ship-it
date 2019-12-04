@@ -22,6 +22,13 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
+type fakeSlack struct{}
+
+func (m *fakeSlack) Send(msg string) error {
+	fmt.Println(msg)
+	return nil
+}
+
 type mockDownloader struct {
 	mock.Mock
 }
@@ -75,7 +82,7 @@ var _ = Describe("HelmReleaseReconciler", func() {
 	BeforeEach(func() {
 		downloader = new(mockDownloader)
 		helmClient = new(helm.FakeClient)
-		reconciler = NewHelmReleaseReconciler(log, k8sClient, helmClient, downloader, &recorder, GracePeriod(42), Namespace("test"))
+		reconciler = NewHelmReleaseReconciler(log, k8sClient, &fakeSlack{}, helmClient, downloader, &recorder, GracePeriod(42), Namespace("test"))
 
 		testRelease = &shipitv1beta1.HelmRelease{
 			TypeMeta: metav1.TypeMeta{
