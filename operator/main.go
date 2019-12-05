@@ -25,6 +25,8 @@ import (
 	"ship-it-operator/chartdownloader"
 	"ship-it-operator/controllers"
 
+	"ship-it-operator/notifications"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
@@ -55,6 +57,8 @@ func main() {
 		watchNamespace       string
 		tillerAddr           string
 		enableLeaderElection bool
+		slackChannel         string
+		slackToken           string
 	)
 
 	flag.StringVar(&awsRegion, "aws-region", "us-east-1", "The AWS region where the operator's chart repository is hosted")
@@ -65,6 +69,9 @@ func main() {
 	flag.DurationVar(&gracePeriod, "grace-period", 10*time.Second, "The duration the operator will wait before checking a release's status after reconciling")
 	flag.BoolVar(&enableLeaderElection, "enable-leader-election", false,
 		"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
+	flag.StringVar(&slackChannel, "slack-channel", "", "The channel to send Slack notifications to")
+	flag.StringVar(&slackToken, "slack-token", "", "API token for Slack")
+
 	flag.Parse()
 
 	ctrl.SetLogger(zap.Logger(true))
@@ -96,6 +103,7 @@ func main() {
 	reconciler := controllers.NewHelmReleaseReconciler(
 		ctrl.Log,
 		mgr.GetClient(),
+		notifications.NewSlack(slackToken, slackChannel),
 		helm.NewClient(helm.Host(tillerAddr)),
 		chartdownloader.New(downloaders),
 		mgr.GetEventRecorderFor("ship-it"),

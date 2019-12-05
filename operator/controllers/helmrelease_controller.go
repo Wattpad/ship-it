@@ -45,6 +45,11 @@ type ChartDownloader interface {
 	Download(ctx context.Context, chart string, version string) (*chart.Chart, error)
 }
 
+// Notifier sends a notification
+type Notifier interface {
+	Send(string) error
+}
+
 type HelmClient interface {
 	DeleteRelease(rlsName string, opts ...helm.DeleteOption) (*hapi.UninstallReleaseResponse, error)
 	InstallReleaseFromChart(chart *chart.Chart, ns string, opts ...helm.InstallOption) (*hapi.InstallReleaseResponse, error)
@@ -61,6 +66,7 @@ type HelmReleaseReconciler struct {
 	Log logr.Logger
 
 	downloader ChartDownloader
+	notifier   Notifier
 	helm       HelmClient
 	manager    ReleaseManager
 }
@@ -84,7 +90,7 @@ func GracePeriod(d time.Duration) ReconcilerOption {
 	}
 }
 
-func NewHelmReleaseReconciler(l logr.Logger, client client.Client, helm HelmClient, d ChartDownloader, rec record.EventRecorder, opts ...ReconcilerOption) *HelmReleaseReconciler {
+func NewHelmReleaseReconciler(l logr.Logger, client client.Client, notifier Notifier, helm HelmClient, d ChartDownloader, rec record.EventRecorder, opts ...ReconcilerOption) *HelmReleaseReconciler {
 	var cfg reconcilerConfig
 	for _, opt := range opts {
 		opt(&cfg)
@@ -95,6 +101,7 @@ func NewHelmReleaseReconciler(l logr.Logger, client client.Client, helm HelmClie
 		Log:    l.WithName("controllers").WithName("HelmRelease"),
 
 		downloader:       d,
+		notifier:         notifier,
 		helm:             helm,
 		reconcilerConfig: cfg,
 
@@ -197,6 +204,7 @@ func (r *HelmReleaseReconciler) delete(ctx context.Context, rls *shipitv1beta1.H
 	case release.Status_DELETING:
 		return ctrl.Result{RequeueAfter: r.GracePeriod}, nil
 	case release.Status_DELETED:
+		r.notifier.Send(fmt.Sprintf("🗑️ `%s` has been deleted.", releaseName))
 		return ctrl.Result{}, r.Update(ctx, clearFinalizer(rls))
 	}
 
@@ -243,9 +251,11 @@ func (r *HelmReleaseReconciler) deploy(ctx context.Context, rls *shipitv1beta1.H
 			return r.upgrade(ctx, rls)
 		}
 
+		r.notifier.Send(fmt.Sprintf("🚢 `%s` is now deployed.", releaseName))
 		return ctrl.Result{}, r.Status().Update(ctx, r.manager.Deployed(rls))
 	case release.Status_FAILED:
 		if err := r.Status().Update(ctx, r.manager.Failed(rls)); err != nil {
+			r.notifier.Send(fmt.Sprintf("🔥 `%s` failed to deploy.", releaseName))
 			return ctrl.Result{}, err
 		}
 
@@ -294,6 +304,7 @@ func (r *HelmReleaseReconciler) rollback(ctx context.Context, rls *shipitv1beta1
 	}
 
 	r.Log.Info("rolling back HelmRelease", "release", releaseName)
+	r.notifier.Send(fmt.Sprintf("⚠️ `%s` is being rolled back.", releaseName))
 	return ctrl.Result{RequeueAfter: r.GracePeriod}, nil
 }
 
