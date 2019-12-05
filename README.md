@@ -15,7 +15,7 @@ deployed. Whenever a `HelmRelease` resource is created/updated/destroyed,
 Ship-it performs the appropriate install/upgrade/delete Helm operation on the
 associated Helm release.
 
-An example of a minimal `HelmRelease` definition,
+An example of a minimal `HelmRelease` definition:
 
 ```
 apiVersion: shipit.wattpad.com/v1beta1
@@ -33,9 +33,20 @@ spec:
     version: my-chart-version
 ```
 
-In this example, it's assumed that the service does not provide any overriding
-chart values. Otherwise a `spec.values` object should be included as well. A
-much more thorough documentation of the `HelmRelease` custom resource can be
+As a quick overview, there are 4 important sections to take note of.
+
+`metadata.annotations` enrich the `HelmRelease` with additional information.
+Annotations are always optional, however the `HelmRelease` will not autodeploy
+as the default is `false`.
+
+`spec.releaseName` defines the desired name of the Helm release
+
+`spec.chart` provides the desired chart name and version
+
+`spec.values` provides the desired chart values. In this example it's assumed
+the service does not provide any overriding chart values, so it's been omitted
+
+A much more thorough documentation of the `HelmRelease` custom resource can be
 found in the resource
 [definition](./operator/config/crd/bases/shipit.wattpad.com_helmreleases.yaml),
 or by `kubectl describe crd/helmreleases.shipit.wattpadhq.com` in a cluster
