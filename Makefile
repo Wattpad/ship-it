@@ -45,7 +45,7 @@ docs: api/*.json docs/operator-release-states.png
 
 kind-up:
 	@echo Creating the $(KIND_CLUSTER_NAME) cluster...
-	kind create cluster --config hack/$(KIND_CLUSTER_NAME).yaml --name $(KIND_CLUSTER_NAME)
+	kind create cluster --config hack/$(KIND_CLUSTER_NAME).yaml --name $(KIND_CLUSTER_NAME) || true
 	$(eval KUBECONFIG := $(shell kind get kubeconfig-path --name $(KIND_CLUSTER_NAME)))
 	KUBECONFIG=$(KUBECONFIG) kubectl apply -f hack/tiller/rbac.yaml
 	KUBECONFIG=$(KUBECONFIG) kubectl apply -f hack/github/secret.yaml
