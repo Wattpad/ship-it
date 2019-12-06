@@ -6,6 +6,66 @@ _Ship it!_ is Wattpad's tool for continuous deployment to Kubernetes.
 
 The technical background and architecture of Ship-it can be found in the overview documentation [here](./docs/OVERVIEW.md)
 
+## Operations
+
+### Continuous Deployment
+
+Ship-it watches `HelmRelease` custom resources in the namespace in which it is
+deployed. Whenever a `HelmRelease` resource is created/updated/destroyed,
+Ship-it performs the appropriate install/upgrade/delete Helm operation on the
+associated Helm release.
+
+An example of a minimal `HelmRelease` definition:
+
+```
+apiVersion: shipit.wattpad.com/v1beta1
+kind: HelmRelease
+metadata:
+  name: my-service-name
+  annotations:
+    helmreleases.shipit.wattpad.com/autodeploy: "true"
+spec:
+  releaseName: my-release-name
+
+  chart:
+    repository: my-chart-repository
+    name: my-chart-name
+    version: my-chart-version
+
+  values: {}
+```
+
+As a quick overview, there are 4 important sections to take note of.
+
+`metadata.annotations` enrich the `HelmRelease` with additional information.
+Annotations are always optional, however the `HelmRelease` will not autodeploy
+as the default is `false`.
+
+`spec.releaseName` defines the desired name of the Helm release
+
+`spec.chart` provides the desired chart name and version
+
+`spec.values` provides the desired chart values. In this example the service
+does not provide any overriding values for the chart, however the field is still
+explicitly required
+
+A much more thorough documentation of the `HelmRelease` custom resource can be
+found in the resource
+[definition](./operator/config/crd/bases/shipit.wattpad.com_helmreleases.yaml),
+or by `kubectl describe crd/helmreleases.shipit.wattpadhq.com` in a cluster
+namespace where the CRD exists.
+
+### Automatic Rollback
+
+Ship-it initially has limited support for automatic rollbacks. When a Helm
+release enters the `FAILED` state, Ship-it will perform a Helm rollback
+operation to the most recent successful release version. Most often, this will
+be the immediately previous release version.
+
+In the future, we plan to add support for more advanced rollback strategies
+such as rollbacks triggered by failing liveness/readiness health probes or
+developer defined conditional expressions on service metrics.
+
 ## Local Development
 
 This project uses kind for local development and testing. To get started,
