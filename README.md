@@ -31,6 +31,8 @@ spec:
     repository: my-chart-repository
     name: my-chart-name
     version: my-chart-version
+
+  values: {}
 ```
 
 As a quick overview, there are 4 important sections to take note of.
@@ -43,8 +45,9 @@ as the default is `false`.
 
 `spec.chart` provides the desired chart name and version
 
-`spec.values` provides the desired chart values. In this example it's assumed
-the service does not provide any overriding chart values, so it's been omitted
+`spec.values` provides the desired chart values. In this example the service
+does not provide any overriding values for the chart, however the field is still
+explicitly required
 
 A much more thorough documentation of the `HelmRelease` custom resource can be
 found in the resource
