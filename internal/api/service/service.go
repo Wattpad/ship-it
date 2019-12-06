@@ -19,7 +19,7 @@ type ResourcesGetter interface {
 
 func New(rl ReleaseLister, rg ResourcesGetter) *Service {
 	return &Service{
-		Namespace: v1.NamespaceAll,
+		Namespace: v1.NamespaceDefault,
 		releases:  rl,
 		resources: rg,
 	}
