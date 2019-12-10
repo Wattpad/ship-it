@@ -62,6 +62,13 @@ release enters the `FAILED` state, Ship-it will perform a Helm rollback
 operation to the most recent successful release version. Most often, this will
 be the immediately previous release version.
 
+Developers should take note that a `FAILED` Helm release is caused by
+_deployment_ errors, not application runtime errors. Some non-exhaustive
+examples are: incomplete chart values or corrupted manifests produced by invalid
+templates, failure to create resources in the desired namespace, or tiller
+internal error. A Helm release will not fail because a Pod crashes after its
+deployment is successfully rolled out.
+
 In the future, we plan to add support for more advanced rollback strategies
 such as rollbacks triggered by failing liveness/readiness health probes or
 developer defined conditional expressions on service metrics.
