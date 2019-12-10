@@ -54,7 +54,7 @@ spec:
           env:
             - name: SLACK_TOKEN
               valueFrom:
-                secretRef:
+                secretKeyRef:
                   name: {{ .Values.existingSecretName }}
                   key: SLACK_TOKEN
                   optional: false
