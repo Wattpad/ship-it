@@ -37,15 +37,25 @@ spec:
 
 As a quick overview, there are 4 important sections to take note of.
 
-`metadata.annotations` enrich the `HelmRelease` with additional information.
+* `metadata.annotations` enrich the `HelmRelease` with additional information.
 Annotations are always optional, however the `HelmRelease` will not autodeploy
-as the default is `false`.
+as the default is `false`. All annotations recognized by Ship-it are prefixed by
+`helmreleases.shipit.wattpad.com/`
 
-`spec.releaseName` defines the desired name of the Helm release
+| Annotation | Description | Default Value |
+| ---------- | ----------- | ------------- |
+| `autodeploy` | Toggle auto-deployment of the release | `"false"` |
+| `code` | Source code URL | `""` |
+| `datadog` | Datadog dashboard URL | `""` |
+| `squad` | Squad owner of the release | `""` |
+| `slack` | Slack channel of the owner | `""` |
+| `sumologic` | Sumologic query URL of the release | `""` |
 
-`spec.chart` provides the desired chart name and version
+* `spec.releaseName` defines the desired name of the Helm release
 
-`spec.values` provides the desired chart values. In this example the service
+* `spec.chart` provides the desired chart name and version
+
+* `spec.values` provides the desired chart values. In this example the service
 does not provide any overriding values for the chart, however the field is still
 explicitly required
 
