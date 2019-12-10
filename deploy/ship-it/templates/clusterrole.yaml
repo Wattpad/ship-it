@@ -18,6 +18,7 @@ rules:
   resources:
   - events
   verbs:
+  - create
   - patch
 - apiGroups:
   - shipit.wattpad.com
