@@ -288,6 +288,7 @@ func (r *HelmReleaseReconciler) install(ctx context.Context, rls *shipitv1beta1.
 	}
 
 	r.Log.Info("installing HelmRelease", "release", releaseName)
+	r.notifier.Send(fmt.Sprintf("⌛ `%s` is being installed.", releaseName))
 	return ctrl.Result{RequeueAfter: r.GracePeriod}, nil
 }
 
@@ -327,5 +328,6 @@ func (r *HelmReleaseReconciler) upgrade(ctx context.Context, rls *shipitv1beta1.
 	}
 
 	r.Log.Info("upgrading HelmRelease", "release", releaseName)
+	r.notifier.Send(fmt.Sprintf("⌛ `%s` is being upgraded.", releaseName))
 	return ctrl.Result{RequeueAfter: r.GracePeriod}, nil
 }
