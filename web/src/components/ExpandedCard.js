@@ -29,7 +29,7 @@ class ExpandedCard extends React.Component {
     podClick = () => {
         this.setState({ podsVisible: !this.state.podsVisible })
         axios.get(urljoin(this.props.API_ADDRESS, 'releases', this.props.data.name, 'resources')).then(response => {
-            this.setState({ resourceString: response.data.resources })
+            this.setState({ resourceString: response.data.status })
         })
     }
 

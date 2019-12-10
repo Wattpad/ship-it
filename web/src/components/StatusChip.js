@@ -32,7 +32,6 @@ class StatusChip extends React.Component {
               label="Deployed"
               color="primary"
               variant="outlined"
-              clickable
             />
           </MuiThemeProvider>
         )
@@ -44,7 +43,6 @@ class StatusChip extends React.Component {
               label="Deleted"
               color="secondary"
               variant="outlined"
-              clickable
             />
           </MuiThemeProvider>
         )
@@ -56,7 +54,6 @@ class StatusChip extends React.Component {
               label="Superseded"
               color="primary"
               variant="outlined"
-              clickable
             />
           </MuiThemeProvider>
         )
@@ -68,7 +65,6 @@ class StatusChip extends React.Component {
               label="Failed"
               color="secondary"
               variant="outlined"
-              clickable
             />
           </MuiThemeProvider>
         )
@@ -80,7 +76,6 @@ class StatusChip extends React.Component {
               label="Deleting"
               color="secondary"
               variant="outlined"
-              clickable
             />
           </MuiThemeProvider>
         )
@@ -92,7 +87,6 @@ class StatusChip extends React.Component {
               label="Deploying"
               color="primary"
               variant="outlined"
-              clickable
             />
           </MuiThemeProvider>
         )
@@ -104,7 +98,6 @@ class StatusChip extends React.Component {
               label="Upgrading"
               color="primary"
               variant="outlined"
-              clickable
             />
           </MuiThemeProvider>
         )
@@ -116,7 +109,6 @@ class StatusChip extends React.Component {
               label="Rolling Back"
               color="secondary"
               variant="outlined"
-              clickable
             />
           </MuiThemeProvider>
         )
@@ -128,7 +120,6 @@ class StatusChip extends React.Component {
               label="Unknown"
               color="default"
               variant="outlined"
-              clickable
             />
           </MuiThemeProvider>
         )
