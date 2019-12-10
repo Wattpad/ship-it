@@ -5,6 +5,7 @@ import CardContent from '@material-ui/core/CardContent'
 import Typography from '@material-ui/core/Typography'
 import ExpandIcon from '@material-ui/icons/Fullscreen'
 import IconButton from '@material-ui/core/IconButton'
+import Icon from '@material-ui/core/Icon'
 import SelectionDialog from './SelectionDialog'
 
 import TimePassed from '../assets/time_passed.png'
@@ -83,9 +84,9 @@ class SingleGridCell extends React.Component {
               </Typography>
               <StatusChip status={this.props.SingleGridCellData.status} />
               <div>
-                <IconButton>
+                <Icon>
                   <img src={TimePassed} alt={constants.imgAlt} />
-                </IconButton>
+                </Icon>
                 {deployDate.toDateString()}
               </div>
               <div className='row-align'>
