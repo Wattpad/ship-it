@@ -84,3 +84,9 @@
 .ImageListItem label {
   font-weight: bold
 }
+
+.MuiTypography-h5 {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}

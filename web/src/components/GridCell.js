@@ -78,8 +78,8 @@ class SingleGridCell extends React.Component {
         <div>
           <Card style={cardStyle}>
             <CardContent>
-              <Typography variant="h5" component="h2">
-                {this.props.SingleGridCellData.name}
+              <Typography variant="h5" component="h2" alt="">
+                <span title={this.props.SingleGridCellData.name}>{this.props.SingleGridCellData.name}</span>
               </Typography>
               <StatusChip status={this.props.SingleGridCellData.status} />
               <div>
