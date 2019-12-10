@@ -77,6 +77,14 @@ func (l *ImageListener) handler(r syncd.ImageReconciler) sqsconsumer.MessageHand
 			return nil
 		}
 
-		return r.Reconcile(ctx, &image)
+		err := r.Reconcile(ctx, &image)
+		if errors.Cause(err) == errNoRegisteredReleasesAffected {
+			// if no releases were affected by the new image, then
+			// the event was successfully handled. Log it to be able
+			// to detect when syncd successfully does nothing.
+			l.logger.Log("info", err.Error())
+			return nil
+		}
+		return err
 	}
 }

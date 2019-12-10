@@ -2,6 +2,7 @@ package ecr
 
 import (
 	"context"
+	"encoding/base64"
 	"path"
 	"testing"
 
@@ -83,27 +84,27 @@ func TestEdit(t *testing.T) {
 
 	treeEntries := append(unmodifiedTreeEntries, modifiedTreeEntries...)
 
-	blobContents := []string{
-		`kind: HelmRelease
+	blobContents := [][]byte{
+		[]byte(`kind: HelmRelease
 apiVersion: shipit.wattpad.com/v1beta1
 metadata:
     name: foo-release
 spec:
     values:
-	image:
-	    repository: hub.docker.com/foo,
-	    tag: fooreleaseoldtag
-`,
-		`kind: HelmRelease
+        image:
+            repository: hub.docker.com/foo,
+            tag: fooreleaseoldtag
+`),
+		[]byte(`kind: HelmRelease
 apiVersion: shipit.wattpad.com/v1beta1
 metadata:
     name: bar-release
 spec:
     values:
-	image:
-	    repository: hub.docker.com/bar,
-	    tag: barreleaseoldtag
-`,
+        image:
+            repository: hub.docker.com/bar,
+            tag: barreleaseoldtag
+`),
 	}
 
 	releases := []types.NamespacedName{
@@ -151,9 +152,10 @@ spec:
 
 	// expect GetBlob per changed file
 	for i, entry := range modifiedTreeEntries {
+		blob64 := base64.StdEncoding.EncodeToString(blobContents[i])
 		mockGit.On("GetBlob", ctx, testOrg, testRepo, entry.GetSHA()).Return(
 			&github.Blob{
-				Content: github.String(blobContents[i]),
+				Content: github.String(blob64),
 			}, &github.Response{}, nil,
 		)
 	}

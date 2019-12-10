@@ -43,6 +43,8 @@ func NewChartEditor(g GitService, org, repo, ref, path string) *chartEditor {
 	}
 }
 
+var errNoRegisteredReleasesAffected = errors.New("no registered releases affected")
+
 func (c *chartEditor) Edit(ctx context.Context, releases []types.NamespacedName, image *image.Ref) error {
 	// Get commit SHA of the targeted branch (ref)
 	ref, _, err := c.github.GetRef(ctx, c.Org, c.Repository, "refs/heads/"+c.Ref)
@@ -64,6 +66,9 @@ func (c *chartEditor) Edit(ctx context.Context, releases []types.NamespacedName,
 
 	// Modify the content tree that the commit points to
 	entries := c.editTreeEntries(ctx, releases, image, tree.Entries)
+	if len(entries) == 0 {
+		return errors.Wrapf(errNoRegisteredReleasesAffected, "no registry chart changes for new image %s", image)
+	}
 
 	// Create a new content tree with the modified entries, computing
 	// Merkle-esque SHAs and so forth
