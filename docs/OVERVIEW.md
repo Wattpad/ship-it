@@ -29,7 +29,7 @@ This section follows the architecture diagram above. Below is a list of each ste
 
 2. A CloudWatch Rule picks up the push event and drops some metadata about the event into an SQS queue.
 
-3. Ship-it consumes this push event and parses out the image tag. The tag is then used to update `HelmRelease` YAML file with the latest running version of the service, which is then committed to a git repository.
+3. Ship-it consumes this push event and parses out the image tag. The tag is then used to update `HelmRelease` YAML file with the latest image version of the service, which is then committed to a git repository.
 
 4. To deploy the service, the Ship-it operator downloads the Helm chart for the service. Using the chart, Ship-it executes the deployment with the tiller client.
 
@@ -37,7 +37,7 @@ This section follows the architecture diagram above. Below is a list of each ste
 
 6. The operator will update the `HelmRelease` each time the release state changes.
 
-7. The API server reads off the `HelmRelease` to get the state of each Helm Release and exposes a REST API to read information about the releases.
+7. The API server reads from the `HelmRelease` status subresource to get the state of each Helm Release and exposes a REST API to read information about the releases.
 
 8. The Web UI consumes this API to present engineers with key deployment information.
 
