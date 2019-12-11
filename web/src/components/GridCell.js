@@ -74,6 +74,7 @@ class SingleGridCell extends React.Component {
     }
 
     let deployDate = new Date(this.props.SingleGridCellData.lastDeployed)
+    const options = {year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric'};
     return (
       <div style={singleGridCellStyle} id={this.props.id} className='SingleGridCell'>
         <div>
@@ -87,7 +88,7 @@ class SingleGridCell extends React.Component {
                 <Icon>
                   <img src={TimePassed} alt={constants.imgAlt} />
                 </Icon>
-                {deployDate.toDateString()}
+                {deployDate.toLocaleString('en-US', options)}
               </div>
               <div className='row-align'>
                 <SelectionDialog source={this.props.SingleGridCellData.code.github} chart={urljoin(this.props.SingleGridCellData.artifacts.chart.repository, this.props.SingleGridCellData.artifacts.chart.path)}/>
