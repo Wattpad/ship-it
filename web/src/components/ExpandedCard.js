@@ -10,6 +10,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel'
 import Switch from '@material-ui/core/Switch'
 import axios from 'axios'
 import urljoin from 'url-join'
+import Highlight from 'react-highlight.js'
 
 import * as themes from '../Themes'
 import * as constants from '../Constants'
@@ -86,7 +87,7 @@ class ExpandedCard extends React.Component {
                             {this.state.podsVisible ? <ExpandLess /> : <ExpandMore />}
                         </ListItem>
                         <Collapse in={this.state.podsVisible} timeout='auto' unmountOnExit>
-                            <pre>{this.state.resourceString}</pre>
+                            <Highlight language="bash">{this.state.resourceString}</Highlight>
                         </Collapse>
                     </List>
                 </DialogContent>
