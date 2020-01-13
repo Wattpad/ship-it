@@ -21,7 +21,7 @@ An example of a minimal `HelmRelease` definition:
 apiVersion: shipit.wattpad.com/v1beta1
 kind: HelmRelease
 metadata:
-  name: my-service-name
+  name: my-release-name
   annotations:
     helmreleases.shipit.wattpad.com/autodeploy: "true"
 spec:
