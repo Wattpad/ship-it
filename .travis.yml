@@ -41,10 +41,9 @@ jobs:
     - stage: Test and Build
       name: Go
       script:
-        - go test -race -coverprofile=coverage.txt -covermode=atomic ./...
+        - go test -race ./...
         - TARGET=ship-it-api make build
         - TARGET=ship-it-syncd make build
-      after_success: bash <(curl -s https://codecov.io/bash)
 
     - stage: Test and Build
       name: Operator
